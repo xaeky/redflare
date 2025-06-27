@@ -1,4 +1,5 @@
 import { RuntimeConfig } from "nuxt/schema";
+import { $fetch } from 'ofetch';
 import _ from 'lodash';
 
 const runtimeConfig = useRuntimeConfig(); 
