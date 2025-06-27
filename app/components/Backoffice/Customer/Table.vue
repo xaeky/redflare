@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { customersQuery } from '~/queries/customers';
 import type { TableColumn } from '@nuxt/ui';
-import type { Customer } from '~/server/types/Customers';
 import { UButton } from '#components';
 
 // Props & vars

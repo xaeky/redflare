@@ -3,7 +3,6 @@ import { useSession, createError, H3Event } from 'h3';
 import { UserInfoClient, AuthenticationClient, ManagementClient } from 'auth0';
 import { SecureSessionData } from '#auth-utils';
 import { decode, JwtPayload } from 'jsonwebtoken';
-import type { Permission } from '~/server/types/Permissions';
 
 type EventUserSession = Parameters<typeof useSession>[0];
 

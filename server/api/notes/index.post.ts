@@ -1,6 +1,3 @@
-import { noteOptionsSchema } from "~/server/schemas/Notes";
-import { $supabase } from "~/server/services/supabase";
-
 export default defineEventHandler(async (event) => {
   const session = await needAuth(event);
   if (!session.user) return;

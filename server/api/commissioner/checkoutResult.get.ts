@@ -1,6 +1,3 @@
-import { getPaymentSchema } from "~/server/schemas/Payments";
-import { mpCreatePreference, mpGetPayment } from "~/server/services/mp";
-
 /**
  * @endpoint /api/commissioner/checkoutResult
  * @method GET

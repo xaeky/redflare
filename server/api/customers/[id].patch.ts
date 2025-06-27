@@ -1,6 +1,3 @@
-import { customerOptionsSchema } from "~/server/schemas/Customers";
-import { $supabase } from "~/server/services/supabase";
-
 export default defineEventHandler(async (event) => {
   // Verify if current session user has permissions to write customers.
   await hasPermission(event, 'write:customers', true);

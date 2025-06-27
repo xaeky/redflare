@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { get } from 'lodash';
-import type { MPPayment } from '~/server/types/MercadoPago/General';
 
 const route = useRoute();
 

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import * as z from 'zod';
 import { notesQuery } from '~/queries/notes';
-import { noteOptionsSchema } from '~/server/schemas/Notes';
 
 const queryCache = useQueryCache();
 
@@ -22,7 +21,8 @@ const addNoteModalOpen = computed({
 });
 
 // Form
-type Schema = z.output<typeof noteOptionsSchema>;
+const schema = noteOptionsSchema;
+type Schema = z.output<typeof schema>;
 const state = reactive<Schema>({
   content: ''
 });
@@ -50,7 +50,7 @@ defineShortcuts({
 <template>
   <UModal v-model:open="addNoteModalOpen" title="Add note">
     <template #body>
-      <UForm :state :schema="noteOptionsSchema" @submit="() => { addNote() }" class="space-y-8">
+      <UForm :state :schema @submit="() => { addNote() }" class="space-y-8">
         <UFormField label="Text" name="text">
           <UTextarea autoresize class="w-full" v-model="state.content"/>
         </UFormField>

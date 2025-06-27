@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const noteOptionsSchema = z.object({
   content: z.string()

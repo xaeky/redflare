@@ -1,5 +1,3 @@
-import { $supabase } from "~/server/services/supabase";
-
 export default defineEventHandler(async (event) => {
   const session = await needAuth(event);
   const id = getRouterParam(event, 'id');

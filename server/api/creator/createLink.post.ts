@@ -1,6 +1,3 @@
-import { createPaymentLinkOptionsSchema } from "~/server/schemas/Links";
-import { mpCreatePreference } from "~/server/services/mp";
-
 /**
  * @endpoint /api/creator/createLink
  * @method POST

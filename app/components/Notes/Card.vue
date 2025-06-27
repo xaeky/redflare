@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Note } from '~/server/types/Notes';
 import { notesQuery } from '~/queries/notes';
 
 const toast = useToast();

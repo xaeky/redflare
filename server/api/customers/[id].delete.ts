@@ -1,5 +1,3 @@
-import { $supabase } from "~/server/services/supabase";
-
 export default defineEventHandler(async (event) => {
   // Verify if current session user has permissions to delete customers.
   await hasPermission(event, 'delete:customers', true);

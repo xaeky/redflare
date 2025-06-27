@@ -1,4 +1,4 @@
-import type { MPBackURIs, MPItem, MPItemOptions, MPPayer, MPPaymentMethods, MPShipment, MPShipmentOptions } from "./General";
+import type { MPBackURIs, MPItem, MPItemOptions, MPPayer, MPPaymentMethods, MPShipment, MPShipmentOptions } from "./MP_General";
 
 interface MPPreference {
   items: MPItem[];

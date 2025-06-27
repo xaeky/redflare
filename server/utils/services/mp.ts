@@ -1,8 +1,5 @@
 import { RuntimeConfig } from "nuxt/schema";
 import _ from 'lodash';
-import type { CreatePaymentLinkOptions } from "../types/Links";
-import type { MPCreatePreferenceRequestOptions } from "../types/MercadoPago/Preferences";
-import type { MPPayment } from "../types/MercadoPago/General";
 
 const runtimeConfig = useRuntimeConfig(); 
 export const $mp = $fetch.create({

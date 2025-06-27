@@ -2,8 +2,6 @@
 import _ from 'lodash';
 import * as z from 'zod';
 import { customersQuery } from '~/queries/customers';
-import { customerOptionsSchema } from '~/server/schemas/Customers';
-import type { Customer } from '~/server/types/Customers';
 
 // Props & vars
 const queryCache = useQueryCache();
@@ -25,6 +23,7 @@ const editCustomerSlideoverOpen = computed({
 });
 
 // Form
+const schema = customerOptionsSchema;
 type Schema = z.output<typeof customerOptionsSchema>;
 const state = reactive<Schema>({
   name: '',
@@ -55,7 +54,7 @@ const { mutate: updateCustomer, isLoading: updateCustomerBusy } = useMutation({
   <USlideover v-model:open="editCustomerSlideoverOpen" title="Edit customer">
     <template #body>
       <div v-if="customer">
-        <UForm :schema="customerOptionsSchema" :state class="space-y-4" @submit="() => { updateCustomer() }">
+        <UForm :schema :state class="space-y-4" @submit="() => { updateCustomer() }">
           <UFormField name="id" label="ID" v-if="updatedCustomer">
             <UInput label="ID" v-model="updatedCustomer.id" class="w-full" readonly disabled aria-readonly="" />
           </UFormField>

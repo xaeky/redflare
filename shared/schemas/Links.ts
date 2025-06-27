@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const createPaymentLinkOptionsSchema = z.object({
   commission_id: z.string(),

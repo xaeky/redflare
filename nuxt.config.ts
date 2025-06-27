@@ -5,6 +5,14 @@ export default defineNuxtConfig({
     compatibilityVersion: 4
   },
   devtools: { enabled: true },
+  imports: {
+    dirs: ['shared/schemas/**']
+  },
+  nitro: {
+    imports: {
+      dirs: ['shared/schemas', 'server/utils/services']
+    }
+  },
   modules: [
     '@nuxt/fonts',
     '@nuxt/icon',
