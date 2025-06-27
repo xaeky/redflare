@@ -3,6 +3,10 @@ const devLinks = [
   {
     label: 'Session',
     to: '/dashboard/dev/session'
+  },
+  {
+    label: 'Endpoint',
+    to: '/dashboard/dev/endpoint'
   }
 ]
 
@@ -14,9 +18,9 @@ definePageMeta({
 </script>
 
 <template>
-  <ul>
+  <ul class="grid grid-cols-2 gap-12 p-8">
     <li v-for="link in devLinks" :key="link.to">
-      <NuxtLink :to="link.to" class="bg-neutral-800 py-4 px-8 rounded-xl">
+      <NuxtLink :to="link.to" class="block bg-neutral-800 py-4 px-8 rounded-xl w-full">
         <span v-text="link.label" />
       </NuxtLink>
     </li>
