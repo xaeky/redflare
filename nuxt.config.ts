@@ -1,16 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-06-27',
+  devtools: { enabled: true },
   future: {
     compatibilityVersion: 4
   },
-  devtools: { enabled: true },
-  imports: {
-    dirs: ['shared/schemas/**']
-  },
   nitro: {
     imports: {
-      dirs: ['shared/schemas', 'server/utils/services']
+      dirs: ['server/utils/services']
     }
   },
   modules: [
