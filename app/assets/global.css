@@ -6,4 +6,4 @@
   --color-beige-200: #efbc8e;
 }
 
-pre { @apply font-mono bg-neutral-800 border border-neutral-700 overflow-x-auto; }
+pre { @apply font-mono bg-neutral-800 border border-neutral-700 overflow-x-auto p-4; }

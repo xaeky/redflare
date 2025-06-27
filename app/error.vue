@@ -18,13 +18,16 @@ const handleError = () => clearError({ redirect: '/' });
 
 <template>
   <main id="redflare_default">
-    <div id="redflare_error" class="container mx-auto px-12 py-6">
-      <div v-if="props.error">
-        <h1 v-text="props.error.statusCode" />
+    <div id="redflare_error" class="container mx-auto px-12 min-h-screen flex flex-col justify-center">
+      <div v-if="props.error" class="font-mono">
+        <Hx level="1" v-text="props.error.statusCode" />
         <div v-text="mapErrors[props.error.statusCode] || 'Unknown error'"/>
       </div>
-      <div class="pt-4">
-        <UButton @click="handleError" label="Reload" />
+      <div class="my-4" v-if="props.error && props.error.stack">
+        <pre v-text="props.error.stack" />
+      </div>
+      <div class="pt-4" v-if="props.error && props.error.statusCode !== 500">
+        <UButton @click="handleError" label="Redirect home" />
       </div>
     </div>
   </main>
