@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --font-sans: 'Public Sans', sans-serif;
+  --color-beige-200: #efbc8e;
+}
+
+pre { @apply font-mono bg-neutral-800 border border-neutral-700 overflow-x-auto; }
