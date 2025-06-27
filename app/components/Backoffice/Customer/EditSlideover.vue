@@ -40,7 +40,7 @@ watch(() => props.customer, (newCustomerData) => {
 // Mutations
 const { mutate: updateCustomer, isLoading: updateCustomerBusy } = useMutation({
   mutation: () => useAPI(`/api/customers/${updatedCustomer.value?.id}`, {
-    method: 'PATCH',
+    method: 'PUT',
     body: _.mapValues(state, v => v?.trim() === '' ? null : v)
   }),
   async onSuccess() { 
