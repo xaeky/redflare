@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "devs": "NODE_TLS_REJECT_UNAUTHORIZED=0 nuxt dev --https",
     "generate": "nuxt generate",
-    "supa:gentype": "source .env && supabase gen types typescript --project-id $SUPABASE_REF --schema public > types/database.types.ts",
+    "supa:prepare": "source .env && supabase gen types typescript --project-id $SUPABASE_REF --schema public > types/database.types.ts",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
