@@ -1,6 +1,7 @@
 import { createPaymentPreference } from "~~/server/utils/payment";
 
 export default defineEventHandler(async (event) => {
+  await hasPermission(event, 'create:payment');
   // Read the validated body from the event
   const body = await readValidatedBody(event, commissionPaymentOptionsSchema.safeParse);
   if (!body.success) throw createError({ statusCode: 400, message: 'Invalid body' });
@@ -11,7 +12,8 @@ export default defineEventHandler(async (event) => {
   const commissionExists = await ($supabase()).from('commissions').select('id').eq('id', commission_id).single();
   if (commissionExists.error || !commissionExists.data) throw createError({ statusCode: 404, message: 'Commission not found' });
   // Prepare the payment, map currency and processor
-  const paymentProcessorByCurrency = {
+  type PaymentProcessorByCurrency = Record<CommissionPaymentCurrency, CommissionPaymentProcessor>;
+  const paymentProcessorByCurrency: PaymentProcessorByCurrency = {
     'ARS': 'mercadopago',
     'USD': 'paypal'
   };
@@ -22,7 +24,7 @@ export default defineEventHandler(async (event) => {
     currency, amount
   }, useRuntimeConfig(event));
   // Insert the payment into the database
-  const { data, error } = await ($supabase()).from('commissions_payments').insert({
+  const paymentObject:CommissionPaymentInsert = {
     commission: commission_id,
     currency,
     income_amount: amount,
@@ -32,7 +34,8 @@ export default defineEventHandler(async (event) => {
     payment_ext_id: paymentPreference.id,
     payment_ext_url: paymentPreference.init_point,
     payment_processor: paymentProcessorByCurrency[currency]
-  }).select('*').single();
+  }; 
+  const { data, error } = await ($supabase()).from('commissions_payments').insert(paymentObject).select('*').single();
   if (error) throw createError({ statusCode: 500, message: 'Failed to create payment' });
   // Return the created payment
   return data;
