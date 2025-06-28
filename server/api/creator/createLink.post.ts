@@ -2,11 +2,12 @@
  * @endpoint /api/creator/createLink
  * @method POST
  * @description Create a payment link, linked to a existing commission.
- */
+ * @deprecated This endpoint is deprecated and will be removed in the future. Use POST /api/commissions/{id}/payments instead.
+*/
 export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, createPaymentLinkOptionsSchema.safeParse);
   if (!body.success) throw createError({
-    statusCode: 401,
+    statusCode: 400,
     message: 'Invalid body'
   });
   const config = useRuntimeConfig(event);

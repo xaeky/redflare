@@ -1,5 +1,5 @@
 import { RuntimeConfig } from "nuxt/schema";
-import { $fetch } from 'ofetch';
+import { $fetch, type FetchError } from 'ofetch';
 import _ from 'lodash';
 
 const runtimeConfig = useRuntimeConfig(); 
@@ -15,12 +15,12 @@ export const $mp = $fetch.create({
  * @param runtimeConfig Nuxt's Runtime Config
  * @returns 
  */
-export const mpCreatePreference = async (options: CreatePaymentLinkOptions, runtimeConfig: RuntimeConfig) => {
+export const mpCreatePreference = async (options: MPCreatePaymentLinkOptions, runtimeConfig: RuntimeConfig) => {
   const requestBody:MPCreatePreferenceRequestOptions = {
     items: [
       {
-        title: `${runtimeConfig.public.creator.marketName} - Comisión #${options.commission_id}`,
-        unit_price: options.attachment.amount,
+        title: options.title,
+        unit_price: options.amount,
         quantity: 1,
         currency_id: 'ARS',
         category_id: 'virtual_goods'
@@ -31,12 +31,19 @@ export const mpCreatePreference = async (options: CreatePaymentLinkOptions, runt
       pending: `${runtimeConfig.public.creator.callbackUri}/commission_checkout/ack`,
       failure: `${runtimeConfig.public.creator.callbackUri}/commission_checkout/cancelled`,
     },
-    marketplace: `${runtimeConfig.mp.marketplace}`,
-    auto_return: 'all',
-    external_reference: options.commission_id
+    auto_return: 'approved'
   };
-  const data = await $mp(`/checkout/preferences`, { method: 'POST', body: requestBody });
-  return data;
+  try {
+    const result = await $mp(`/checkout/preferences`, { method: 'POST', body: requestBody });
+    return result as MPCreatePreferenceResponseFields;
+  } catch (error) {
+    const err = error as FetchError || Error;
+    throw createError({
+      statusCode: 500,
+      message: 'Failed to create MercadoPago preference',
+      data: err.data || err
+    });
+  }
 }
 
 /**

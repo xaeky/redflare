@@ -1,0 +1,39 @@
+import _ from "lodash";
+
+interface PaymentAttachment {
+  id: string;
+  currency: 'ARS' | 'USD';
+  amount: number;
+  init_point: string;
+  processor: 'mercadopago' | 'paypal';
+}
+
+
+export const createPaymentPreference = async (options: CreatePaymentLinkOptions, runtimeConfig: any) => {
+  const { title, currency, amount } = options;
+  const paymentObject:Partial<PaymentAttachment> = {};
+  const paymentFunctionMap = {
+    'ARS': async () => {
+      try {
+        const result = await mpCreatePreference({ title, amount }, runtimeConfig);
+        // Assign values to paymentObject
+        return _.assign(paymentObject, {
+          id: result.id,
+          currency: 'ARS',
+          amount,
+          init_point: result.init_point,
+          processor: 'mercadopago'
+        });
+      } catch (error) {
+        throw createError({ statusCode: 500, message: 'Unable to create MercadoPago preference', data: error });
+      }
+    },
+    'USD': async () => {
+      // TODO: PayPal integration
+      throw createError({ statusCode: 501, message: 'PayPal integration not implemented yet' });
+    }
+  };
+  await paymentFunctionMap[currency]();
+  if (!paymentObject) throw createError({ statusCode: 500, message: 'Payment object not created' });
+  return paymentObject as PaymentAttachment;
+};

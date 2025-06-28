@@ -1,12 +1,10 @@
 export interface CreatePaymentLinkOptions {
-	commission_id: string;
-	customer_id: string;
-	attachment: {
-		currency: "ARS" | "USD";
-		amount: number;
-	},
-	note?: string;
+	currency: 'ARS' | 'USD';
+	title: string;
+	amount: number;
 }
+
+export type MPCreatePaymentLinkOptions = Omit<CreatePaymentLinkOptions, 'currency'>;
 
 export interface PaymentLink {
 	paymentlink_id: string;

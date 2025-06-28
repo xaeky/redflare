@@ -21,3 +21,15 @@ export const commissionUpdateSchema = z.object({
   secure_note: z.string().nullable().optional(),
   customer: z.string().optional(), // Customer ID
 });
+
+export const commissionPaymentOptionsSchema = z.object({
+  currency: z.enum(['ARS', 'USD']), // ISO 4217 currency code
+  income_amount: z.number().positive(),
+  public_note: z.string().nullable().optional(),
+  secure_note: z.string().nullable().optional()
+});
+
+export const commissionPaymentUpdateSchema = z.object({
+  public_note: z.string().nullable().optional(),
+  secure_note: z.string().nullable().optional()
+});

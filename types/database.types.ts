@@ -94,6 +94,9 @@ export type Database = {
           created_at: string
           currency: string
           income_amount: number
+          payment_ext_id: string
+          payment_ext_url: string
+          payment_processor: string
           pid: string
           public_note: string | null
           secure_note: string | null
@@ -104,6 +107,9 @@ export type Database = {
           created_at?: string
           currency: string
           income_amount?: number
+          payment_ext_id: string
+          payment_ext_url: string
+          payment_processor: string
           pid?: string
           public_note?: string | null
           secure_note?: string | null
@@ -114,6 +120,9 @@ export type Database = {
           created_at?: string
           currency?: string
           income_amount?: number
+          payment_ext_id?: string
+          payment_ext_url?: string
+          payment_processor?: string
           pid?: string
           public_note?: string | null
           secure_note?: string | null
