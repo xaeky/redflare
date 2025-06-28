@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "devs": "NODE_TLS_REJECT_UNAUTHORIZED=0 nuxt dev --https",
     "generate": "nuxt generate",
-    "supa:gentype": "dotenv supabase gen types typescript --project-id %SUPABASE_REF% --schema public > types/database.types.ts",
+    "supa:gentype": "source .env && supabase gen types typescript --project-id $SUPABASE_REF --schema public > types/database.types.ts",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
@@ -39,6 +39,8 @@
     "@iconify-json/heroicons": "^1.2.2",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/lodash": "^4.17.16",
+    "cross-env": "^7.0.3",
+    "dotenv": "^17.0.0",
     "supabase": ">=1.8.1"
   }
 }
