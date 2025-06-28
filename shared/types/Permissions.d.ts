@@ -3,9 +3,14 @@ export type Permission =
   'read:commissions' |
   'write:commissions' |
   'delete:commissions' |
+  'read:commissions_characters' |
+  'write:commissions_characters' |
+  'delete:commissions_characters' |
   // Finance
   'read:finance' |
   'write:finance' |
+  'create:payment' |
+  'cancel:payment' |
   // Customers
   'read:customers' |
   'write:customers' |
