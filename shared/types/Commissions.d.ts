@@ -17,3 +17,4 @@ export interface Commission {
 }
 
 export type CommissionOptions = Omit<Commission, 'id' | 'oid' | 'created_at' | 'updated_at'> & { customer: string; }
+export type CommissionUpdate = Partial<CommissionOptions>;

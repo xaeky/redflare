@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   // Ensure commission ID is provided
   if (!commissionId) throw createError({ statusCode: 400, message: 'Commission ID is required' });
   // Parse request validated body
-  const body = await readValidatedBody(event, commissionOptionsSchema.safeParse);
+  const body = await readValidatedBody(event, commissionUpdateSchema.safeParse);
   if (!body.success) throw createError({ statusCode: 400, message: body.error.message });
   // Update commission in the database
   const { data, error } = await $supabase()
