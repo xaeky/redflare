@@ -50,38 +50,78 @@ export type Database = {
           },
         ]
       }
-      commissions_characters: {
+      commissions_bases: {
         Row: {
-          changelog: Json
           created_at: string
-          id: number
+          creator_name: string
+          id: string
           name: string
-          note: string
-          parent: string
+          storefront_url: string
           updated_at: string
         }
         Insert: {
-          changelog?: Json
           created_at?: string
-          id?: number
+          creator_name: string
+          id?: string
           name: string
-          note: string
-          parent: string
+          storefront_url: string
           updated_at?: string
         }
         Update: {
+          created_at?: string
+          creator_name?: string
+          id?: string
+          name?: string
+          storefront_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      commissions_characters: {
+        Row: {
+          base: string
+          changelog: Json
+          commission: string
+          created_at: string
+          id: number
+          name: string
+          note: string | null
+          order_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          base: string
           changelog?: Json
+          commission: string
+          created_at?: string
+          id?: number
+          name: string
+          note?: string | null
+          order_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base?: string
+          changelog?: Json
+          commission?: string
           created_at?: string
           id?: number
           name?: string
-          note?: string
-          parent?: string
+          note?: string | null
+          order_id?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "commission_character_parent_fkey"
-            columns: ["parent"]
+            foreignKeyName: "commissions_characters_base_fkey"
+            columns: ["base"]
+            isOneToOne: false
+            referencedRelation: "commissions_bases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_characters_commission_fkey"
+            columns: ["commission"]
             isOneToOne: false
             referencedRelation: "commissions"
             referencedColumns: ["id"]

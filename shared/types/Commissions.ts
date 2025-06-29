@@ -34,3 +34,10 @@ export const commissionPaymentUpdateSchema = z.object({
   secure_note: z.string().nullable().optional(),
   state: z.enum(['paid_manual', 'cancelled', 'refunded', 'chargeback', 'disputed']).optional(),
 });
+
+export const commissionCharacterOptionsSchema = z.object({
+  name: z.string().min(1),
+  note: z.string().nullable().optional(),
+  changelog: z.record(z.string()).nullable().optional(),
+  base: z.string().min(1)
+});
