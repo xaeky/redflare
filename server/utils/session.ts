@@ -20,9 +20,10 @@ export async function needAuth(event: EventUserSession) {
   // Get if user exists
   try {
     const userInfo = await a0User.getUserInfo(access_token);
-    if (!userInfo.data) throw new Error();
+    if (!userInfo.data || userInfo.status !== 200) throw new Error(userInfo.statusText);
   } catch (e) {
-    throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: 'Failed to fetch user details.' });
+    const err = e as Error;
+    throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: err.message || 'Failed to fetch user details.' });
   }
   // User exists, now we try to update the token if it's expired
   const decoded = decode(access_token) as JwtPayload || decode(id_token) as JwtPayload;
@@ -65,7 +66,7 @@ export async function getPermissions(event: EventUserSession, useTrustedSession:
 }
 
 export async function hasPermission(event: EventUserSession, permissionName: Permission, throwError?: boolean) {
-  const permissions = await getPermissions(event);
+  const permissions = await getPermissions(event, false);
   const itHasPermission = permissions.includes(permissionName);
   if (throwError && !itHasPermission) throw createError({ statusCode: 403, statusMessage: 'Missing permissions to perform this action' });
   return permissions.includes(permissionName);
