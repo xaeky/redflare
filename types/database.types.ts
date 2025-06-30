@@ -234,7 +234,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_all_commissions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          commission_id: string
+          status: string
+          public_note: string
+          secure_note: string
+          created_at: string
+          updated_at: string
+          latest_payment: Json
+          customer: Json
+          n_characters: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

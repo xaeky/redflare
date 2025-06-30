@@ -19,6 +19,7 @@ export interface Commission {
   created_at: string;
   updated_at: string;
   customer: Customer;
+  characaters: CommissionCharacter[];
 }
 
 export interface CommissionPayment {
@@ -59,7 +60,7 @@ export interface CommissionCharacter {
   updated_at: string;
 }
 
-export type CommissionOptions = Omit<Commission, 'id' | 'oid' | 'created_at' | 'updated_at'> & { customer: string; };
+export type CommissionOptions = Omit<Commission, 'id' | 'oid' | 'created_at' | 'updated_at' | 'customer'> & { customer: string; };
 export type CommissionUpdate = Partial<CommissionOptions>;
 
 export type CommissionPaymentOptions = Pick<CommissionPayment, 'currency' | 'income_amount' | 'public_note' | 'secure_note'> & { commission: string; };
@@ -70,3 +71,15 @@ export type CommissionBaseOptions = Omit<CommissionBase, 'id' | 'created_at' | '
 
 export type CommissionCharacterOptions = Pick<CommissionCharacter, 'name'> & Partial<Pick<CommissionCharacter, 'note', 'changelog'>> & { commission: string; base: string; };
 export type CommissionCharacterUpdate = Partial<CommissionCharacterOptions>;
+
+// Front-end types
+
+export type SerializedCommission = Omit<Commission, 'characters' | 'customer'> & {
+  n_characters: number;
+  customer: {
+    id: string;
+    name: string;
+    vrc_id: string | null;
+  };
+  latest_payment: CommissionPayment;
+};
