@@ -56,7 +56,7 @@ const { mutate: addCustomer, isLoading: addCustomerBusy } = useMutation({
           <UInput label="Note" v-model="state.note" class="w-full" />
         </UFormField>
         <div>
-          <UButton label="Save changes" type="submit" block :loading="addCustomerBusy" :disabled="addCustomerBusy" />
+          <UButton label="Add customer" type="submit" block :loading="addCustomerBusy" :disabled="addCustomerBusy" />
         </div>
       </UForm>
     </template>

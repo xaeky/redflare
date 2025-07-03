@@ -17,6 +17,11 @@ const links:SidebarLink[] = [
     to: '/dashboard/commissions'
   },
   {
+    label: 'Avatar Bases',
+    icon: 'i-lucide-cat',
+    to: '/dashboard/bases'
+  },
+  {
     label: 'Customers',
     icon: 'i-heroicons-at-symbol-solid',
     to: '/dashboard/customers'

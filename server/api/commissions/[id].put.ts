@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   if (!commissionId) throw createError({ statusCode: 400, message: 'Commission ID is required' });
   // Parse request validated body
   const body = await readValidatedBody(event, commissionUpdateSchema.safeParse);
-  if (!body.success) throw createError({ statusCode: 400, message: body.error.message });
+  if (!body.success) throw createError({ statusCode: 400, message: 'Invalid body', data: body.error });
   // Update commission in the database
   const { data, error } = await $supabase()
     .from('commissions').update(body.data).eq('id', commissionId)

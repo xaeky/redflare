@@ -41,7 +41,7 @@ watch(() => props.customer, (newCustomerData) => {
 const { mutate: updateCustomer, isLoading: updateCustomerBusy } = useMutation({
   mutation: () => useAPI(`/api/customers/${updatedCustomer.value?.id}`, {
     method: 'PUT',
-    body: _.mapValues(state, v => v?.trim() === '' ? null : v)
+    body: _.mapValues(state, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
   }),
   async onSuccess() { 
     await queryCache.invalidateQueries(customersQuery);
@@ -54,7 +54,7 @@ const { mutate: updateCustomer, isLoading: updateCustomerBusy } = useMutation({
   <USlideover v-model:open="editCustomerSlideoverOpen" title="Edit customer">
     <template #body>
       <div v-if="customer">
-        <UForm :schema :state class="space-y-4" @submit="() => { updateCustomer() }">
+        <UForm :schema :state class="space-y-4" @submit="() => updateCustomer()">
           <UFormField name="id" label="ID" v-if="updatedCustomer">
             <UInput label="ID" v-model="updatedCustomer.id" class="w-full" readonly disabled aria-readonly="" />
           </UFormField>
@@ -68,11 +68,10 @@ const { mutate: updateCustomer, isLoading: updateCustomerBusy } = useMutation({
             <UInput label="Note" v-model="state.note" class="w-full" />
           </UFormField>
           <div>
-            <UButton label="Save changes" type="submit" block :loading="updateCustomerBusy" :disabled="updateCustomerBusy" />
+            <UButton label="Save changes" type="submit" block :loading="updateCustomerBusy" :disabled="updateCustomerBusy"/>
           </div>
         </UForm>
       </div>
-      <div v-else>no customer data!</div>
     </template>
   </USlideover>
 </template>

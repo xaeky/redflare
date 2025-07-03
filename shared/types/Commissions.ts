@@ -8,7 +8,8 @@ export const commissionOptionsSchema = z.object({
   ]).optional().default('in_setup'),
   public_note: z.string().nullable().optional(),
   secure_note: z.string().nullable().optional(),
-  customer: z.string(), // Customer ID
+  customer: z.string().nonempty('Customer cannot be empty!'), // Customer ID
+  created_at: z.date().or(z.string()).optional(), // Date or ISO string
 });
 
 export const commissionUpdateSchema = z.object({
@@ -19,7 +20,8 @@ export const commissionUpdateSchema = z.object({
   ]).optional(),
   public_note: z.string().nullable().optional(),
   secure_note: z.string().nullable().optional(),
-  customer: z.string().optional(), // Customer ID
+  customer: z.string().nonempty('Customer cannot be empty!'), // Customer ID
+  created_at: z.date().or(z.string()).optional(), // Date or ISO string
 });
 
 export const commissionPaymentOptionsSchema = z.object({
@@ -41,3 +43,9 @@ export const commissionCharacterOptionsSchema = z.object({
   changelog: z.record(z.string()).nullable().optional(),
   base: z.string().min(1)
 });
+
+export const commissionBaseOptionsSchema = z.object({
+  name: z.string().min(1),
+  creator_name: z.string().min(1),
+  storefront_url: z.string().url()
+})

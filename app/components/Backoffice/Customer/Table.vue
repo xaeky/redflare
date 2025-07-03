@@ -66,7 +66,7 @@ const columns: TableColumn<Customer>[] = [
   {
     accessorKey: 'created_at',
     header: 'Created',
-    cell: ({row}) => new Date(row.getValue('created_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+    cell: ({row}) => new Date(row.getValue('created_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   },
   {
     id: 'actions',

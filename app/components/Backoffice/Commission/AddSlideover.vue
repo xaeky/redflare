@@ -9,10 +9,8 @@ import type { TabsItem } from '@nuxt/ui';
 // Props & vars
 const queryCache = useQueryCache();
 const props = defineProps<{
-  open: boolean,
-  commission: SerializedCommission
+  open: boolean
 }>();
-const updatedCommission = ref<CommissionUpdate>();
 
 // Emits
 const emit = defineEmits<{
@@ -20,13 +18,13 @@ const emit = defineEmits<{
 }>();
 
 // Inputs
-const editCommissionSlideoverOpen = computed({
+const addCommissionSlideoverOpen = computed({
   get: () => props.open,
   set: (value: boolean) => emit('update:open', value)
 });
 
 // Form
-const schema = commissionUpdateSchema;
+const schema = commissionOptionsSchema;
 type Schema = z.output<typeof schema>;
 const state = reactive<Schema>({
   customer: '',
@@ -47,23 +45,18 @@ const customerSearchQueryRaw = shallowRef<string>('');
 const customerSearchQuery = refDebounced(customerSearchQueryRaw, 1000);
 const customerSearchSelected = shallowRef<SerializedCommission['customer']>()
 const { data:customers, isLoading: getCustomersBusy, refetch: customersRefetch } = useQuery(customerFilterQuery, () => ({
-  name: customerSearchQuery.value || props.commission?.customer.name || ''
+  name: customerSearchQuery.value || ''
 }));
 const availableCustomers = computed(() => {
-  const localCustomer = props.commission?.customer;
-  const sanitizedCustomer = {
-    label: localCustomer.name,
-    value: localCustomer.id
-  }
-  const sanitizedCustomers = [ sanitizedCustomer ];
+  // TODO: Add type to this array.
+  const sanitizedCustomers = [];
   if (customerSearchSelected.value) sanitizedCustomers.push({
     label: customerSearchSelected.value.name,
     value: customerSearchSelected.value.id
   });
   // Filters for remote customers
-  const notLocalCustomer = (c: SerializedCommission['customer']) => c.id !== localCustomer.id;
   const notSelectedCustomer = (c: SerializedCommission['customer']) => c.id !== customerSearchSelected.value?.id;
-  if (customers.value) sanitizedCustomers.push(...customers.value.filter(c => notLocalCustomer(c) && notSelectedCustomer(c)).map(c => ({
+  if (customers.value) sanitizedCustomers.push(...customers.value.filter(c => notSelectedCustomer(c)).map(c => ({
     label: c.name,
     value: c.id,
     onSelect: () => {
@@ -101,74 +94,47 @@ const commissionCreatedDate = computed({
     const sanitizedCalendarDate = value.toDate('UTC');
     state.created_at = sanitizedCalendarDate;
   }
-});
-// - Commission characters
-const commissionCharacters = computed(() => props.commission.characaters || [])
-
-// Watchers
-watch(() => props.commission, (newCommissionData) => {
-  if (!newCommissionData) return;
-  const sanitizedData = _.cloneDeep(newCommissionData) as unknown as CommissionUpdate;
-  sanitizedData.customer = newCommissionData.customer.id;
-  sanitizedData.created_at = new Date(newCommissionData.created_at);
-  updatedCommission.value = sanitizedData;
-  customerSearchQueryRaw.value = newCommissionData.customer.name;
-  // Assign the sanitized data to state, only existing fields with lodash
-  _.assign(state, _.pick(sanitizedData, Object.keys(schema.shape)));
-}, { immediate: true, deep: true });
+})
 
 // Mutations
-const { mutate: updateCommission, isLoading: updateCommissionBusy } = useMutation({
-  mutation: () => useAPI(`/api/commissions/${props.commission.id}`, {
-    method: 'PUT',
+const { mutate: addCommission, isLoading: addCommissionBusy } = useMutation({
+  mutation: () => useAPI(`/api/commissions`, {
+    method: 'POST',
     body: _.mapValues(state, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
   }),
   async onSuccess() { 
     await queryCache.invalidateQueries(commissionsQuery);
-    editCommissionSlideoverOpen.value = false;
+    addCommissionSlideoverOpen.value = false;
   }
 });
 </script>
 
 <template>
-  <USlideover v-model:open="editCommissionSlideoverOpen" title="Edit commission">
+  <USlideover v-model:open="addCommissionSlideoverOpen" title="Add commission">
     <template #body>
-      <div v-if="commission" class="space-y-4">
-        <UTabs variant="link" :items="formTabs" class="w-full" :ui="{ trigger: 'grow' }">
-          <template #general="{ item }">
-            <UForm :schema :state class="space-y-4" @submit="() => updateCommission()">
-              <UFormField name="id" label="ID" v-if="props.commission">
-                <UInput label="ID" v-model="props.commission.id" class="w-full" readonly disabled aria-readonly="" />
-              </UFormField>
-              <UFormField name="customer" label="Customer">
-                <USelectMenu
-                  v-model:model-value="state.customer"
-                  v-model:search-term="customerSearchQueryRaw"
-                  :items="availableCustomers"
-                  valueKey="value"
-                  :loading="getCustomersBusy"
-                  placeholder="Select a customer"
-                  class="w-full"
-                />
-              </UFormField>
-              <UFormField name="status" label="Status">
-                <USelect v-model="state.status" :items="commissionStatusOptions" :icon="commissionStatusOptionsIcon" class="w-full" />
-              </UFormField>
-              <UFormField name="created_at" label="Created at">
-                <UCalendar v-model="commissionCreatedDate" />
-              </UFormField>
-              <div>
-                <UButton label="Save changes" type="submit" block :loading="updateCommissionBusy" />
-              </div>
-            </UForm>
-          </template>
-          <template #characters="{ item }">
-            <BackofficeCommissionFormCharacters :characters="commissionCharacters" :commission-id="props.commission.id" />
-          </template>
-          <template #payments="{ item }">
-            Payments
-          </template>
-        </UTabs>
+      <div class="space-y-4">
+        <UForm :schema :state class="space-y-4" @submit="() => addCommission()">
+          <UFormField name="customer" label="Customer">
+            <USelectMenu
+              v-model:model-value="state.customer"
+              v-model:search-term="customerSearchQueryRaw"
+              :items="availableCustomers"
+              valueKey="value"
+              :loading="getCustomersBusy"
+              placeholder="Select a customer"
+              class="w-full"
+            />
+          </UFormField>
+          <UFormField name="status" label="Status">
+            <USelect v-model="state.status" :items="commissionStatusOptions" :icon="commissionStatusOptionsIcon" class="w-full" />
+          </UFormField>
+          <UFormField name="created_at" label="Created at">
+            <UCalendar v-model="commissionCreatedDate" />
+          </UFormField>
+          <div>
+            <UButton label="Add commission" type="submit" block :loading="addCommissionBusy" />
+          </div>
+        </UForm>
       </div>
     </template>
   </USlideover>

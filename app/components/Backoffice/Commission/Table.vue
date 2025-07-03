@@ -52,7 +52,8 @@ const columns: TableColumn<SerializedCommission>[] = [
     header: 'Latest Payment',
     cell: ({row}) => {
       const thisCommission = row.original;
-      return h('span', { class: 'font-semibold' }, thisCommission.latest_payment.state);
+      const latestPayment = thisCommission.latest_payment ? thisCommission.latest_payment.state : 'None';
+      return h('span', { class: 'font-semibold' }, latestPayment);
     }
   },
   {
@@ -62,7 +63,7 @@ const columns: TableColumn<SerializedCommission>[] = [
   {
     accessorKey: 'created_at',
     header: 'Created',
-    cell: ({row}) => new Date(row.getValue('created_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+    cell: ({row}) => new Date(row.getValue('created_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
   },
   {
     id: 'actions',

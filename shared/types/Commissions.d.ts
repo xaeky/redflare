@@ -16,8 +16,8 @@ export interface Commission {
   status: CommissionStatus | string;
   public_note: string | null;
   secure_note: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at: string | Date;
+  updated_at: string | Date;
   customer: Customer;
   characaters: CommissionCharacter[];
 }
@@ -54,13 +54,13 @@ export interface CommissionCharacter {
   commission: Commission;
   base: CommissionBase;
   name: string;
-  note: string | null;
-  changelog: Record<string, string> | null;
+  note: string | undefined;
+  changelog: Record<string, string> | undefined;
   created_at: string;
   updated_at: string;
 }
 
-export type CommissionOptions = Omit<Commission, 'id' | 'oid' | 'created_at' | 'updated_at' | 'customer'> & { customer: string; };
+export type CommissionOptions = Omit<Commission, 'id' | 'oid' | 'updated_at' | 'customer'> & { customer: string; };
 export type CommissionUpdate = Partial<CommissionOptions>;
 
 export type CommissionPaymentOptions = Pick<CommissionPayment, 'currency' | 'income_amount' | 'public_note' | 'secure_note'> & { commission: string; };
@@ -69,7 +69,7 @@ export type CommissionPaymentInsert = Omit<CommissionPayment, 'pid' | 'created_a
 
 export type CommissionBaseOptions = Omit<CommissionBase, 'id' | 'created_at' | 'updated_at'>;
 
-export type CommissionCharacterOptions = Pick<CommissionCharacter, 'name'> & Partial<Pick<CommissionCharacter, 'note', 'changelog'>> & { commission: string; base: string; };
+export type CommissionCharacterOptions = Pick<CommissionCharacter, 'name'> & { note?: string; changelog?: Record<string, string>; commission: string; base: string; };
 export type CommissionCharacterUpdate = Partial<CommissionCharacterOptions>;
 
 // Front-end types
@@ -83,3 +83,7 @@ export type SerializedCommission = Omit<Commission, 'characters' | 'customer'> &
   };
   latest_payment: CommissionPayment;
 };
+
+export type SerializedCommissionCharacterOptions = Omit<CommissionCharacterOptions, 'commission'>;
+
+export type WithId<T> = { id: string; } & T;
