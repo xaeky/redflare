@@ -30,7 +30,7 @@ jobs:
     - name: Login to pkg.dev
       uses: docker/login-action@v3
       with:
-        registry: southamerica-east1-docker.pkg.dev
+        registry: us-west1-docker.pkg.dev
         username: oauth2accesstoken
         password: ${{ steps.auth.outputs.access_token }}
 
@@ -41,7 +41,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: southamerica-east1-docker.pkg.dev/redflare-prod/cloud-run-source-deploy/redflare
+        images: us-west1-docker.pkg.dev/redflare-prod/cloud-run-source-deploy/redflare
 
     - name: Build and push
       id: build-push
@@ -81,12 +81,12 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ vars.SERVICE_NAME }}
-          image: southamerica-east1-docker.pkg.dev/redflare-prod/cloud-run-source-deploy/redflare@${{ needs.build.outputs.digest }}
+          image: us-west1-docker.pkg.dev/redflare-prod/cloud-run-source-deploy/redflare@${{ needs.build.outputs.digest }}
           env_vars: |
 
           secrets: |
             DB_URL=${{ vars.DB_URL }}
-          region: southamerica-east1
+          region: us-west1
           flags: >
             --service-account=${{ vars.SERVICE_ACCOUNT }}
             --platform=managed
@@ -97,4 +97,4 @@ jobs:
             --allow-unauthenticated
       
       - name: Send all traffic to this new version
-        run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --to-latest --region=southamerica-east1 --quiet
+        run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --to-latest --region=us-west1 --quiet
