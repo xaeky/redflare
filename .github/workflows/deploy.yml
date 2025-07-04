@@ -81,7 +81,7 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ vars.SERVICE_NAME }}
-          image: us-west1-docker.pkg.dev/redflare-prod/cloud-run-source-deploy/redflare@${{ needs.build.outputs.digest }}
+          image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
           env_vars: |
 
           secrets: |
