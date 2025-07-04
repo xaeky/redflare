@@ -103,7 +103,7 @@ const commissionCreatedDate = computed({
   }
 });
 // - Commission characters
-const commissionCharacters = computed(() => props.commission.characaters || [])
+const commissionCharacters = computed(() => props.commission.characters || [])
 
 // Watchers
 watch(() => props.commission, (newCommissionData) => {

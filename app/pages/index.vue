@@ -1,5 +1,7 @@
-<template>
-  <main>
-    <h2>Redflare</h2>
-  </main>
-</template>
+<script setup lang="ts">
+definePageMeta({
+  middleware: 'to-landing'
+})
+</script>
+
+<template></template>

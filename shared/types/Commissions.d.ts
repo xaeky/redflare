@@ -19,7 +19,7 @@ export interface Commission {
   created_at: string | Date;
   updated_at: string | Date;
   customer: Customer;
-  characaters: CommissionCharacter[];
+  characters: CommissionCharacter[];
 }
 
 export interface CommissionPayment {
@@ -72,9 +72,9 @@ export type CommissionBaseOptions = Omit<CommissionBase, 'id' | 'created_at' | '
 export type CommissionCharacterOptions = Pick<CommissionCharacter, 'name'> & { note?: string; changelog?: Record<string, string>; commission: string; base: string; };
 export type CommissionCharacterUpdate = Partial<CommissionCharacterOptions>;
 
-// Front-end types
+// Front-end types @ Backoffice
 
-export type SerializedCommission = Omit<Commission, 'characters' | 'customer'> & {
+export type SerializedCommission = Omit<Commission, 'customer'> & {
   n_characters: number;
   customer: {
     id: string;
@@ -87,3 +87,16 @@ export type SerializedCommission = Omit<Commission, 'characters' | 'customer'> &
 export type SerializedCommissionCharacterOptions = Omit<CommissionCharacterOptions, 'commission'>;
 
 export type WithId<T> = { id: string; } & T;
+
+// Front-end types @ Frontoffice
+
+export type PublicSerializedCommission = Omit<Commission, 'public_note' | 'secure_note'> & {
+  note: string;
+  n_characters: number;
+  customer: {
+    id: string;
+    name: string;
+    vrc_id: string | null;
+  };
+  latest_payment: CommissionPayment;
+}
