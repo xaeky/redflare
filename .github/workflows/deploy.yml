@@ -41,7 +41,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: us-west1-docker.pkg.dev/redflare-prod/cloud-run-source-deploy/redflare
+        images: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare
 
     - name: Build and push
       id: build-push
