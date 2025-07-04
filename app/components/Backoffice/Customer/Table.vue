@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import _ from 'lodash';
 import { customersQuery } from '~/queries/customers';
 import type { TableColumn } from '@nuxt/ui';
 import { UButton } from '#components';
@@ -12,7 +13,7 @@ const customers = computed(() => props.customers);
 const toast = useToast();
 const queryCache = useQueryCache();
 const editSlideoverOpen = ref(false);
-const editSlideoverData = ref<Customer | null>(null);
+const editSlideoverData = reactive<Customer>({} as Customer);
 const deleteModalOpen = ref(false);
 const deleteModalData = ref<Customer | null>(null);
 
@@ -83,7 +84,7 @@ const columns: TableColumn<Customer>[] = [
             variant: 'soft',
             onClick() {
               const thisCustomer = customers.value?.find(c => row.getValue('id') === c.id) as Customer;
-              editSlideoverData.value = thisCustomer;
+              _.assign(editSlideoverData, thisCustomer);
               editSlideoverOpen.value = true;
             }
           }),
@@ -110,7 +111,7 @@ const columns: TableColumn<Customer>[] = [
   <UTable :columns :data="customers" class="flex-1" />
   <BackofficeCustomerEditSlideover
     v-model:open="editSlideoverOpen"
-    v-model:customer="(editSlideoverData as Customer)"
+    v-model:customer="editSlideoverData"
   />
   <ModalGenericConfirmation
     v-model:open="deleteModalOpen"
