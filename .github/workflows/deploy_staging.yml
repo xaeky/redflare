@@ -1,0 +1,116 @@
+name: Deploy main branch to Cloud Run as staging
+on:
+  push:
+    branches:
+      - 'main'
+    paths-ignore: # do not build for irrelvant changes like markdown files
+      - '**.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    outputs:
+      digest: ${{ steps.build-push.outputs.digest }}
+      meta: ${{ steps.meta.outputs.json }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Auth Cloud SDK
+      id: 'auth'
+      uses: google-github-actions/auth@v2
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+        token_format: 'access_token'
+
+    - name: Login to pkg.dev
+      uses: docker/login-action@v3
+      with:
+        registry: us-west1-docker.pkg.dev
+        username: oauth2accesstoken
+        password: ${{ steps.auth.outputs.access_token }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Generate docker metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare
+
+    - name: Build and push
+      id: build-push
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+            BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+            SOURCE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.source'] }}
+  
+  cloud-run-deploy:
+    runs-on: ubuntu-latest
+    environment: 
+      name: staging
+      url: https://avatars-console-staging.xaeky.cloud
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: 'auth'
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - id: 'deploy'
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ vars.SERVICE_NAME }}
+          image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
+          env_vars: |
+            NUXT_MP_PUBLIC=${{ vars.MP_PUBLIC }}
+            NUXT_MP_SERVICE=${{ secrets.MP_SERVICE }}
+            NUXT_MP_MARKETPLACE=${{ vars.MP_MARKETPLACE }}
+            NUXT_MP_ENDPOINT_BASE=${{ vars.MP_BASE }}
+            NUXT_PP_CID=${{ vars.PP_CID }}
+            NUXT_PP_SID=${{ secrets.PP_SID }}
+            NUXT_PP_ENDPOINT_BASE=${{ vars.PP_BASE }}
+            NUXT_OAUTH_AUTH0_CLIENT_ID=${{ vars.A0_CLIENT_ID }}
+            NUXT_OAUTH_AUTH0_CLIENT_SECRET=${{ secrets.A0_CLIENT_SECRET }}
+            NUXT_OAUTH_AUTH0_DOMAIN=${{ vars.A0_TENANT }}
+            NUXT_OAUTH_AUTH0_REDIRECT_URL=${{ vars.A0_CALLBACK }}
+            NUXT_SUPABASE_BASE=${{ vars.SP_BASE }}
+            NUXT_SUPABASE_ANON=${{ vars.SP_ANON }}
+            NUXT_SUPABASE_SERV=${{ secrets.SP_SERV }}
+            NUXT_PUBLIC_CREATOR_MARKET_NAME=${{ vars.MARKET_NAME }}
+            NUXT_PUBLIC_CREATOR_CALLBACK_URI=${{ vars.MARKET_CALLBACK }}
+            NUXT_SESSION_PASSWORD=${{ secrets.SESSION_PASSWORD }}
+          secrets: |
+            DB_URL=${{ vars.DB_URL }}
+          region: us-west1
+          flags: >
+            --service-account=${{ vars.SERVICE_ACCOUNT }}
+            --platform=managed
+            --cpu=1
+            --cpu-throttling
+            --memory=1024Mi
+            --max-instances=1
+            --allow-unauthenticated
+      
+      - name: Send all traffic to this new version
+        run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --to-latest --region=us-west1 --quiet

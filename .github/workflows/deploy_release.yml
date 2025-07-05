@@ -1,10 +1,8 @@
-name: Deploy branch to Cloud Run
+name: Deploy main branch to Cloud Run as production
 on:
-  push:
-    branches:
-      - 'main'
-    paths-ignore: # do not build for irrelvant changes like markdown files
-      - '**.md'
+  push: 
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -61,8 +59,8 @@ jobs:
   cloud-run-deploy:
     runs-on: ubuntu-latest
     environment: 
-      name: staging
-      url: https://avatars-console-staging.xaeky.cloud
+      name: production
+      url: https://avatars-console.xaeky.cloud
     permissions:
       contents: 'read'
       id-token: 'write'
