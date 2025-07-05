@@ -83,7 +83,22 @@ jobs:
           service: ${{ vars.SERVICE_NAME }}
           image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
           env_vars: |
-
+            NUXT_MP_PUBLIC=${{ vars.MP_PUBLIC }}
+            NUXT_MP_SERVICE=${{ secrets.MP_SERVICE }}
+            NUXT_MP_MARKETPLACE=${{ vars.MP_MARKETPLACE }}
+            NUXT_MP_ENDPOINT_BASE=${{ vars.MP_BASE }}
+            NUXT_PP_CID=${{ vars.PP_CID }}
+            NUXT_PP_SID=${{ secrets.PP_SID }}
+            NUXT_PP_ENDPOINT_BASE=${{ vars.PP_BASE }}
+            NUXT_OAUTH_AUTH0_CLIENT_ID=${{ vars.A0_CLIENT_ID }}
+            NUXT_OAUTH_AUTH0_CLIENT_SECRET=${{ secrets.A0_CLIENT_SECRET }}
+            NUXT_OAUTH_AUTH0_DOMAIN=${{ vars.A0_TENANT }}
+            NUXT_OAUTH_AUTH0_REDIRECT_URL=${{ vars.A0_CALLBACK }}
+            NUXT_SUPABASE_BASE=${{ vars.SP_BASE }}
+            NUXT_SUPABASE_ANON=${{ vars.SP_ANON }}
+            NUXT_SUPABASE_SERV=${{ secrets.SP_SERV }}
+            NUXT_PUBLIC_CREATOR_MARKET_NAME=${{ vars.MARKET_NAME }}
+            NUXT_PUBLIC_CREATOR_CALLBACK_URI=${{ vars.MARKET_CALLBACK }}
           secrets: |
             DB_URL=${{ vars.DB_URL }}
           region: us-west1
