@@ -31,7 +31,6 @@ WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/.output ./.output
 COPY --from=builder /usr/src/app/supabase ./supabase
 
-ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=8080
 
