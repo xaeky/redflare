@@ -47,7 +47,8 @@ export default defineNuxtConfig({
       creator: {
         marketName: '',
         callbackUri: ''
-      }
+      },
+      env: process.env.NODE_ENV || ''
     }
   }
 })
