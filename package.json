@@ -9,7 +9,9 @@
     "generate": "nuxt generate",
     "supa:prepare": "source .env && supabase gen types typescript --project-id $SUPABASE_REF --schema public > types/database.types.ts",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "db:prod:data": "scripts/restore-data.sh -e production",
+    "db:prod:migrate": "scripts/restore-schema.sh -e production"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.2.0",
