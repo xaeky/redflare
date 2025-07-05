@@ -99,6 +99,7 @@ jobs:
             NUXT_SUPABASE_SERV=${{ secrets.SP_SERV }}
             NUXT_PUBLIC_CREATOR_MARKET_NAME=${{ vars.MARKET_NAME }}
             NUXT_PUBLIC_CREATOR_CALLBACK_URI=${{ vars.MARKET_CALLBACK }}
+            NUXT_SESSION_PASSWORD=${{ secrets.SESSION_PASSWORD }}
           secrets: |
             DB_URL=${{ vars.DB_URL }}
           region: us-west1
