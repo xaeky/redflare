@@ -48,7 +48,7 @@ export default defineNuxtConfig({
         marketName: '',
         callbackUri: ''
       },
-      env: process.env.NODE_ENV || ''
+      env: process.env.REDFLARE_ENV || process.env.NODE_ENV || ''
     }
   }
 })
