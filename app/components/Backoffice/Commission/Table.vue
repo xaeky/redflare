@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
-import { UButton } from '#components';
+import { UButton, ULink } from '#components';
 
 // Props & vars
 const props = defineProps<{
@@ -14,7 +14,14 @@ const columns: TableColumn<SerializedCommission>[] = [
   {
     accessorKey: 'id',
     header: '#',
-    cell: ({row}) => (row.getValue('id') as string).slice(0, 6).toUpperCase()
+    cell: ({row}) => {
+      const thisCommission = row.original;
+      return h('div', { class: 'flex items-center gap-2' }, [
+        h(ULink, { to: `/commission/${thisCommission.id}`, target: '_blank' },
+          [ h(UButton, { icon: 'i-lucide-link-2', color: 'neutral', size: 'sm', variant: 'soft' }) ]),
+        h('span', thisCommission.id.substring(0, 6))
+      ])
+    }
   },
   {
     id: 'customer',
