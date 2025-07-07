@@ -62,7 +62,7 @@ const commissionRoutedValue = routeCommissionStatus(commission.status as Commiss
         </section>
         <section class="space-y-4">
           <Hx level="2">Characters</Hx>
-          <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8">
             <div class="bg-linear-125 from-neutral-800/50 to-primary-500/20 border border-neutral-700/25 p-4 md:p-6 rounded-xl" v-for="char in commission.characters" :key="char.id">
               <div class="flex flex-col gap-2">
                 <span class="text-2xl font-bold" v-text="char.name"/>
