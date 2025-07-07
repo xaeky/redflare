@@ -1,7 +1,8 @@
 <script setup lang="ts">
-const props = defineProps<{
-  status: CommissionStatus | string
-}>();
+const props = withDefaults(defineProps<{
+  status: CommissionStatus | string,
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+}>(), { status: 'backlog', size: 'xl' });
 type colorType = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral';
 const defaultLabel = {
   label: 'Invalid status',
@@ -24,5 +25,5 @@ const thisLabel = statusLabels[props.status as CommissionStatus] || defaultLabel
 </script>
 
 <template>
-  <UBadge :color="thisLabel.color" :label="thisLabel.label" :icon="thisLabel.icon" size="xl" variant="soft" />
+  <UBadge :color="thisLabel.color" :label="thisLabel.label" :icon="thisLabel.icon" :size variant="soft" />
 </template>
