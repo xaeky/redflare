@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
-import { UButton, ULink } from '#components';
+import { UButton, ULink, SharedCommissionStatusBadge } from '#components';
 
 // Props & vars
 const props = defineProps<{
@@ -19,7 +19,7 @@ const columns: TableColumn<SerializedCommission>[] = [
       return h('div', { class: 'flex items-center gap-2' }, [
         h(ULink, { to: `/commission/${thisCommission.id}`, target: '_blank' },
           [ h(UButton, { icon: 'i-lucide-link-2', color: 'neutral', size: 'sm', variant: 'soft' }) ]),
-        h('span', thisCommission.id.substring(0, 6))
+        h('span', { class: 'font-mono uppercase' }, thisCommission.id.substring(0, 6))
       ])
     }
   },
@@ -31,8 +31,7 @@ const columns: TableColumn<SerializedCommission>[] = [
       const { id, name, vrc_id } = thisCommission.customer;
       // TODO: Make a button to invoke a slideover with customer details and actions
       const items = [ h('span', { class: 'font-semibold' }, name) ];
-      if (vrc_id) items.push(h(UButton, {
-        label: 'See profile',
+      if (vrc_id) items.unshift(h(UButton, {
         variant: 'soft',
         color: 'neutral',
         size: 'sm',
@@ -42,7 +41,7 @@ const columns: TableColumn<SerializedCommission>[] = [
           navigateTo(`${baseURI}/${vrc_id}`, { external: true, open: { target: '_blank' } });
         }
       }))
-      return h('div', { class: 'space-x-4' }, items)
+      return h('div', { class: 'space-x-2' }, items)
     }
   },
   {
@@ -65,7 +64,8 @@ const columns: TableColumn<SerializedCommission>[] = [
   },
   {
     header: 'Status',
-    accessorKey: 'status'
+    accessorKey: 'status',
+    cell: ({row}) => h(SharedCommissionStatusBadge, { status: row.original.status, size: 'md' })
   },
   {
     accessorKey: 'created_at',
