@@ -9,8 +9,12 @@ export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, commissionUpdateSchema.safeParse);
   if (!body.success) throw createError({ statusCode: 400, message: 'Invalid body', data: body.error });
   // Update commission in the database
+  const updateData = {
+    ...body.data,
+    updated_at: new Date().toISOString()
+  }
   const { data, error } = await $supabase()
-    .from('commissions').update(body.data).eq('id', commissionId)
+    .from('commissions').update(updateData).eq('id', commissionId)
     .select('*, customer:customers(*)').single();
   if (error) throw createError({ statusCode: 500, data: error });
   // Return updated commission data
