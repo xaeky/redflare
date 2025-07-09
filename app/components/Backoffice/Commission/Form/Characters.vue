@@ -133,7 +133,7 @@ watch(remoteCharactersRaw, (newCharacters) => {
       </ul>
     </div>
     <div v-else-if="remoteCharactersBusy">
-      Fetching characters...
+      <SharedGeneralLoader text="Fetching commission characters" />
     </div>
     <div v-if="newCharacterActive" class="border border-neutral-800 p-4 rounded-xl space-y-4">
       <div class="flex items-center justify-between">
