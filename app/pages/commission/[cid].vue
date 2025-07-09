@@ -83,9 +83,15 @@ const commissionRoutedValue = routeCommissionStatus(commission.status as Commiss
       </div>
     </div>
     <div class="md:p-8 lg:w-md border-t lg:border-l border-neutral-700 lg:border-neutral-800 pt-4 md:border-t-0 space-y-4">
-      <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
-        <Hx level="3">Created</Hx>
-        <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.created_at))" />
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
+          <Hx level="3">Created</Hx>
+          <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.created_at))" />
+        </div>
+        <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
+          <Hx level="3">Modified</Hx>
+          <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.updated_at))" />
+        </div>
       </div>
       <section class="space-y-4">
         <Hx level="2">Customer</Hx>
