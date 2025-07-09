@@ -134,7 +134,7 @@ const { mutate: updateCommission, isLoading: updateCommissionBusy } = useMutatio
   <USlideover v-model:open="editCommissionSlideoverOpen" title="Edit commission">
     <template #body>
       <div v-if="commission" class="space-y-4">
-        <UTabs variant="link" :items="formTabs" class="w-full" :ui="{ trigger: 'grow' }">
+        <UTabs variant="link" :items="formTabs" class="w-full" :ui="{ trigger: 'grow' }" :unmountOnHide="false">
           <template #general="{ item }">
             <UForm :schema :state class="space-y-4" @submit="() => updateCommission()">
               <UFormField name="id" label="ID" v-if="props.commission">
