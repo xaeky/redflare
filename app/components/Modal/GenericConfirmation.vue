@@ -6,7 +6,7 @@ const props = withDefaults(defineProps<{
   confirmLabel?: string;
   confirmAdditional?: false | null | 'name'
   confirmAdditionalValue?: string;
-  open: boolean
+  open?: boolean
 }>(), {
   title: 'Confirmation',
   message: 'Are you sure you want to perform this action?',
