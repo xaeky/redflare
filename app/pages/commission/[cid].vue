@@ -62,10 +62,18 @@ const commissionRoutedValue = routeCommissionStatus(commission.status as Commiss
         </section>
         <section class="space-y-4">
           <Hx level="2">Characters</Hx>
-          <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8">
+          <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8 select-none">
             <div class="bg-linear-125 from-neutral-800/50 to-primary-500/20 border border-neutral-700/25 p-4 md:p-6 rounded-xl" v-for="char in commission.characters" :key="char.id">
               <div class="flex flex-col gap-2">
-                <span class="text-2xl font-bold" v-text="char.name"/>
+                <div class="flex items-center justify-between">
+                  <span class="text-2xl font-bold" v-text="char.name"/>
+                  <UTooltip text="Character's Order ID">
+                    <div class="flex items-center gap-2">
+                      <UIcon name="i-lucide-hash" class="opacity-50 text-primary-300" />
+                      <span class="text-sm font-bold font-mono uppercase select-all" v-text="char.order_id"/>
+                    </div>
+                  </UTooltip>
+                </div>
                 <span class="font-bold text-primary" v-text="char.base.name"/>
                 <span v-if="char.note && char.note.length" class="text-xs" v-text="char.note" />
               </div>
