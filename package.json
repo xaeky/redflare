@@ -11,7 +11,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "db:prod:data": "scripts/restore-data.sh -e production",
-    "db:prod:migrate": "scripts/restore-schema.sh -e production"
+    "db:prod:migrate": "scripts/restore-schema.sh -e production",
+    "db:prod:backup": "scripts/backup-data.sh -e production"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.2.0",
