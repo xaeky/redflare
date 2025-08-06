@@ -35,8 +35,6 @@ const getAll = async ({ page, pageSize = 50, filters, sort }: CustomerGetAllPara
     { $limit: pageSize },
   ];
 
-  console.log('Customer aggregation pipeline:', JSON.stringify(pipelineObject, null, 2));
-
   return await collection.aggregate(pipelineObject).toArray();
 }
 
