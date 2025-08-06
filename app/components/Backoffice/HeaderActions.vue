@@ -9,7 +9,7 @@ defineProps<{
     <div class="uppercase text-xs font-semibold text-neutral-500">
       <span>Actions</span>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-4">
       <UButton
         v-for="(action, actionIndex) in actions"
         :key="actionIndex" :icon="action.icon" :color="action.color"

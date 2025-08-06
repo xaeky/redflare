@@ -3,7 +3,6 @@ const route = useRoute();
 
 const title = computed(() => route.meta.title || '');
 const description = computed(() => route.meta.description || '');
-
 </script>
 
 <template>
@@ -25,9 +24,6 @@ const description = computed(() => route.meta.description || '');
               <div>
                 <Hx level="1">{{ title }}</Hx>
                 <span v-if="description" v-text="description" class="text-muted" />
-              </div>
-              <div class="rf_backoffice_content_header_actions">
-                
               </div>
             </div>
             <slot />
