@@ -23,11 +23,27 @@ watch(state, newState => {
   });
 });
 
-watch(customerSorting, (newSorting) => {
+watch(customerSorting, () => {
   refetchCustomers();
 }, { immediate: true, deep: true });
 
 definePageMeta({
+  title: 'Customers',
+  description: 'Manage your customers',
+  actions: [
+    {
+      label: 'Refresh',
+      icon: 'i-heroicons-arrow-path-16-solid',
+      color: 'neutral',
+      variant: 'subtle',
+      action: () => { refetchCustomers(); }
+    },
+    {
+      label: 'Add customer',
+      icon: 'i-heroicons-plus-16-solid',
+      action: () => { addSlideoverOverlay.open(); }
+    }
+  ],
   middleware: 'auth',
   layout: 'backoffice',
   keepalive: true
@@ -35,31 +51,13 @@ definePageMeta({
 </script>
 
 <template>
-  <div id="xarf_dash_customers">
-    <div id="xarf_dash_customer_head" class="flex items-center justify-between">
-      <Hx level="1">Customers</Hx>
-      <div id="xarf_dash_customer_head_actions" class="space-x-4">
-        <UButton
-          label="Refresh" icon="i-heroicons-arrow-path-16-solid"
-          color="neutral" variant="subtle"
-          @click="() => { refetchCustomers() }"
-        />
-        <UButton
-          label="Add customer" icon="i-heroicons-plus-16-solid"
-          @click="() => { addSlideoverOverlay.open() }"
-        />
-      </div>
-    </div>
-    <div class="mt-8">
-      <div v-if="asyncStatus === 'loading'" class="space-y-4">
-        <USkeleton class="w-full h-12" v-for="_ in new Array(4)" />
-      </div>
-      <div v-else-if="customers && customers.length">
-        <BackofficeCustomerTable :customers v-model:sorting="customerSorting" />
-      </div>
-      <div v-else-if="customers && !customers.length">
-        No customers found!
-      </div>
-    </div>
+  <div v-if="asyncStatus === 'loading'" class="space-y-4">
+    <USkeleton class="w-full h-12" v-for="_ in new Array(4)" />
+  </div>
+  <div v-else-if="customers && customers.length">
+    <BackofficeCustomerTable :customers v-model:sorting="customerSorting" />
+  </div>
+  <div v-else-if="customers && !customers.length">
+    No customers found!
   </div>
 </template>
