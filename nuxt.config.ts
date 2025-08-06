@@ -12,6 +12,9 @@ export default defineNuxtConfig({
       dirs: ['server/utils/services', 'server/utils/models'],
     },
   },
+  imports: {
+    dirs: ['shared/enums'],
+  },
   alias: {
     '#models': fileURLToPath(new URL('./server/utils/models', import.meta.url)),
   },

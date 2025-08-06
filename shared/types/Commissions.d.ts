@@ -1,36 +1,38 @@
-import type { Customer } from './Customers.d';
 import type { WithId } from 'mongodb';
 
-export type CommissionStatus =
-  'settled' | 'missing' | 'backlog' | 'in_setup' | 'next_up' |
-  'in_development' | 'in_cooldown' |
-  'showtime' | 'maintenance' | 'cancelled';
+export enum CommissionFlagsType {
+  None           = 0,
+  HideCustomer   = 1 << 0,
+  HideCharacters = 1 << 1,
+  HidePayment    = 1 << 2,
+  HighPriority   = 1 << 3,
+}
 
 export type CommissionPaymentStatus = 'pending' | 'paid_auto' | 'paid_manual' | 'cancelled' | 'refunded' | 'chargeback' | 'disputed';
 export type CommissionPaymentStatusEditable = 'paid_manual' | 'cancelled' | 'refunded' | 'chargeback' | 'disputed';
 export type CommissionPaymentCurrency = 'ARS' | 'USD'; // ISO 4217 currency codes
 export type CommissionPaymentProcessor = 'mercadopago' | 'paypal';
 
-export type withCharacters<T> = T & { characters: CommissionCharacter[]; };
-export type withCustomer<T> = T & { customer: Customer; };
-
 export interface CommissionBase {
-  id: string;
   oid: string | number;
-  status: CommissionStatus | string;
+  status: CommissionStatusType | number;
+  flags: CommissionFlagsType | number;
   public_note: string | null;
   secure_note: string | null;
   created_at: string | Date;
   updated_at: string | Date;
 }
 
-export interface Commission extends CommissionBase {
-  customer: Customer;
-  characters: CommissionCharacter[];
-}
+export type DeserializedCommission = Deserialized<WithId<CommissionBase>>;
 
-export type CommissionOptions = Omit<Commission, 'id' | 'oid' | 'updated_at' | 'customer'> & { customer: string; };
+export type CommissionOptions = Omit<Commission, 'oid' | 'updated_at' | 'customer'> & { customer: string; };
 export type CommissionUpdate = Partial<CommissionOptions>;
+export type CommissionInsert = Omit<Commission, 'oid' | 'created_at' | 'updated_at' | 'customer'> & { customer: string; };
+
+export type CommissionFilterOptions = {
+  customer_id?: string;
+  status?: CommissionStatusType | string;
+};
 
 // Payments
 
@@ -55,19 +57,7 @@ export type CommissionPaymentOptions = Pick<CommissionPayment, 'currency' | 'inc
 export type CommissionPaymentUpdate = Partial<Pick<CommissionPayment, 'public_note' | 'secure_note'>> & { state?: CommissionPaymentStatusEditable; };
 export type CommissionPaymentInsert = Omit<CommissionPayment, 'pid' | 'created_at' | 'updated_at'>;
 
-// Characters
 
-export interface CommissionCharacter {
-  order_id: string;
-  name: string;
-  note: string | undefined;
-  changelog: Record<string, string> | undefined;
-  created_at: string;
-  updated_at: string;
-}
-
-export type CommissionCharacterOptions = Pick<CommissionCharacter, 'name'> & { note?: string; changelog?: Record<string, string>; commission: string; base: string; };
-export type CommissionCharacterUpdate = Partial<CommissionCharacterOptions>;
 
 // Avatar bases
 
