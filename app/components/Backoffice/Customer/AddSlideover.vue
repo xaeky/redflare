@@ -3,22 +3,7 @@ import _ from 'lodash';
 import * as z from 'zod';
 import { customersQuery } from '~/queries/customers';
 
-// Props & vars
 const queryCache = useQueryCache();
-const props = defineProps<{
-  open: boolean
-}>();
-
-// Emits
-const emit = defineEmits<{
-  (e: 'update:open', value: boolean): void
-}>();
-
-// Inputs
-const addCustomerSlideoverOpen = computed({
-  get: () => props.open,
-  set: (value: boolean) => emit('update:open', value)
-});
 
 // Form
 const schema = customerOptionsSchema;
@@ -36,14 +21,14 @@ const { mutate: addCustomer, isLoading: addCustomerBusy } = useMutation({
     body: _.mapValues(state, v => v?.trim() === '' ? null : v)
   }),
   async onSuccess() { 
-    await queryCache.invalidateQueries(customersQuery);
-    addCustomerSlideoverOpen.value = false;
+    await queryCache.invalidateQueries({ key: ['customers'] });
+    useOverlay().closeAll();
   }
 });
 </script>
 
 <template>
-  <USlideover v-model:open="addCustomerSlideoverOpen" title="Add customer">
+  <USlideover title="Add customer">
     <template #body>
       <UForm :schema :state class="space-y-4" @submit="() => { addCustomer() }">
         <UFormField name="name" label="Name">

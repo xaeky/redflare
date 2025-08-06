@@ -4,9 +4,8 @@ export default defineEventHandler(async (event) => {
   // Get validated body from request
   const trustedBody = await readValidatedBody(event, customerOptionsSchema.safeParse);
   if (trustedBody.error) throw createError({ statusCode: 400 });
-  const body = trustedBody.data;
+  const body = trustedBody.data as CustomerInsertOptions;
   // Write one customer.
-  const content = await ($supabase()).from('customers').insert(body);
-  if (content.error) throw createError({ statusCode: 500, data: content.error });
-  return content.data;
+  const result = await useCustomerModel().insertOne(body);
+  return result;
 });

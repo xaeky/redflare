@@ -3,24 +3,11 @@ import _ from 'lodash';
 import * as z from 'zod';
 import { customersQuery } from '~/queries/customers';
 
-// Props & vars
 const queryCache = useQueryCache();
 const props = defineProps<{
-  open: boolean,
-  customer: Customer
+  customer: DeserializedCustomer
 }>();
-const updatedCustomer = ref<Customer>();
-
-// Emits
-const emit = defineEmits<{
-  (e: 'update:open', value: boolean): void
-}>();
-
-// Inputs
-const editCustomerSlideoverOpen = computed({
-  get: () => props.open,
-  set: (value: boolean) => emit('update:open', value)
-});
+const updatedCustomer = ref<DeserializedCustomer>();
 
 // Form
 const schema = customerOptionsSchema;
@@ -39,24 +26,24 @@ watch(() => props.customer, (newCustomerData) => {
 
 // Mutations
 const { mutate: updateCustomer, isLoading: updateCustomerBusy } = useMutation({
-  mutation: () => useAPI(`/api/customers/${updatedCustomer.value?.id}`, {
+  mutation: () => useAPI(`/api/customers/${updatedCustomer.value?._id}`, {
     method: 'PUT',
     body: _.mapValues(state, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
   }),
   async onSuccess() { 
-    await queryCache.invalidateQueries(customersQuery);
-    editCustomerSlideoverOpen.value = false;
+    await queryCache.invalidateQueries({ key: ['customers'] });
+    useOverlay().closeAll();
   }
 });
 </script>
 
 <template>
-  <USlideover v-model:open="editCustomerSlideoverOpen" title="Edit customer">
+  <USlideover title="Edit customer">
     <template #body>
       <div v-if="customer">
         <UForm :schema :state class="space-y-4" @submit="() => updateCustomer()">
           <UFormField name="id" label="ID" v-if="updatedCustomer">
-            <UInput label="ID" v-model="updatedCustomer.id" class="w-full" readonly disabled aria-readonly="" />
+            <UInput label="ID" v-model="updatedCustomer._id" class="w-full" readonly disabled aria-readonly="" />
           </UFormField>
           <UFormField name="name" label="Name">
             <UInput label="Name" v-model="state.name" class="w-full" />

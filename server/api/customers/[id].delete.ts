@@ -5,10 +5,6 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id');
   if (!id) throw createError({ statusCode: 400 });
   // Delete it
-  const content = await ($supabase())
-    .from('customers')
-    .delete()
-    .eq('id', id);
-  if (content.error) throw createError({ statusCode: 500, data: content.error });
-  return content.data;
+  const result = useCustomerModel().deleteOne(id);
+  return result;
 });

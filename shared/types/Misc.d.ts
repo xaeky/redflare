@@ -1,0 +1,1 @@
+export type Deserialized<T> = Omit<T, '_id'> & { _id: string };

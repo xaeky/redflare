@@ -10,7 +10,10 @@ export type CommissionPaymentStatusEditable = 'paid_manual' | 'cancelled' | 'ref
 export type CommissionPaymentCurrency = 'ARS' | 'USD'; // ISO 4217 currency codes
 export type CommissionPaymentProcessor = 'mercadopago' | 'paypal';
 
-export interface Commission {
+export type withCharacters<T> = T & { characters: CommissionCharacter[]; };
+export type withCustomer<T> = T & { customer: Customer; };
+
+export interface CommissionBase {
   id: string;
   oid: string | number;
   status: CommissionStatus | string;
@@ -18,6 +21,9 @@ export interface Commission {
   secure_note: string | null;
   created_at: string | Date;
   updated_at: string | Date;
+}
+
+export interface Commission extends CommissionBase {
   customer: Customer;
   characters: CommissionCharacter[];
 }

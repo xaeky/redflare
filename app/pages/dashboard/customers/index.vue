@@ -1,19 +1,31 @@
 <script setup lang="ts">
 import { customersQuery } from '~/queries/customers';
-import { UButton } from '#components';
+import { BackofficeCustomerAddSlideover } from '#components';
 
 const toast = useToast();
-const { data:customers, refetch: refetchCustomers, asyncStatus, state } = useQuery(customersQuery);
-const addSlideoverOpen = ref(false);
+const customerSorting = ref([{ id: 'created_at', desc: true }])
+const { data:customers, refetch: refetchCustomers, asyncStatus, state } = useQuery(customersQuery, () => ({
+  sorting: {
+    by: customerSorting.value[0]?.id || 'created_at',
+    order: customerSorting.value[0]?.desc ? -1 : 1
+  }
+}));
+
+// Overlays
+const overlay = useOverlay();
+const addSlideoverOverlay = overlay.create(BackofficeCustomerAddSlideover);
 
 watch(state, newState => {
   const isError = newState.status === 'error';
   if (isError) toast.add({
     color: 'error',
-    title: 'Failed to fetch customers',
-    description: newState.error.message || 'Unknown error'
+    title: 'Failed to fetch customers'
   });
 });
+
+watch(customerSorting, (newSorting) => {
+  refetchCustomers();
+}, { immediate: true, deep: true });
 
 definePageMeta({
   middleware: 'auth',
@@ -34,7 +46,7 @@ definePageMeta({
         />
         <UButton
           label="Add customer" icon="i-heroicons-plus-16-solid"
-          @click="() => { addSlideoverOpen = true; }"
+          @click="() => { addSlideoverOverlay.open() }"
         />
       </div>
     </div>
@@ -43,14 +55,11 @@ definePageMeta({
         <USkeleton class="w-full h-12" v-for="_ in new Array(4)" />
       </div>
       <div v-else-if="customers && customers.length">
-        <BackofficeCustomerTable :customers />
+        <BackofficeCustomerTable :customers v-model:sorting="customerSorting" />
       </div>
       <div v-else-if="customers && !customers.length">
         No customers found!
       </div>
     </div>
-    <BackofficeCustomerAddSlideover
-      v-model:open="addSlideoverOpen"
-    />
   </div>
 </template>

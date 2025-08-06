@@ -66,10 +66,13 @@ export async function getPermissions(event: EventUserSession, useTrustedSession:
 }
 
 export async function hasPermission(event: EventUserSession, permissionName: Permission, throwError?: boolean) {
-  const permissions = await getPermissions(event, false);
   const runtime = useRuntimeConfig();
   // Skip permission check if runtime config allows it
-  if (runtime.backoffice.skipRoles) return true;
+  if (runtime.backoffice.skipRoles) {
+    console.warn('⚠️', `Skipping permission check for "${permissionName}" due to runtime config setting.`);
+    return true;
+  }
+  const permissions = await getPermissions(event, false);
   const itHasPermission = permissions.includes(permissionName);
   if (throwError && !itHasPermission) throw createError({ statusCode: 403, statusMessage: 'Missing permissions to perform this action' });
   return permissions.includes(permissionName);

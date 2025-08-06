@@ -27,16 +27,6 @@ const links:SidebarLink[] = [
     to: '/dashboard/customers'
   },
   {
-    label: 'Finances',
-    icon: 'i-heroicons-banknotes-solid',
-    to: '/dashboard/finances'
-  },
-  {
-    label: 'Users',
-    icon: 'i-heroicons-users-solid',
-    to: '/dashboard/users'
-  },
-  {
     label: 'Notes',
     icon: 'i-heroicons-book-open-16-solid',
     to: '/dashboard/notes'
