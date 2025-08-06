@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import * as z from 'zod';
-import { commissionCharactersQuery, commissionsBasesQuery } from '~/queries/commissions';
+import { commissionCharactersQuery, avatarBasesQuery } from '~/queries/commissions';
 
 // Props
 const props = defineProps<{
@@ -30,15 +30,15 @@ const addCharacterDraft = () => { toggleNewCharacterActive(true) };
 
 // Queries
 const queryCache = useQueryCache();
-const { data:remoteCharactersRaw, isLoading:remoteCharactersBusy } = useQuery(commissionCharactersQuery({ commissionId: props.commissionId }));
-const { data:remoteBasesRaw, isLoading:remoteBasesBusy } = useQuery(commissionsBasesQuery);
+const { data:remoteCharactersRaw, isLoading:remoteCharactersBusy } = useQuery(commissionCharactersQuery, { commissionId: props.commissionId });
+const { data:remoteBasesRaw, isLoading:remoteBasesBusy } = useQuery(avatarBasesQuery);
 
 // Computed queries
 const remoteBases = computed(() => {
   if (!remoteBasesRaw.value) return [];
   return remoteBasesRaw.value.map(b => ({
     label: b.name,
-    value: b.id
+    value: b._id
   }))
 });
 

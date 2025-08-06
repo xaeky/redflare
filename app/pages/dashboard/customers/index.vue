@@ -27,23 +27,24 @@ watch(customerSorting, () => {
   refetchCustomers();
 }, { immediate: true, deep: true });
 
+const actions:PageAction[] = [
+  {
+    label: 'Refresh',
+    icon: 'i-heroicons-arrow-path-16-solid',
+    color: 'neutral',
+    variant: 'subtle',
+    action: () => { refetchCustomers(); }
+  },
+  {
+    label: 'Add customer',
+    icon: 'i-heroicons-plus-16-solid',
+    action: () => { addSlideoverOverlay.open(); }
+  }
+];
+
 definePageMeta({
   title: 'Customers',
   description: 'Manage your customers',
-  actions: [
-    {
-      label: 'Refresh',
-      icon: 'i-heroicons-arrow-path-16-solid',
-      color: 'neutral',
-      variant: 'subtle',
-      action: () => { refetchCustomers(); }
-    },
-    {
-      label: 'Add customer',
-      icon: 'i-heroicons-plus-16-solid',
-      action: () => { addSlideoverOverlay.open(); }
-    }
-  ],
   middleware: 'auth',
   layout: 'backoffice',
   keepalive: true
@@ -51,13 +52,16 @@ definePageMeta({
 </script>
 
 <template>
-  <div v-if="asyncStatus === 'loading'" class="space-y-4">
-    <USkeleton class="w-full h-12" v-for="_ in new Array(4)" />
-  </div>
-  <div v-else-if="customers && customers.length">
-    <BackofficeCustomerTable :customers v-model:sorting="customerSorting" />
-  </div>
-  <div v-else-if="customers && !customers.length">
-    No customers found!
+  <div class="space-y-4">
+    <BackofficeHeaderActions :actions />
+    <div v-if="asyncStatus === 'loading'" class="space-y-4">
+      <USkeleton class="w-full h-12" v-for="_ in new Array(4)" />
+    </div>
+    <div v-else-if="customers && customers.length">
+      <BackofficeCustomerTable :customers v-model:sorting="customerSorting" />
+    </div>
+    <div v-else-if="customers && !customers.length">
+      No customers found!
+    </div>
   </div>
 </template>

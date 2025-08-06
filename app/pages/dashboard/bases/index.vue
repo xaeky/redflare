@@ -18,23 +18,24 @@ function handleEditBaseButton(base: DeserializedAvatarBase) {
   editSlideoverOverlay.open({ base });
 }
 
+const actions:PageAction[] = [
+  {
+    label: 'Refresh',
+    icon: 'i-heroicons-arrow-path-16-solid',
+    color: 'neutral',
+    variant: 'subtle',
+    action: () => { remoteBasesRefetch(); }
+  },
+  {
+    label: 'New base',
+    icon: 'i-heroicons-plus-16-solid',
+    action: handleAddBaseButton
+  }
+];
+
 definePageMeta({
   title: 'Avatar bases',
   description: 'Manage your avatar bases for commissions',
-  actions: [
-    {
-      label: 'Refresh',
-      icon: 'i-heroicons-arrow-path-16-solid',
-      color: 'neutral',
-      variant: 'subtle',
-      action: () => { remoteBasesRefetch(); }
-    },
-    {
-      label: 'New base',
-      icon: 'i-heroicons-plus-16-solid',
-      action: handleAddBaseButton
-    }
-  ],
   middleware: 'auth',
   layout: 'backoffice',
   keepalive: true
@@ -43,6 +44,7 @@ definePageMeta({
 
 <template>
   <div class="flex flex-col gap-4">
+    <BackofficeHeaderActions :actions />
     <UAlert
       description="When managing commissions, you'll need to annotate the avatar bases that you own."
       color="neutral" variant="soft" icon="i-lucide-info"

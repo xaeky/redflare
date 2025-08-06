@@ -3,7 +3,7 @@ const route = useRoute();
 
 const title = computed(() => route.meta.title || '');
 const description = computed(() => route.meta.description || '');
-const actions = computed(() => route.meta.actions || []);
+
 </script>
 
 <template>
@@ -27,15 +27,7 @@ const actions = computed(() => route.meta.actions || []);
                 <span v-if="description" v-text="description" class="text-muted" />
               </div>
               <div class="rf_backoffice_content_header_actions">
-                <UButton
-                  v-for="action in actions"
-                  :key="action.label"
-                  :label="action.label"
-                  :icon="action.icon"
-                  :color="action.color"
-                  :variant="action.variant"
-                  @click="action.action"
-                />
+                
               </div>
             </div>
             <slot />
