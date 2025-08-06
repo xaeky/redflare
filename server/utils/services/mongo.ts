@@ -1,4 +1,4 @@
-import { MongoClient, Db, ServerApiVersion } from 'mongodb';
+import { MongoClient, Db, ServerApiVersion, Document } from 'mongodb';
 import type { H3Event } from 'h3';
 
 let client:  MongoClient | null = null;
@@ -13,10 +13,10 @@ export const useMongo = async (event?: H3Event) => {
   return client;
 }
 
-export const useMongoCollection = async (collectionName: string, event?: H3Event) => {
+export const useMongoCollection = async <T extends Document>(collectionName: string, event?: H3Event) => {
   if (!db) {
     const mongoClient = await useMongo(event);
     db = mongoClient.db('app');
   }
-  return db.collection(collectionName);
+  return db.collection<T>(collectionName);
 }

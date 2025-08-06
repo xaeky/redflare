@@ -1,5 +1,4 @@
-import { ObjectId, Sort } from 'mongodb';
-import { useMongoCollection } from '../services/mongo';
+import { ObjectId } from 'mongodb';
 import _ from 'lodash';
 
 type CustomerGetAllParams = { page: number; pageSize?: number; filters: Partial<CustomerFilterOptions>, sort?: { by: string; order: 1 | -1 } };
@@ -15,7 +14,6 @@ const getAll = async ({ page, pageSize = 50, filters, sort }: CustomerGetAllPara
   // Prepare sort, default sort is created_at desc
   sort ||= { by: 'created_at', order: -1 };
   const sortObject: [string, 1 | -1][] = [[sort.by, sort.order]];
-  // Exec query
   return await collection.find(filterObject).sort(sortObject).skip(skip).limit(pageSize).toArray();
 }
 
@@ -39,6 +37,7 @@ const insertOne = async (dataInput: CustomerInsertOptions) => {
 
 const updateOne = async (id: string, data: CustomerUpdateOptions) => {
   const collection = await useMongoCollection('customers');
+  (data as Customer).updated_at = new Date().toISOString();
   const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: data });
   return result;
 }

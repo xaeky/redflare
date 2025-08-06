@@ -1,3 +1,5 @@
+import type { WithId } from 'mongodb';
+
 export interface Customer {
   name: string;
   vrc_id: string;

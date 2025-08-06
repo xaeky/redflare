@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import _ from 'lodash';
-import { commissionsBasesQuery } from '~/queries/commissions';
+import { avatarBasesQuery } from '~/queries/commissions';
+import { BackofficeBasesAddSlideover, BackofficeBasesEditSlideover } from '#components';
 
-const { data:remoteBases, isLoading:remoteBasesBusy, refetch:remoteBasesRefetch } = useQuery(commissionsBasesQuery);
-const addSlideoverOpen = ref(false);
-const editSlideoverOpen = ref(false);
-const editSlideoverData = reactive<CommissionBase>({} as CommissionBase);
+const { data:remoteBases, isLoading:remoteBasesBusy, refetch:remoteBasesRefetch } = useQuery(avatarBasesQuery);
 
-async function handleEmitBaseEdit(base: CommissionBase) {
-  _.assign(editSlideoverData, base);
-  await nextTick();
-  editSlideoverOpen.value = true;
+// Overlays
+const overlay = useOverlay();
+const addSlideoverOverlay = overlay.create(BackofficeBasesAddSlideover);
+const editSlideoverOverlay = overlay.create(BackofficeBasesEditSlideover);
+
+function handleAddBaseButton() {
+  addSlideoverOverlay.open();
+}
+
+function handleEditBaseButton(base: DeserializedAvatarBase) {
+  editSlideoverOverlay.open({ base });
 }
 
 definePageMeta({
@@ -32,7 +37,7 @@ definePageMeta({
         />
         <UButton
           label="New base" icon="i-heroicons-plus-16-solid"
-          @click="() => { addSlideoverOpen = true; }"
+          @click="handleAddBaseButton"
         />
       </div>
     </div>
@@ -44,9 +49,7 @@ definePageMeta({
       Fetching remote avatar bases...
     </div>
     <ul v-else-if="remoteBases && !remoteBasesBusy" class="grid grid-cols-2 gap-4">
-      <BackofficeBasesGridItem v-for="base in remoteBases" :base @edit="handleEmitBaseEdit" />
+      <BackofficeBasesGridItem v-for="base in remoteBases" :key="base._id" :base @edit="handleEditBaseButton" />
     </ul>
-    <BackofficeBasesAddSlideover v-model:open="addSlideoverOpen" />
-    <BackofficeBasesEditSlideover v-model:open="editSlideoverOpen" :base="editSlideoverData" />
   </div>
 </template>

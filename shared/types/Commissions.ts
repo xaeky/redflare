@@ -44,7 +44,7 @@ export const commissionCharacterOptionsSchema = z.object({
   base: z.string().min(1)
 });
 
-export const commissionBaseOptionsSchema = z.object({
+export const avatarBaseOptionsSchema = z.object({
   name: z.string().min(1),
   creator_name: z.string().min(1),
   storefront_url: z.string().url()

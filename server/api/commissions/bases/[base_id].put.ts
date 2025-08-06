@@ -1,16 +1,11 @@
 export default defineEventHandler(async (event) => {
-  // TODO: Add permission gate
   // Get base ID
   const baseId = getRouterParam(event, 'base_id');
   if (!baseId) throw createError({ statusCode: 400, message: 'Base ID is required' });
   // Read & validate request body
-  const body = await readValidatedBody(event, commissionBaseOptionsSchema.safeParse);
+  const body = await readValidatedBody(event, avatarBaseOptionsSchema.safeParse);
   if (body.error) throw createError({ statusCode: 400, data: body.error });
-  // Delete commission from database
-  const { data, error } = await $supabase()
-    .from('commissions_bases').update(body.data)
-    .eq('id', baseId).select();
-  if (error) throw createError({ statusCode: 500, data: error });
-  // Return deleted commission data
-  return data;
+  // Update commission in database
+  const result = await useAvatarBasesModel().updateOne(baseId, body.data);
+  return result;
 });
