@@ -64,8 +64,9 @@ function sortingHeader(label: string, column: Column<DeserializedCustomer>) {
 const columns: TableColumn<DeserializedCustomer>[] = [
   {
     accessorKey: 'name',
+    sortingFn: 'alphanumeric',
     header: ({ column }) => sortingHeader('Name', column),
-    cell: ({row}) => row.getValue('name'),
+    cell: ({row}) => row.getValue('name')
   },
   {
     accessorKey: 'vrc_id',
@@ -81,10 +82,11 @@ const columns: TableColumn<DeserializedCustomer>[] = [
         icon: 'i-heroicons-arrow-up-right-20-solid',
         onClick() { handleVRCProfileVisit(row.getValue('vrc_id')) }
       });
-    }
+    },
   },
   {
     accessorKey: 'created_at',
+    sortingFn: 'datetime',
     header: ({ column }) => sortingHeader('Created at', column),
     cell: ({row}) => new Date(row.getValue('created_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   },

@@ -5,16 +5,39 @@ type CustomerGetAllParams = { page: number; pageSize?: number; filters: Partial<
 const getAll = async ({ page, pageSize = 50, filters, sort }: CustomerGetAllParams) => {
   const collection = await useMongoCollection('customers');
   const skip = (page - 1) * pageSize;
+
   // Prepare filters
   filters ||= {};
   const filterObject: Record<string, any> = {};
   if (filters.name) filterObject.name = { $regex: new RegExp(_.escapeRegExp(filters.name), 'i') };
   if (filters.vrc_id) filterObject.vrc_id = { $regex: new RegExp(_.escapeRegExp(filters.vrc_id), 'i') };
   if (filters.note) filterObject.note = { $regex: new RegExp(_.escapeRegExp(filters.note), 'i') };
+  
   // Prepare sort, default sort is created_at desc
-  sort ||= { by: 'created_at', order: -1 };
-  const sortObject: [string, 1 | -1][] = [[sort.by, sort.order]];
-  return await collection.find(filterObject).sort(sortObject).skip(skip).limit(pageSize).toArray();
+  sort ||= { by: 'created_at', order: 1 };
+  let sortStage: Record<string, 1 | -1>;
+  if (sort.by === 'name') {
+    // Case-insensitive sort for name
+    sortStage = { lowerName: sort.order };
+  } else {
+    sortStage = { [sort.by]: sort.order };
+  }
+
+  // Prepare pipeline
+  const pipelineObject: Record<string, any>[] = [
+    { $match: filterObject },
+    ...(sort.by === 'name' ? [
+      { $addFields: { lowerName: { $toLower: "$name" } } },
+      { $project: { lowerName: 0 } }
+    ] : []),
+    { $sort: sortStage },
+    { $skip: skip },
+    { $limit: pageSize },
+  ];
+
+  console.log('Customer aggregation pipeline:', JSON.stringify(pipelineObject, null, 2));
+
+  return await collection.aggregate(pipelineObject).toArray();
 }
 
 const getById = async (id: string) => {
