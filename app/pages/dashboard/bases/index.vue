@@ -19,6 +19,22 @@ function handleEditBaseButton(base: DeserializedAvatarBase) {
 }
 
 definePageMeta({
+  title: 'Avatar bases',
+  description: 'Manage your avatar bases for commissions',
+  actions: [
+    {
+      label: 'Refresh',
+      icon: 'i-heroicons-arrow-path-16-solid',
+      color: 'neutral',
+      variant: 'subtle',
+      action: () => { remoteBasesRefetch(); }
+    },
+    {
+      label: 'New base',
+      icon: 'i-heroicons-plus-16-solid',
+      action: handleAddBaseButton
+    }
+  ],
   middleware: 'auth',
   layout: 'backoffice',
   keepalive: true
@@ -26,21 +42,7 @@ definePageMeta({
 </script>
 
 <template>
-  <div id="xarf_dash_bases" class="space-y-4">
-    <div class="flex items-center justify-between">
-      <Hx level="1">Avatar bases</Hx>
-      <div class="space-x-4">
-        <UButton
-          label="Refresh" icon="i-heroicons-arrow-path-16-solid"
-          color="neutral" variant="subtle" :loading="remoteBasesBusy"
-          @click="() => { remoteBasesRefetch() }"
-        />
-        <UButton
-          label="New base" icon="i-heroicons-plus-16-solid"
-          @click="handleAddBaseButton"
-        />
-      </div>
-    </div>
+  <div class="flex flex-col gap-4">
     <UAlert
       description="When managing commissions, you'll need to annotate the avatar bases that you own."
       color="neutral" variant="soft" icon="i-lucide-info"
