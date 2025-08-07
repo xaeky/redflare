@@ -46,11 +46,6 @@ export default defineNuxtConfig({
       sid: '',
       endpointBase: ''
     },
-    supabase: {
-      base: '',
-      anon: '',
-      serv: ''
-    },
     public: {
       creator: {
         marketName: '',
