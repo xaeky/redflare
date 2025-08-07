@@ -8,18 +8,23 @@ export enum CommissionCharacterFlags {
   HasVtuber      = 1 << 3,
 }
 
+export interface CommissionCharacterChangelog {
+  date: string;
+  items: string[];
+}
+
 export interface CommissionCharacter {
   id: string;
   name: string;
-  note: string | undefined;
-  changelog: Record<string, string> | undefined;
+  note: string | null;
+  changelog: CommissionCharacterChangelog[];
   flags: CommissionCharacterFlags | number;
   base: string;
   created_at: string;
   updated_at: string;
 }
 
-export type CommissionCharacterOptions = Pick<CommissionCharacter, 'name'> & { note?: string; changelog?: Record<string, string>; commission: string; base: string; };
+export type CommissionCharacterOptions = Pick<CommissionCharacter, 'name' | 'base' | 'note' | 'changelog'>;
 export type CommissionCharacterUpdate = Partial<CommissionCharacterOptions>;
 
 export type WithCharacters<T> = T & { characters: CommissionCharacter[]; };

@@ -2,7 +2,7 @@
 import { commissionsQuery } from '~/queries/commissions';
 import { BackofficeCommissionAddSlideover } from '#components';
 
-const { data:commissions, refetch:refetchCommissions, asyncStatus, state } = useQuery(commissionsQuery)
+const { data:commissions, refetch:refetchCommissions, asyncStatus } = useQuery(commissionsQuery)
 
 // Overlays
 const overlay = useOverlay();

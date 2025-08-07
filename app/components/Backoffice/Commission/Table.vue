@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
 import { commissionsQuery } from '~/queries/commissions';
-import { UButton, UIcon, ULink, SharedCommissionStatusBadge } from '#components';
+import { UButton, UIcon, ULink, SharedCommissionStatusBadge, BackofficeCommissionEditSlideover } from '#components';
 
-const { data:commissions, refetch:refetchCommissions, asyncStatus, state } = useQuery(commissionsQuery)
+const { data:commissions, refetch:refetchCommissions, asyncStatus, state } = useQuery(commissionsQuery);
+
+// Overlays
+const overlay = useOverlay();
+const editSlideoverOverlay = overlay.create(BackofficeCommissionEditSlideover);
 
 type DeserializedCommissionWithCustomer = WithCustomer<DeserializedCommission>;
 const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
@@ -13,10 +17,11 @@ const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
     header: '#',
     cell: ({row}) => {
       const thisCommission = row.original;
+      const idDigit = thisCommission._id.substring(thisCommission._id.length - 6);
       return h('div', { class: 'flex items-center gap-2' }, [
         h(ULink, { to: `/commission/${thisCommission._id}`, target: '_blank', class: 'inline-flex items-center' },
           () => [ h(UIcon, { name: 'i-lucide-link-2' }) ]),
-        h('span', { class: 'font-mono uppercase' }, thisCommission._id.substring(0, 6))
+        h('span', { class: 'font-mono uppercase' }, idDigit)
       ])
     }
   },
@@ -65,7 +70,9 @@ const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
         size: 'lg',
         variant: 'soft',
         onClick() {
-          const thisCommission = row.original;
+          editSlideoverOverlay.open({
+            commission_id: row.original._id
+          });
         }
       })
     }

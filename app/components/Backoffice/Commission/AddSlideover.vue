@@ -1,25 +1,53 @@
 <script setup lang="ts">
-// Props & vars
-const props = defineProps<{
-  open: boolean
-}>();
+import _ from 'lodash';
+import z from 'zod';
+import { commissionsQuery } from '~/queries/commissions';
+import type { BackofficeCommissionFormExposed } from '~/components/Backoffice/Commission/Form/Index.vue';
 
-// Emits
-const emit = defineEmits<{
-  (e: 'update:open', value: boolean): void
-}>();
+const toast = useToast();
+const queryCache = useQueryCache();
+const schema = commissionUpdateSchema;
+type Schema = z.output<typeof schema>;
+const formRef = ref<BackofficeCommissionFormExposed>();
 
-// Inputs
-const addCommissionSlideoverOpen = computed({
-  get: () => props.open,
-  set: (value: boolean) => emit('update:open', value)
+const { mutate: addCommission, isLoading: addCommissionBusy } = useMutation({
+  mutation: (upsertData: Schema) => useAPI('/api/commissions', {
+    method: 'POST',
+    body: _.mapValues(upsertData, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
+  }),
+  onSuccess: () => {  
+    queryCache.invalidateQueries(commissionsQuery);
+    useOverlay().closeAll();
+  },
+  onError() { toast.add({ title: 'Failed to add commission.', color: 'error' }) }
 });
+
+function handleCancel() {
+  useOverlay().closeAll();
+}
+
+async function handleSave() {
+  if (!formRef.value) return;
+  const errors = await formRef.value.validate();
+  const insertData = toRaw(formRef.value.state);
+  if (errors) {
+    toast.add({ title: 'Please fix the errors in the form.', color: 'error' });
+    return;
+  }
+  addCommission(insertData);
+}
 </script>
 
 <template>
-  <USlideover v-model:open="addCommissionSlideoverOpen" title="Add commission">
+  <USlideover title="Add commission">
     <template #body>
-      <BackofficeCommissionForm />
+      <BackofficeCommissionForm ref="formRef" />
+    </template>
+    <template #footer>
+      <div class="flex w-full justify-end gap-2">
+        <UButton @click="handleCancel" color="neutral" variant="subtle" :disabled="addCommissionBusy">Cancel</UButton>
+        <UButton @click="handleSave" :loading="addCommissionBusy">Save</UButton>
+      </div>
     </template>
   </USlideover>
 </template>

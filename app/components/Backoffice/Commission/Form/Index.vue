@@ -1,67 +1,62 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import * as z from 'zod';
-import { commissionsQuery } from '~/queries/commissions';
 import { customerFilterQuery } from '~/queries/customers';
 import { CalendarDate } from '@internationalized/date';
 import type { TabsItem, SelectItem } from '@nuxt/ui';
-import { ModalGenericConfirmation } from '#components';
+import { CommissionStatusType } from '~~/shared/enums/Commissions';
 
-// Props & vars
-const queryCache = useQueryCache();
+const toast = useToast();
 const props = defineProps<{
-  commission?: SerializedCommission
+  commission_id?: string
 }>();
-const updatedCommission = ref<CommissionUpdate>();
+const remoteCommission = ref<WithCharacters<WithExistingCustomer<DeserializedCommission>> | null>(null);
+const remoteCommissionBusy = ref<boolean>(true);
 
-// Form
 const schema = commissionUpdateSchema;
 type Schema = z.output<typeof schema>;
 const state = reactive<Schema>({
   customer: '',
   public_note: '',
   secure_note: '',
-  status: 'in_setup',
+  status: CommissionStatusType.InSetup,
+  characters: [],
   created_at: new Date()
 });
 const formTabs = ref<TabsItem[]>([ 
   { label: 'General', slot: 'general' as const }, 
-  { label: 'Characters', disabled: !props.commission, slot: 'characters' as const }, 
-  { label: 'Payments', disabled: !props.commission, slot: 'payments' as const }
+  { label: 'Characters', slot: 'characters' as const }, 
+  { label: 'Payments', slot: 'payments' as const }
 ]);
-const closeOverlaysAndRefresh = () => {
-  queryCache.invalidateQueries(commissionsQuery);
-  useOverlay().closeAll();
-  return;
-};
-const throwErrorToast = (text: string) => { useToast().add({ title: text, color: 'error' }) }
+const formGeneralRef = ref();
+const formCharactersRef = ref();
 
 // External queries & computed props
 // - Customer search query
 const customerSearchQueryRaw = shallowRef<string>('');
 const customerSearchQuery = refDebounced(customerSearchQueryRaw, 1000);
-const customerSearchSelected = shallowRef<SerializedCommission['customer']>()
+const customerSearchSelected = shallowRef<DeserializedCustomer>()
 const { data:customers, isLoading: getCustomersBusy, refetch: customersRefetch } = useQuery(customerFilterQuery, () => ({
-  name: customerSearchQuery.value || props.commission?.customer.name || ''
+  name: customerSearchQuery.value || ''
 }));
 const availableCustomers = computed(() => {
-  const localCustomer = props.commission ? props.commission.customer : null;
+  const localCustomer = remoteCommission.value ? remoteCommission.value.customer : null;
   const sanitizedLocalCustomer = localCustomer ? {
     label: localCustomer.name,
-    value: localCustomer.id
+    value: localCustomer._id
   } : null;
   const sanitizedCustomers = [];
-  if (props.commission) sanitizedCustomers.push(sanitizedLocalCustomer)
+  if (remoteCommission) sanitizedCustomers.push(sanitizedLocalCustomer)
   if (customerSearchSelected.value) sanitizedCustomers.push({
     label: customerSearchSelected.value.name,
-    value: customerSearchSelected.value.id
+    value: customerSearchSelected.value._id
   });
   // Filters for remote customers
-  const notLocalCustomer = (c: SerializedCommission['customer']) => localCustomer ? c.id !== localCustomer.id : true;
-  const notSelectedCustomer = (c: SerializedCommission['customer']) => c.id !== customerSearchSelected.value?.id;
+  const notLocalCustomer = (c: DeserializedCustomer) => localCustomer ? c._id !== localCustomer._id : true;
+  const notSelectedCustomer = (c: DeserializedCustomer) => c._id !== customerSearchSelected.value?._id;
   if (customers.value) sanitizedCustomers.push(...customers.value.filter(c => notLocalCustomer(c) && notSelectedCustomer(c)).map(c => ({
     label: c.name,
-    value: c.id,
+    value: c._id,
     onSelect: () => {
       customerSearchSelected.value = c;
     }
@@ -71,20 +66,20 @@ const availableCustomers = computed(() => {
 // - Commission status options
 const commissionStatusOptions:SelectItem[] = [
   { type: 'label', label: 'Pending' },
-  { label: 'In Project Setup', value: 'in_setup', icon: 'i-lucide-circle-dashed' },
-  { label: 'Backlog', value: 'backlog', icon: 'i-lucide-circle-question-mark' },
-  { label: 'Missing', value: 'missing', icon: 'i-lucide-circle-alert' },
-  { label: 'Next Up', value: 'next_up', icon: 'i-lucide-circle-ellipsis' },
+  { label: 'In Project Setup', value: CommissionStatusType.InSetup, icon: 'i-lucide-circle-dashed' },
+  { label: 'Backlog', value: CommissionStatusType.Backlog, icon: 'i-lucide-circle-question-mark' },
+  { label: 'Missing', value: CommissionStatusType.Missing, icon: 'i-lucide-circle-alert' },
+  { label: 'Next Up', value: CommissionStatusType.NextUp, icon: 'i-lucide-circle-ellipsis' },
   { type: 'separator' },
   { type: 'label', label: 'In progress' },
-  { label: 'In Development', value: 'in_development', icon: 'i-lucide-circle-play' },
-  { label: 'In Cooldown', value: 'in_cooldown', icon: 'i-lucide-circle-stop' },
+  { label: 'In Development', value: CommissionStatusType.InDevelopment, icon: 'i-lucide-circle-play' },
+  { label: 'In Cooldown', value: CommissionStatusType.InCooldown, icon: 'i-lucide-circle-stop' },
   { type: 'separator' },
   { type: 'label', label: 'Complete' },
-  { label: 'Showtime', value: 'showtime', icon: 'i-lucide-sparkles' },
-  { label: 'Maintenance', value: 'maintenance', icon: 'i-lucide-hammer' },
-  { label: 'Cancelled', value: 'cancelled', icon: 'i-lucide-circle-minus' },
-  { label: 'Settled', value: 'settled', icon: 'i-lucide-circle-check-big' },
+  { label: 'Showtime', value: CommissionStatusType.Showtime, icon: 'i-lucide-sparkles' },
+  { label: 'Maintenance', value: CommissionStatusType.Maintenance, icon: 'i-lucide-hammer' },
+  { label: 'Cancelled', value: CommissionStatusType.Cancelled, icon: 'i-lucide-circle-minus' },
+  { label: 'Settled', value: CommissionStatusType.Settled, icon: 'i-lucide-circle-check-big' },
 ];
 // @ts-expect-error @nuxt/ui should expose SelectItemBase!
 const commissionStatusOptionsIcon = computed(() => commissionStatusOptions.find(o => o.value === state.status)?.icon);
@@ -100,68 +95,67 @@ const commissionCreatedDate = computed({
   }
 });
 // - Commission characters
-const commissionCharacters = computed(() => props.commission && props.commission.characters ? props.commission.characters : [])
+const commissionCharacters = computed(() => remoteCommission.value ? remoteCommission.value.characters : [])
 
 // Watchers
-watch(() => props.commission, (newCommissionData) => {
+watch(remoteCommission, (newCommissionData) => {
   if (!newCommissionData) return;
   const sanitizedData = _.cloneDeep(newCommissionData) as unknown as CommissionUpdate;
-  sanitizedData.customer = newCommissionData.customer.id;
+  sanitizedData.customer = newCommissionData.customer._id;
   sanitizedData.created_at = new Date(newCommissionData.created_at);
-  updatedCommission.value = sanitizedData;
   customerSearchQueryRaw.value = newCommissionData.customer.name;
   // Assign the sanitized data to state, only existing fields with lodash
   _.assign(state, _.pick(sanitizedData, Object.keys(schema.shape)));
 }, { immediate: true, deep: true });
 
+watch(() => props.commission_id, async (newCommissionId) => {
+  if (!newCommissionId) return;
+  remoteCommissionBusy.value = true;
+  try {
+    const data = await useAPI<WithCharacters<WithExistingCustomer<DeserializedCommission>>>(`/api/commissions/${newCommissionId}`);
+    remoteCommission.value = data;
+  } catch (error) {
+    toast.add({ title: 'Failed to load commission data.', color: 'error' });
+  } finally {
+    remoteCommissionBusy.value = false;
+  }
+}, { immediate: true });
 
-// Mutations
-const { mutate: updateCommission, isLoading: updateCommissionBusy } = useMutation({
-  mutation: () => useAPI(`/api/commissions/${props.commission?.id}`, {
-    method: 'PUT',
-    body: _.mapValues(state, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
-  }),
-  onSuccess: closeOverlaysAndRefresh,
-  onError() { throwErrorToast('Failed to update commission.') }
-});
-const { mutate: addCommission, isLoading: addCommissionBusy } = useMutation({
-  mutation: () => useAPI('/api/commissions', {
-    method: 'POST',
-    body: _.mapValues(state, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
-  }),
-  onSuccess: closeOverlaysAndRefresh,
-  onError() { throwErrorToast('Failed to add commission.') }
-});
-const operationCommissionBusy = computed(() => updateCommissionBusy.value || addCommissionBusy.value);
-const { mutate: deleteCommission, isLoading: deleteCommissionBusy } = useMutation({
-  mutation: () => useAPI(`/api/commissions/${props.commission?.id}`, { method: 'DELETE' }),
-  onSuccess: closeOverlaysAndRefresh,
-  onError() { throwErrorToast('Failed to delete commission.') }
-});
-
-// Form methods
-function formSubmitHandler() {
-  if (props.commission) return updateCommission();
-  return addCommission();
-}
-function formDeleteHandler() {
-  useOverlay().create(ModalGenericConfirmation, {
-    props: {
-      title: 'Delete commission',
-      onConfirm: deleteCommission
+async function validate() {
+  // Do not report errors, next logic already does that
+  try {
+    await formGeneralRef.value?.validate();
+    const characterForms = formCharactersRef.value?.forms;
+    // @ts-expect-error // TODO: Fix type for formsCharacterRef
+    await Promise.all(characterForms.map(async (f) => await f.validate()) || []);
+  } catch (e) {}
+  try {
+    schema.parse(toRaw(state));
+    return null;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return error.flatten().fieldErrors;
     }
-  }).open();
+    return { _form: ['An unknown error occurred.'] };
+  }
 }
+
+export type BackofficeCommissionFormExposed = {
+  state: Schema;
+  validate: () => Record<string, string[] | null> | null;
+}
+
+defineExpose({
+  state,
+  validate
+});
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div v-if="(props.commission_id && !remoteCommissionBusy) || !props.commission_id" class="space-y-4">
     <UTabs variant="link" :items="formTabs" class="w-full" :ui="{ trigger: 'grow' }" :unmountOnHide="false">
       <template #general="{ item }">
-        <UForm :schema :state class="space-y-4" @submit="formSubmitHandler">
-          <UFormField name="id" label="ID" v-if="props.commission">
-            <UInput label="ID" v-model="props.commission.id" class="w-full" readonly disabled aria-readonly="" />
-          </UFormField>
+        <UForm ref="formGeneralRef" :schema :state class="space-y-4">
           <UFormField name="customer" label="Customer">
             <USelectMenu
               v-model:model-value="state.customer"
@@ -185,19 +179,17 @@ function formDeleteHandler() {
           <UFormField name="secure_note" label="Private Note (only visible to you)">
             <UInput v-model="state.secure_note" class="w-full" />
           </UFormField>
-          <div class="space-y-4">
-            <UButton label="Save changes" type="submit" block :loading="operationCommissionBusy" />
-            <UButton v-if="props.commission" label="Delete" type="button" block color="error" @click="formDeleteHandler" />
-          </div>
         </UForm>
       </template>
       <template #characters="{ item }">
-        <BackofficeCommissionFormCharacters v-if="props.commission" :characters="commissionCharacters" :commission-id="props.commission.id" />
-        <UAlert v-else description="You have to create the commission first to create characters." />
+        <BackofficeCommissionFormCharacters ref="formCharactersRef" v-model:state="state" />
       </template>
       <template #payments="{ item }">
         Payments
       </template>
     </UTabs>
+  </div>
+  <div v-else class="space-y-4">
+    <USkeleton class="w-full h-12" v-for="_ in new Array(4)" />
   </div>
 </template>

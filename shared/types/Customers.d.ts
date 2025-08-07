@@ -1,4 +1,4 @@
-import type { WithId } from 'mongodb';
+import type { ObjectId, WithId } from 'mongodb';
 
 export interface Customer {
   name: string;
@@ -25,4 +25,5 @@ export type DeserializedCustomer = Deserialized<WithId<Customer>>;
 
 export type WithCustomer<T> = T & { customer: Customer; };
 export type WithExistingCustomer<T> = T & { customer: DeserializedCustomer; };
-export type WithCustomerId<T> = T & { customer_id: string; };
+export type WithCustomerId<T> = T & { customer: string; };
+export type WithCustomerOId<T> = T & { customer: typeof ObjectId; };

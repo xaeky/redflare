@@ -1,27 +1,41 @@
 import * as z from 'zod';
+import { CommissionStatusType } from '../enums/Commissions';
+
+const commissionChangelogSchema = z.object({
+  date: z.string().min(1, 'Change date is required'),
+  items: z.array(z.string().min(1, 'Change item is required')).min(1, 'At least one change item is required')
+});
 
 export const commissionOptionsSchema = z.object({
-  status: z.enum([
-    'settled', 'missing', 'backlog', 'in_setup', 'next_up',
-    'in_development', 'in_cooldown',
-    'showtime', 'maintenance', 'cancelled'
-  ]).optional().default('in_setup'),
+  status: z.number().default(CommissionStatusType.InSetup),
   public_note: z.string().nullable().optional(),
   secure_note: z.string().nullable().optional(),
   customer: z.string().nonempty('Customer cannot be empty!'), // Customer ID
   created_at: z.date().or(z.string()).optional(), // Date or ISO string
+  characters: z.array(
+    z.object({
+      name: z.string().min(1, 'Character name is required'),
+      note: z.string().nullable().optional(),
+      changelog: z.array(commissionChangelogSchema).default([]),
+      base: z.string().min(1, 'Base character is required')
+    })
+  ).default([])
 });
 
 export const commissionUpdateSchema = z.object({
-  status: z.enum([
-    'settled', 'missing', 'backlog', 'in_setup', 'next_up',
-    'in_development', 'in_cooldown',
-    'showtime', 'maintenance', 'cancelled'
-  ]).optional(),
+  status: z.number().optional(),
   public_note: z.string().nullable().optional(),
   secure_note: z.string().nullable().optional(),
   customer: z.string().nonempty('Customer cannot be empty!'), // Customer ID
   created_at: z.date().or(z.string()).optional(), // Date or ISO string
+  characters: z.array(
+    z.object({
+      name: z.string().min(1, 'Character name is required'),
+      note: z.string().nullable().optional(),
+      changelog: z.array(commissionChangelogSchema).default([]),
+      base: z.string().min(1, 'Base character is required')
+    })
+  ).optional().default([])
 });
 
 export const commissionPaymentOptionsSchema = z.object({
@@ -40,7 +54,7 @@ export const commissionPaymentUpdateSchema = z.object({
 export const commissionCharacterOptionsSchema = z.object({
   name: z.string().min(1),
   note: z.string().nullable().optional(),
-  changelog: z.record(z.string()).nullable().optional(),
+  changelog: z.array(commissionChangelogSchema).default([]),
   base: z.string().min(1)
 });
 

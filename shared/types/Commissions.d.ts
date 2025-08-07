@@ -14,7 +14,6 @@ export type CommissionPaymentCurrency = 'ARS' | 'USD'; // ISO 4217 currency code
 export type CommissionPaymentProcessor = 'mercadopago' | 'paypal';
 
 export interface CommissionBase {
-  oid: string | number;
   status: CommissionStatusType | number;
   flags: CommissionFlagsType | number;
   public_note: string | null;
@@ -25,12 +24,18 @@ export interface CommissionBase {
 
 export type DeserializedCommission = Deserialized<WithId<CommissionBase>>;
 
-export type CommissionOptions = Omit<Commission, 'oid' | 'updated_at' | 'customer'> & { customer: string; };
-export type CommissionUpdate = Partial<CommissionOptions>;
-export type CommissionInsert = Omit<Commission, 'oid' | 'created_at' | 'updated_at' | 'customer'> & { customer: string; };
+export type CommissionOptions = Omit<Commission, 'created_at' | 'updated_at'> & {
+  customer: string | ObjectId;
+  characters: (CommissionCharacterOptions & { base: string | ObjectId })[];
+};
+export type CommissionUpdate = CommissionOptions & {
+  customer: string | ObjectId;
+  characters: (CommissionCharacterOptions & { base: string | ObjectId })[];
+};
+export type CommissionInsert = Omit<Commission, 'created_at' | 'updated_at' | 'customer'> & { customer: string; };
 
 export type CommissionFilterOptions = {
-  customer_id?: string;
+  customer?: string;
   status?: CommissionStatusType | string;
 };
 
