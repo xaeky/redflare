@@ -46,21 +46,58 @@ const getOneById = async (commissionId: string) => {
         localField: 'customer',
         foreignField: '_id',
         as: 'customer'
+      },
+    },
+    { $unwind: { path: '$customer', preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: '$characters', preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: 'avatar_bases',
+        let: { baseId: '$characters.base' },
+        pipeline: [
+          { $match: { $expr: { $eq: ['$_id', '$$baseId'] } } }
+        ],
+        as: 'baseObj'
       }
     },
-    { $unwind: { path: '$customer', preserveNullAndEmptyArrays: true } }
+    {
+      $addFields: {
+        'characters.base': { $arrayElemAt: ['$baseObj', 0] }
+      }
+    },
+    {
+      $group: {
+        _id: '$_id',
+        doc: { $first: '$$ROOT' },
+        characters: { $push: '$characters' }
+      }
+    },
+    {
+      $addFields: {
+        'doc.characters': {
+          $cond: [
+            { $and: [
+              { $eq: [ { $size: '$characters' }, 1 ] },
+              { $eq: [ '$characters.0', {} ] }
+            ] },
+            [],
+            {
+              $filter: {
+                input: '$characters',
+                as: 'char',
+                cond: { $ne: ['$$char', {}] }
+              }
+            }
+          ]
+        }
+      }
+    },
+    { $replaceRoot: { newRoot: '$doc' } }
   ]).next();
 
   if (_.isEmpty(commission)) return null;
   if (!commission) return null;
   return commission as WithId<WithCharacters<WithExistingCustomer<CommissionBase>>>;
-}
-
-const getCharactersByCommissionId = async (commissionId: string) => {
-  const collection = await useMongoCollection('commissions');
-  const commission = await collection.findOne({ _id: new ObjectId(commissionId) }, { projection: { characters: 1 } });
-  if (!commission) return [];
-  return commission.characters || [];
 }
 
 const updateOne = async (commissionId: string, updateData: CommissionUpdate) => {
@@ -103,7 +140,7 @@ const insertOne = async (data: CommissionOptions) => {
   }
   
   // Initialize commission data with defaults
-  const commissionData: CommissionBase = {
+  const commissionData: CommissionOptions = {
     ...data,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -124,7 +161,6 @@ const deleteOne = async (commissionId: string) => {
 export const useCommissionModel = () => ({
   getAll,
   getOneById,
-  getCharactersByCommissionId,
   updateOne,
   insertOne,
   deleteOne

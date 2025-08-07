@@ -1,52 +1,55 @@
 <script setup lang="ts">
+import { CommissionStatusType } from '~~/shared/enums/Commissions';
 import type { TimelineItem } from '@nuxt/ui'
 
 const thisRoute = useRoute();
 const commissionId = thisRoute.params.cid;
-const commission = await useAPI<PublicSerializedCommission>(`/api/public/commissions/${commissionId}`);
-type AllowedTimelineValues = 'in_setup' | 'next_up' | 'in_development' | 'showtime';
-const commissionTimelineAllowedValues:AllowedTimelineValues[] = ['in_setup', 'next_up', 'in_development', 'showtime']
+const commission = await useAPI<Omit<WithCharacters<WithCustomer<DeserializedCommission>>, 'secure_note'>>(`/api/public/commissions/${commissionId}`);
+type AllowedTimelineValues = CommissionStatusType.InSetup | CommissionStatusType.NextUp | CommissionStatusType.InDevelopment | CommissionStatusType.Showtime;
+const commissionTimelineAllowedValues:AllowedTimelineValues[] = [CommissionStatusType.InSetup, CommissionStatusType.NextUp, CommissionStatusType.InDevelopment, CommissionStatusType.Showtime]
 const commissionTimeline = ref<TimelineItem[]>([
   {
     title: 'In project setup',
     description: 'We\'ve received your order and it was approved. We are making the project workspace (folders).',
     icon: 'i-lucide-folder-open',
-    value: 'in_setup'
+    value: CommissionStatusType.InSetup.toString()
   },
   {
     title: 'Next up',
     description: 'Your commission is next up! Will be under development soon.',
     icon: 'i-lucide-flag',
-    value: 'next_up'
+    value: CommissionStatusType.NextUp.toString()
   },
   {
     title: 'In development',
     description: 'Your commission is under development by the artist.',
     icon: 'i-lucide-brush',
-    value: 'in_development'
+    value: CommissionStatusType.InDevelopment.toString()
   },
   {
     title: 'Showtime',
     description: 'Your commission was delivered by the artist and it\'s ready to use!',
     icon: 'i-lucide-package-check',
-    value: 'showtime'
+    value: CommissionStatusType.Showtime.toString()
   }
 ]);
-const commissionRoutedValues:Record<AllowedTimelineValues, CommissionStatus[]> = {
-  'in_setup': ['in_setup'],
-  'next_up': ['next_up'],
-  'in_development': ['in_development', 'in_cooldown', 'maintenance'],
-  'showtime': ['showtime', 'settled']
+const commissionRoutedValues:Record<AllowedTimelineValues, CommissionStatusType[]> = {
+  [CommissionStatusType.InSetup]: [CommissionStatusType.InSetup],
+  [CommissionStatusType.NextUp]: [CommissionStatusType.NextUp],
+  [CommissionStatusType.InDevelopment]: [CommissionStatusType.InDevelopment, CommissionStatusType.InCooldown, CommissionStatusType.Maintenance],
+  [CommissionStatusType.Showtime]: [CommissionStatusType.Showtime, CommissionStatusType.Settled]
 }
-function routeCommissionStatus(status: CommissionStatus): CommissionStatus {
+function routeCommissionStatus(status: CommissionStatusType): CommissionStatusType {
   for (const [key, values] of Object.entries(commissionRoutedValues)) {
     if (values.includes(status)) {
-      return key as CommissionStatus;
+      return Number(key) as CommissionStatusType;
     }
   }
   return status; // fallback if not found
 }
-const commissionRoutedValue = routeCommissionStatus(commission.status as CommissionStatus);
+const commissionRoutedValue = routeCommissionStatus(commission.status as CommissionStatusType);
+const commissionRoutedValueString = computed(() => commissionRoutedValue.toString());
+console.log(commission)
 </script>
 
 <template>
@@ -58,23 +61,28 @@ const commissionRoutedValue = routeCommissionStatus(commission.status as Commiss
       </div>
       <div id="commission_sections" class="space-y-4">
         <section v-if="commissionTimelineAllowedValues.includes(commissionRoutedValue as AllowedTimelineValues)">
-          <UTimeline :items="commissionTimeline" v-model="commissionRoutedValue" />
+          <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" />
         </section>
-        <section class="space-y-4">
+        <section v-if="commission.characters.length" class="space-y-4">
           <Hx level="2">Characters</Hx>
           <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8 select-none">
-            <div class="bg-linear-125 from-neutral-800/50 to-primary-500/20 border border-neutral-700/25 p-4 md:p-6 rounded-xl" v-for="char in commission.characters" :key="char.id">
+            <div
+              v-for="(char, charIndex) in commission.characters" :key="char.id"
+              class="bg-linear-125 from-neutral-800/50 to-primary-500/20 border border-neutral-700/25 p-4 md:p-6 rounded-xl hover:shadow-xl hover:shadow-neutral-950/50 duration-300"
+            >
               <div class="flex flex-col gap-2">
                 <div class="flex items-center justify-between">
                   <span class="text-2xl font-bold" v-text="char.name"/>
                   <UTooltip text="Character's Order ID">
                     <div class="flex items-center gap-2">
                       <UIcon name="i-lucide-hash" class="opacity-50 text-primary-300" />
-                      <span class="text-sm font-bold font-mono uppercase select-all" v-text="char.order_id"/>
+                      <span class="text-sm font-bold font-mono uppercase select-all">
+                        {{ commission._id.substring(commission._id.length - 6) }}-{{ charIndex }}
+                      </span>
                     </div>
                   </UTooltip>
                 </div>
-                <span class="font-bold text-primary" v-text="char.base.name"/>
+                <span class="font-bold text-primary" v-text="(char.base as AvatarBase).name"/>
                 <span v-if="char.note && char.note.length" class="text-xs" v-text="char.note" />
               </div>
             </div>
@@ -105,9 +113,9 @@ const commissionRoutedValue = routeCommissionStatus(commission.status as Commiss
           </ULink>
         </div>
       </section>
-      <section class="space-y-4" v-if="commission.note && commission.note.length">
+      <section class="space-y-4" v-if="commission.public_note && commission.public_note.length">
         <Hx level="2">Notes</Hx>
-        <p v-text="commission.note" />
+        <p v-text="commission.public_note" />
       </section>
       <section class="space-y-4">
         <Hx level="2">Payments</Hx>

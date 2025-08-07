@@ -100,10 +100,13 @@ const commissionCharacters = computed(() => remoteCommission.value ? remoteCommi
 // Watchers
 watch(remoteCommission, (newCommissionData) => {
   if (!newCommissionData) return;
-  const sanitizedData = _.cloneDeep(newCommissionData) as unknown as CommissionUpdate;
+  const sanitizedData = _.cloneDeep(newCommissionData) as CommissionUpdate;
   sanitizedData.customer = newCommissionData.customer._id;
   sanitizedData.created_at = new Date(newCommissionData.created_at);
-  customerSearchQueryRaw.value = newCommissionData.customer.name;
+  sanitizedData.characters = newCommissionData.characters.map(c => ({
+    ...c,
+    base: c.base._id // Ensure base is an ID
+  }));
   // Assign the sanitized data to state, only existing fields with lodash
   _.assign(state, _.pick(sanitizedData, Object.keys(schema.shape)));
 }, { immediate: true, deep: true });

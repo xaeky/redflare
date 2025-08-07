@@ -1,5 +1,3 @@
-// Characters
-
 export enum CommissionCharacterFlags {
   None           = 0,
   NotSafeForWork = 1 << 0,
@@ -19,7 +17,7 @@ export interface CommissionCharacter {
   note: string | null;
   changelog: CommissionCharacterChangelog[];
   flags: CommissionCharacterFlags | number;
-  base: string;
+  base: string | ObjectId | AvatarBase;
   created_at: string;
   updated_at: string;
 }
