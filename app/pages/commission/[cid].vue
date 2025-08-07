@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { CommissionStatusType } from '~~/shared/enums/Commissions';
-import type { TimelineItem } from '@nuxt/ui'
+import { SharedCommissionReadonlyCharacterChangelog } from '#components';
+import type { TimelineItem } from '@nuxt/ui';
 
 const thisRoute = useRoute();
 const commissionId = thisRoute.params.cid;
@@ -39,6 +40,11 @@ const commissionRoutedValues:Record<AllowedTimelineValues, CommissionStatusType[
   [CommissionStatusType.InDevelopment]: [CommissionStatusType.InDevelopment, CommissionStatusType.InCooldown, CommissionStatusType.Maintenance],
   [CommissionStatusType.Showtime]: [CommissionStatusType.Showtime, CommissionStatusType.Settled]
 }
+
+// Overlays
+const overlay = useOverlay();
+const characterChangelogOverlay = overlay.create(SharedCommissionReadonlyCharacterChangelog);
+
 function routeCommissionStatus(status: CommissionStatusType): CommissionStatusType {
   for (const [key, values] of Object.entries(commissionRoutedValues)) {
     if (values.includes(status)) {
@@ -49,6 +55,14 @@ function routeCommissionStatus(status: CommissionStatusType): CommissionStatusTy
 }
 const commissionRoutedValue = routeCommissionStatus(commission.status as CommissionStatusType);
 const commissionRoutedValueString = computed(() => commissionRoutedValue.toString());
+
+function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[]) {
+  characterChangelogOverlay.open({ changelog });
+}
+
+useSeoMeta({
+  title: 'Commission Details'
+});
 </script>
 
 <template>
@@ -83,6 +97,14 @@ const commissionRoutedValueString = computed(() => commissionRoutedValue.toStrin
                 </div>
                 <span class="font-bold text-primary" v-text="(char.base as AvatarBase).name"/>
                 <span v-if="char.note && char.note.length" class="text-xs" v-text="char.note" />
+                <div v-if="char.changelog && char.changelog.length" class="flex items-center gap-2">
+                  <UButton
+                    label="View changelog"
+                    icon="i-lucide-list"
+                    variant="soft"
+                    @click="handleCharacterChangelogOpen(char.changelog)"
+                  />
+                </div>
               </div>
             </div>
           </div>

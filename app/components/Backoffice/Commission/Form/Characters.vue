@@ -2,6 +2,7 @@
 import _ from 'lodash';
 import * as z from 'zod';
 import { avatarBasesQuery } from '~/queries/commissions';
+import { BackofficeCommissionModalEditCharacterChangelog } from '#components';
 
 const schema = commissionUpdateSchema;
 const characterSchema = commissionCharacterOptionsSchema;
@@ -11,8 +12,11 @@ const state = defineModel<Schema>('state', {
 });
 const formsCharacterRef = ref();
 
+// Overlays
+const overlay = useOverlay();
+const editChangelogModalOverlay = overlay.create(BackofficeCommissionModalEditCharacterChangelog);
+
 // Queries
-const queryCache = useQueryCache();
 const { data:remoteBasesRaw, isLoading:remoteBasesBusy } = useQuery(avatarBasesQuery);
 
 // Computed queries
@@ -34,6 +38,14 @@ function addCharacterObject() {
   };
   state.value.characters.push(characterObject);
 }
+
+function handleCharacterChangelogEdit(characterIndex: number) {
+  if (!state.value.characters[characterIndex]) return;
+  editChangelogModalOverlay.open({
+    changelogState: state.value.characters[characterIndex].changelog,
+    overlay: editChangelogModalOverlay
+  });
+} 
 
 defineExpose({
   forms: formsCharacterRef
@@ -61,13 +73,21 @@ defineExpose({
             <UTextarea v-model="character.note" placeholder="Optional character note" class="w-full" />
           </UFormField>
         </UForm>
-        <div>
+        <div class="flex items-center justify-between">
           <UButton
             icon="i-heroicons-trash-16-solid"
             color="error"
             variant="subtle"
             @click="state.characters.splice(index, 1)"
             class="mb-2"
+          />
+          <UButton
+            icon="i-heroicons-pencil-square-16-solid"
+            color="neutral"
+            variant="soft"
+            @click="handleCharacterChangelogEdit(index)"
+            class="mb-2"
+            label="Edit changelog"
           />
         </div>
       </div>

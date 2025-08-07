@@ -92,7 +92,8 @@ const getOneById = async (commissionId: string) => {
         }
       }
     },
-    { $replaceRoot: { newRoot: '$doc' } }
+    { $replaceRoot: { newRoot: '$doc' } },
+    { $project: { baseObj: 0 } }
   ]).next();
 
   if (_.isEmpty(commission)) return null;
