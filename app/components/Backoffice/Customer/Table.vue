@@ -1,27 +1,30 @@
 <script setup lang="ts">
-import _ from 'lodash';
-import { customersQuery } from '~/queries/customers';
 import type { TableColumn } from '@nuxt/ui';
+import type { Column } from '@tanstack/table-core';
 import { UButton } from '#components';
+import { ModalGenericConfirmation, BackofficeCustomerEditSlideover } from '#components';
 
-// Props & vars
 const props = defineProps<{
-  customers: Customer[]
+  customers: DeserializedCustomer[]
 }>();
+const sorting = defineModel('sorting', {
+  type: Array as () => { id: string; desc: boolean }[],
+  default: () => [{ id: 'created_at', desc: true }]
+});
 const customers = computed(() => props.customers);
-
 const toast = useToast();
 const queryCache = useQueryCache();
-const editSlideoverOpen = ref(false);
-const editSlideoverData = reactive<Customer>({} as Customer);
-const deleteModalOpen = ref(false);
-const deleteModalData = ref<Customer | null>(null);
+
+// Overlays
+const overlay = useOverlay();
+const confirmationOverlay = overlay.create(ModalGenericConfirmation);
+const editSlideoverOverlay = overlay.create(BackofficeCustomerEditSlideover);
 
 // Mutations
 const { mutate: deleteCustomer, isLoading: deleteCustomerBusy } = useMutation({
-  mutation: () => useAPI(`/api/customers/${deleteModalData.value?.id}`, { method: 'DELETE' }),
+  mutation: (id: string) => useAPI(`/api/customers/${id}`, { method: 'DELETE' }),
   onSuccess() {
-    queryCache.invalidateQueries(customersQuery);
+    queryCache.invalidateQueries({ key: ['customers'] });
     toast.add({
       description: 'Customer deleted.'
     });
@@ -33,19 +36,36 @@ function handleVRCProfileVisit(id: string) {
   navigateTo(`${baseURI}/${id}`, { external: true, open: { target: '_blank' } });
 }
 
-function handleDeleteConfirm() {
-  deleteCustomer();
+function handleDeleteButton(id: string) {
+  confirmationOverlay.open({
+    onConfirm: () => deleteCustomer(id),
+  });
 }
 
-const columns: TableColumn<Customer>[] = [
-  {
-    accessorKey: 'id',
-    header: '#',
-    cell: ({row}) => (row.getValue('id') as string).slice(0, 6).toUpperCase()
-  },
+function handleEditButton(customer: DeserializedCustomer) {
+  editSlideoverOverlay.open({ customer });
+}
+
+function sortingHeader(label: string, column: Column<DeserializedCustomer>) {
+  const isSorted = column.getIsSorted();
+  return h(UButton, {
+    label,
+    variant: 'soft',
+    color: isSorted ? (column.getIsSorted() === 'asc' ? 'primary' : 'secondary') : 'neutral',
+    size: 'sm',
+    icon: isSorted ? (isSorted === 'asc'
+        ? 'i-lucide-arrow-up-narrow-wide'
+        : 'i-lucide-arrow-down-wide-narrow')
+      : 'i-lucide-arrow-up-down',
+    onClick: () => column.toggleSorting(),
+  });
+}
+
+const columns: TableColumn<DeserializedCustomer>[] = [
   {
     accessorKey: 'name',
-    header: 'Name',
+    sortingFn: 'alphanumeric',
+    header: ({ column }) => sortingHeader('Name', column),
     cell: ({row}) => row.getValue('name')
   },
   {
@@ -62,12 +82,19 @@ const columns: TableColumn<Customer>[] = [
         icon: 'i-heroicons-arrow-up-right-20-solid',
         onClick() { handleVRCProfileVisit(row.getValue('vrc_id')) }
       });
-    }
+    },
   },
   {
     accessorKey: 'created_at',
-    header: 'Created',
+    sortingFn: 'datetime',
+    header: ({ column }) => sortingHeader('Created at', column),
     cell: ({row}) => new Date(row.getValue('created_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  },
+  {
+    accessorKey: 'updated_at',
+    sortingFn: 'datetime',
+    header: ({ column }) => sortingHeader('Updated at', column),
+    cell: ({row}) => new Date(row.getValue('updated_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   },
   {
     id: 'actions',
@@ -82,11 +109,7 @@ const columns: TableColumn<Customer>[] = [
             icon: 'i-heroicons-pencil-square-20-solid',
             size: 'lg',
             variant: 'soft',
-            onClick() {
-              const thisCustomer = customers.value?.find(c => row.getValue('id') === c.id) as Customer;
-              _.assign(editSlideoverData, thisCustomer);
-              editSlideoverOpen.value = true;
-            }
+            onClick: () => handleEditButton(row.original)
           }),
           h(UButton, {
             icon: 'i-heroicons-trash-20-solid',
@@ -94,11 +117,7 @@ const columns: TableColumn<Customer>[] = [
             color: 'error',
             variant: 'soft',
             disabled: deleteCustomerBusy.value,
-            onClick() {
-              const thisCustomer = customers.value?.find(c => row.getValue('id') === c.id) as Customer;
-              deleteModalData.value = thisCustomer;
-              deleteModalOpen.value = true;
-            }
+            onClick: () => handleDeleteButton(row.original._id as string)
           })
         ]
       )
@@ -108,13 +127,10 @@ const columns: TableColumn<Customer>[] = [
 </script>
 
 <template>
-  <UTable :columns :data="customers" class="flex-1" />
-  <BackofficeCustomerEditSlideover
-    v-model:open="editSlideoverOpen"
-    v-model:customer="editSlideoverData"
-  />
-  <ModalGenericConfirmation
-    v-model:open="deleteModalOpen"
-    @confirm="handleDeleteConfirm"
+  <UTable
+    v-model:sorting="sorting"
+    :columns="columns"
+    :data="customers"
+    class="flex-1"
   />
 </template>

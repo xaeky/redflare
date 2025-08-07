@@ -25,21 +25,6 @@ const links:SidebarLink[] = [
     label: 'Customers',
     icon: 'i-heroicons-at-symbol-solid',
     to: '/dashboard/customers'
-  },
-  {
-    label: 'Finances',
-    icon: 'i-heroicons-banknotes-solid',
-    to: '/dashboard/finances'
-  },
-  {
-    label: 'Users',
-    icon: 'i-heroicons-users-solid',
-    to: '/dashboard/users'
-  },
-  {
-    label: 'Notes',
-    icon: 'i-heroicons-book-open-16-solid',
-    to: '/dashboard/notes'
   }
 ];
 </script>

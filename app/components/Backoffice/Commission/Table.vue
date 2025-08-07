@@ -1,25 +1,27 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
-import { UButton, ULink, SharedCommissionStatusBadge } from '#components';
+import { commissionsQuery } from '~/queries/commissions';
+import { UButton, UIcon, ULink, SharedCommissionStatusBadge, BackofficeCommissionEditSlideover } from '#components';
 
-// Props & vars
-const props = defineProps<{
-  commissions: SerializedCommission[]
-}>();
-const commissions = computed(() => props.commissions);
-const editSlideoverData = ref<SerializedCommission | null>(null);
-const editSlideoverOpen = ref(false);
+const { data:commissions, refetch:refetchCommissions, asyncStatus, state } = useQuery(commissionsQuery);
 
-const columns: TableColumn<SerializedCommission>[] = [
+// Overlays
+const overlay = useOverlay();
+const editSlideoverOverlay = overlay.create(BackofficeCommissionEditSlideover);
+
+type DeserializedCommissionWithCustomer = WithCustomer<DeserializedCommission>;
+const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
   {
-    accessorKey: 'id',
+    id: 'id',
+    accessorKey: '_id',
     header: '#',
     cell: ({row}) => {
       const thisCommission = row.original;
+      const idDigit = thisCommission._id.substring(thisCommission._id.length - 6);
       return h('div', { class: 'flex items-center gap-2' }, [
-        h(ULink, { to: `/commission/${thisCommission.id}`, target: '_blank' },
-          [ h(UButton, { icon: 'i-lucide-link-2', color: 'neutral', size: 'sm', variant: 'soft' }) ]),
-        h('span', { class: 'font-mono uppercase' }, thisCommission.id.substring(0, 6))
+        h(ULink, { to: `/commission/${thisCommission._id}`, target: '_blank', class: 'inline-flex items-center' },
+          () => [ h(UIcon, { name: 'i-lucide-link-2' }) ]),
+        h('span', { class: 'font-mono uppercase' }, idDigit)
       ])
     }
   },
@@ -28,7 +30,7 @@ const columns: TableColumn<SerializedCommission>[] = [
     header: 'Customer',
     cell: ({row}) => {
       const thisCommission = row.original;
-      const { id, name, vrc_id } = thisCommission.customer;
+      const { name, vrc_id } = thisCommission.customer;
       // TODO: Make a button to invoke a slideover with customer details and actions
       const items = [ h('span', { class: 'font-semibold' }, name) ];
       if (vrc_id) items.unshift(h(UButton, {
@@ -42,15 +44,6 @@ const columns: TableColumn<SerializedCommission>[] = [
         }
       }))
       return h('div', { class: 'space-x-2' }, items)
-    }
-  },
-  {
-    id: 'latest_payment',
-    header: 'Latest Payment',
-    cell: ({row}) => {
-      const thisCommission = row.original;
-      const latestPayment = thisCommission.latest_payment ? thisCommission.latest_payment.state : 'None';
-      return h('span', { class: 'font-semibold' }, latestPayment);
     }
   },
   {
@@ -77,9 +70,9 @@ const columns: TableColumn<SerializedCommission>[] = [
         size: 'lg',
         variant: 'soft',
         onClick() {
-          const thisCommission = row.original;
-          editSlideoverData.value = thisCommission;
-          editSlideoverOpen.value = true;
+          editSlideoverOverlay.open({
+            commission_id: row.original._id
+          });
         }
       })
     }
@@ -88,6 +81,5 @@ const columns: TableColumn<SerializedCommission>[] = [
 </script>
 
 <template>
-  <UTable :columns :data="commissions" />
-  <BackofficeCommissionEditSlideover v-model:open="editSlideoverOpen" :commission="(editSlideoverData as SerializedCommission)" />
+  <UTable v-if="commissions" :columns :data="commissions" />
 </template>

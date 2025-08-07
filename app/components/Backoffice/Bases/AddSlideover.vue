@@ -1,27 +1,12 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import * as z from 'zod';
-import { commissionsBasesQuery } from '~/queries/commissions';
+import { avatarBasesQuery } from '~/queries/commissions';
 
-// Props & vars
 const queryCache = useQueryCache();
-const props = defineProps<{
-  open: boolean;
-}>();
-
-// Emits
-const emit = defineEmits<{
-  (e: 'update:open', value: boolean): void
-}>();
-
-// Inputs
-const addBaseSlideoverOpen = computed({
-  get: () => props.open,
-  set: (value: boolean) => emit('update:open', value)
-});
 
 // Form
-const schema = commissionBaseOptionsSchema;
+const schema = avatarBaseOptionsSchema;
 type Schema = z.output<typeof schema>;
 const defaultState:Schema = {
   name: '',
@@ -34,15 +19,15 @@ const state = reactive<Schema>(_.cloneDeep(defaultState));
 const { mutate:addCommissionBase, isLoading:addCommissionBaseBusy } = useMutation({
   mutation: () => useAPI('/api/commissions/bases', { method: 'POST', body: state }),
   onSuccess() {
-    addBaseSlideoverOpen.value = false;
     _.assign(state, defaultState);
-    queryCache.invalidateQueries(commissionsBasesQuery);
+    queryCache.invalidateQueries(avatarBasesQuery);
+    useOverlay().closeAll();
   }
 });
 </script>
 
 <template>
-  <USlideover v-model:open="addBaseSlideoverOpen" title="Add commission base">
+  <USlideover title="Add avatar base">
     <template #body>
       <UForm :schema :state class="space-y-4" @submit="() => { addCommissionBase() }">
         <UFormField name="name" label="Name">

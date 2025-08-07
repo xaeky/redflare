@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { commissionsBasesQuery } from '~/queries/commissions';
+import { avatarBasesQuery } from '~/queries/commissions';
 
 // Props
 const props = defineProps<{
-  base: CommissionBase 
+  base: DeserializedAvatarBase 
 }>();
 
 // Emits
 const emit = defineEmits<{
-  (e: 'edit', value: CommissionBase): void
+  (e: 'edit', value: DeserializedAvatarBase): void
 }>();
 
 // Misc vars
@@ -17,9 +17,9 @@ const toast = useToast();
 
 // Mutations
 const { mutate:deleteBase, isLoading:deleteBaseBusy  } = useMutation({
-  mutation: () => useAPI(`/api/commissions/bases/${props.base.id}`, { method: 'DELETE' }),
+  mutation: () => useAPI(`/api/commissions/bases/${props.base._id}`, { method: 'DELETE' }),
   onSuccess() {
-    queryCache.invalidateQueries(commissionsBasesQuery);
+    queryCache.invalidateQueries(avatarBasesQuery);
     toast.add({
       icon: 'i-lucide-check',
       description: 'Base deleted.'
@@ -38,7 +38,7 @@ const { mutate:deleteBase, isLoading:deleteBaseBusy  } = useMutation({
     </div>
     <div>by {{ base.creator_name }}</div>
     <div class="flex justify-between items-center">
-      <span v-text="base.id" class="font-mono text-xs select-all" />
+      <span v-text="base._id" class="font-mono text-xs select-all" />
       <div class="flex items-center gap-2">
         <UButton icon="i-lucide-trash-2" variant="soft" color="error" size="xl" @click="() => { deleteBase() }" :loading="deleteBaseBusy" :disable="deleteBaseBusy" />
         <UButton label="Edit base" icon="i-lucide-pencil" variant="soft" :disable="deleteBaseBusy" @click="emit('edit', base)" />

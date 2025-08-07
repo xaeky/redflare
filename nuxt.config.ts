@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-06-27',
@@ -7,8 +9,14 @@ export default defineNuxtConfig({
   },
   nitro: {
     imports: {
-      dirs: ['server/utils/services']
-    }
+      dirs: ['server/utils/services', 'server/utils/models'],
+    },
+  },
+  imports: {
+    dirs: ['shared/enums'],
+  },
+  alias: {
+    '#models': fileURLToPath(new URL('./server/utils/models', import.meta.url)),
   },
   modules: [
     '@nuxt/fonts',
@@ -38,11 +46,6 @@ export default defineNuxtConfig({
       sid: '',
       endpointBase: ''
     },
-    supabase: {
-      base: '',
-      anon: '',
-      serv: ''
-    },
     public: {
       creator: {
         marketName: '',
@@ -52,7 +55,8 @@ export default defineNuxtConfig({
       redflare_env: '',
     },
     backoffice: {
-      skipRoles: false
+      skipRoles: false,
+      mongo: ''
     }
   }
 })

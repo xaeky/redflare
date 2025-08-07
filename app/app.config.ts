@@ -3,6 +3,9 @@ export default defineAppConfig({
     colors: {
       primary: 'amber',
       neutral: 'stone'
+    },
+    container: {
+      base: 'w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8'
     }
   }
 });

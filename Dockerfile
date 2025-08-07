@@ -29,7 +29,6 @@ FROM node:22.17
 WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/.output ./.output
-COPY --from=builder /usr/src/app/supabase ./supabase
 
 ENV HOST=0.0.0.0
 ENV PORT=8080

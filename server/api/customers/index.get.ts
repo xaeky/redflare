@@ -1,18 +1,18 @@
 export default defineEventHandler(async (event) => {
   // Verify if current session user has permissions to read customers.
   await hasPermission(event, 'read:customers', true);
-  // Read page & name from query params.
-  const { page, name } = getQuery(event);
-  const pageRangeBase = 50;
-  const pageRangeInitial = page ? pageRangeBase * (Number(page) - 1) : 0;
-  const pageRangeEnd = pageRangeInitial + pageRangeBase - 1;
-  // Read database and return all customers, get commissions counts as well.
-  const content = await ($supabase())
-  .from('customers')
-  .select('*, commissions_count:commissions(count)')
-  .like('name', name ? `%${name as string}%` : '*')
-  .order('created_at', { ascending: false })
-  .range(pageRangeInitial, pageRangeEnd);
-  if (content.error) throw createError({ statusCode: 500, data: content.error });
-  return content.data;
+  // Set objects and parameters for the request.
+  let { page, name, sort_by, sort_order } = getQuery(event);
+  const filters: Partial<CustomerFilterOptions> = {
+    name: name ? String(name) : undefined
+  };
+  sort_by ||= 'created_at';
+  sort_order = (sort_order === '1' || sort_order === '-1') ? Number(sort_order) : 1;
+  const sort = (sort_by && sort_order) ? { by: String(sort_by), order: Number(sort_order) as 1 | -1 } : undefined;
+  // Get all customers with pagination and filters.
+  const content = await useCustomerModel().getAll({
+    page: Number(page) || 1,
+    filters, sort
+  });
+  return content;
 });

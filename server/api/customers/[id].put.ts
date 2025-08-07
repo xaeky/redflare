@@ -7,9 +7,8 @@ export default defineEventHandler(async (event) => {
   // Get validated body from request
   const trustedBody = await readValidatedBody(event, customerOptionsSchema.safeParse);
   if (trustedBody.error) throw createError({ statusCode: 400 });
-  const body = trustedBody.data;
-  // Update customer by ID.
-  const content = await ($supabase()).from('customers').update(body).eq('id', id);
-  if (content.error) throw createError({ statusCode: 500, data: content.error });
-  return content.data;
+  const body = trustedBody.data as CustomerUpdateOptions;
+  // Update customer
+  const result = await useCustomerModel().updateOne(id, body);
+  return result;
 });
