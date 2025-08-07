@@ -49,7 +49,6 @@ function routeCommissionStatus(status: CommissionStatusType): CommissionStatusTy
 }
 const commissionRoutedValue = routeCommissionStatus(commission.status as CommissionStatusType);
 const commissionRoutedValueString = computed(() => commissionRoutedValue.toString());
-console.log(commission)
 </script>
 
 <template>
