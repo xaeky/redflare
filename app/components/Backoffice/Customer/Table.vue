@@ -91,6 +91,12 @@ const columns: TableColumn<DeserializedCustomer>[] = [
     cell: ({row}) => new Date(row.getValue('created_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   },
   {
+    accessorKey: 'updated_at',
+    sortingFn: 'datetime',
+    header: ({ column }) => sortingHeader('Updated at', column),
+    cell: ({row}) => new Date(row.getValue('updated_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  },
+  {
     id: 'actions',
     header: 'Actions',
     cell: ({row}) => {
