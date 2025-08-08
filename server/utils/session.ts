@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { useSession, createError, H3Event } from 'h3';
 import { UserInfoClient, AuthenticationClient, ManagementClient } from 'auth0';
-import { SecureSessionData } from '#auth-utils';
+import type { SecureSessionData } from '#auth-utils';
 import { decode, JwtPayload } from 'jsonwebtoken';
 
 type EventUserSession = Parameters<typeof useSession>[0];
