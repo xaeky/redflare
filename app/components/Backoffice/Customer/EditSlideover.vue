@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import * as z from 'zod';
-import { customersQuery } from '~/queries/customers';
 
 const queryCache = useQueryCache();
 const props = defineProps<{

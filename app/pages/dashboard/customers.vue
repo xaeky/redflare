@@ -4,11 +4,11 @@ import { BackofficeCustomerAddSlideover } from '#components';
 
 const toast = useToast();
 const customerSorting = ref([{ id: 'created_at', desc: true }])
-const { data:customers, refetch: refetchCustomers, asyncStatus, state } = useQuery(customersQuery, () => ({
+const { data:customers, refresh, asyncStatus, state } = useQuery(customersQuery, () => ({
   sorting: {
     by: customerSorting.value[0]?.id || 'created_at',
     order: customerSorting.value[0]?.desc ? -1 : 1
-  }
+  },
 }));
 
 // Overlays
@@ -24,7 +24,7 @@ watch(state, newState => {
 });
 
 watch(customerSorting, () => {
-  refetchCustomers();
+  refresh();
 }, { immediate: true, deep: true });
 
 const actions:PageAction[] = [
@@ -33,7 +33,7 @@ const actions:PageAction[] = [
     icon: 'i-heroicons-arrow-path-16-solid',
     color: 'neutral',
     variant: 'subtle',
-    action: () => { refetchCustomers(); }
+    action: () => { refresh(); }
   },
   {
     label: 'Add customer',
