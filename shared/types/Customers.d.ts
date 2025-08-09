@@ -4,6 +4,7 @@ export interface Customer {
   name: string;
   vrc_id: string;
   note: string | null;
+  telegram_id?: string | null;
   created_at: string;
   updated_at: string;
 }

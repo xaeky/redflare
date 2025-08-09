@@ -14,7 +14,8 @@ type Schema = z.output<typeof customerOptionsSchema>;
 const state = reactive<Schema>({
   name: '',
   vrc_id: '',
-  note: ''
+  note: '',
+  telegram_id: ''
 });
 
 // Watchers
@@ -41,14 +42,14 @@ const { mutate: updateCustomer, isLoading: updateCustomerBusy } = useMutation({
     <template #body>
       <div v-if="customer">
         <UForm :schema :state class="space-y-4" @submit="() => updateCustomer()">
-          <UFormField name="id" label="ID" v-if="updatedCustomer">
-            <UInput label="ID" v-model="updatedCustomer._id" class="w-full" readonly disabled aria-readonly="" />
-          </UFormField>
-          <UFormField name="name" label="Name">
+          <UFormField name="name" label="Name" required>
             <UInput label="Name" v-model="state.name" class="w-full" />
           </UFormField>
           <UFormField name="vrc_id" label="VRChat User ID">
             <UInput label="VRChat User ID" v-model="state.vrc_id" class="w-full" />
+          </UFormField>
+          <UFormField name="telegram_id" label="Telegram ID">
+            <UInput label="Telegram ID" v-model="state.telegram_id" class="w-full" />
           </UFormField>
           <UFormField name="note" label="Note">
             <UInput label="Note" v-model="state.note" class="w-full" />
