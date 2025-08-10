@@ -10,6 +10,7 @@ type Schema = z.output<typeof customerOptionsSchema>;
 const state = reactive<Schema>({
   name: '',
   vrc_id: '',
+  telegram_id: '',
   note: ''
 });
 
@@ -35,6 +36,9 @@ const { mutate: addCustomer, isLoading: addCustomerBusy } = useMutation({
         </UFormField>
         <UFormField name="vrc_id" label="VRChat User ID">
           <UInput label="VRChat User ID" v-model="state.vrc_id" class="w-full" />
+        </UFormField>
+        <UFormField name="telegram_id" label="Telegram ID">
+          <UInput label="Telegram ID" v-model="state.telegram_id" class="w-full" />
         </UFormField>
         <UFormField name="note" label="Note">
           <UInput label="Note" v-model="state.note" class="w-full" />

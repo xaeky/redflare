@@ -45,6 +45,13 @@ const getById = async (id: string) => {
   return result;
 }
 
+const getByTelegramId = async (telegramId: string) => {
+  const collection = await useMongoCollection<Customer>('customers');
+  const result = await collection.findOne({ telegram_id: telegramId });
+  if (!result) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
+  return result;
+}
+
 const insertOne = async (dataInput: CustomerInsertOptions) => {
   const collection = await useMongoCollection('customers');
   // Initialize customer data with defaults
@@ -72,6 +79,7 @@ const deleteOne = async (id: string) => {
 export const useCustomerModel = () => ({
   getAll,
   getById,
+  getByTelegramId,
   insertOne,
   updateOne,
   deleteOne
