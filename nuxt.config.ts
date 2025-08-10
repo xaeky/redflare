@@ -57,6 +57,7 @@ export default defineNuxtConfig({
     backoffice: {
       skipRoles: false,
       mongo: '',
+      mongoDb: '',
       service: ''
     }
   }

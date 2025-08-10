@@ -99,6 +99,7 @@ jobs:
             NUXT_SESSION_PASSWORD=${{ secrets.SESSION_PASSWORD }}
             NUXT_BACKOFFICE_SKIP_ROLES=${{ vars.BO_SKIP_ROLES }}
             NUXT_BACKOFFICE_MONGO=${{ secrets.BO_MONGO }}
+            NUXT_BACKOFFICE_MONGO_DB=${{ vars.BO_MONGO_DB }}
             NUXT_PUBLIC_REDFLARE_ENV=${{ vars.ENV }}
           secrets: |
             DB_URL=${{ vars.DB_URL }}
