@@ -7,6 +7,10 @@ const devLinks = [
   {
     label: 'Endpoint',
     to: '/dashboard/dev/endpoint'
+  },
+  {
+    label: 'Database Health',
+    to: '/dashboard/dev/database'
   }
 ]
 

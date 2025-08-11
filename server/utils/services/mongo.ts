@@ -16,7 +16,7 @@ export const useMongo = async (event?: H3Event) => {
 export const useMongoCollection = async <T extends Document>(collectionName: string, event?: H3Event) => {
   if (!db) {
     const mongoClient = await useMongo(event);
-    db = mongoClient.db('app');
+    db = mongoClient.db(process.env.MONGO_DB_NAME || 'app');
   }
   return db.collection<T>(collectionName);
 }
