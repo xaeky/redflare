@@ -116,6 +116,8 @@ const updateOne = async (commissionId: string, updateData: CommissionUpdate) => 
       return sanitizedCharacter;
     });
   }
+  // Set updated_at to current time
+  updateData.updated_at = new Date().toISOString();
   const result = await collection.updateOne(
     { _id: new ObjectId(commissionId) },
     { $set: updateData }
