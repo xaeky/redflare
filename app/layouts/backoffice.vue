@@ -1,8 +1,13 @@
 <script setup lang="ts">
 const route = useRoute();
 
-const title = computed(() => route.meta.title || '');
-const description = computed(() => route.meta.description || '');
+const title = computed<string>(() => (route.meta.title as string) || '');
+const description = computed<string>(() => (route.meta.description as string) || '');
+
+useHead({
+  titleTemplate: '%s - Redflare Backoffice',
+  title
+});
 </script>
 
 <template>
