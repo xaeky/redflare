@@ -19,19 +19,14 @@ const getByCommission = async (commissionId: string) => {
 
 const insertOne = async (options: PaymentTransactionOptions) => {
   const collection = await useMongoCollection<PaymentTransaction>(collectionName);
+  // Make sure approved_at is a ISOString
+  options.approved_at = new Date(options.approved_at).toISOString();
   const newData: PaymentTransaction = {
     ...options,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
   return await collection.insertOne(newData);
-};
-
-const updateOne = async (id: string, data: Partial<PaymentTransaction>) => {
-  const collection = await useMongoCollection<PaymentTransaction>(collectionName);
-  (data as PaymentTransaction).updated_at = new Date().toISOString();
-  const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: data });
-  return result;
 };
 
 const deleteOne = async (id: string) => {
@@ -44,6 +39,5 @@ export const useBillingModel = () => ({
   getAll,
   getByCommission,
   insertOne,
-  updateOne,
   deleteOne
 });

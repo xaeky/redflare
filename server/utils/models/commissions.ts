@@ -119,6 +119,8 @@ const updateOne = async (commissionId: string, updateData: Partial<CommissionUpd
   }
   // Set updated_at to current time
   updateData.updated_at = new Date().toISOString();
+  // Remove payments from updateData since Billing controller handles it
+  if (updateData.payments) delete updateData.payments;
   const result = await collection.updateOne(
     { _id: new ObjectId(commissionId) },
     { $set: updateData }
@@ -168,11 +170,37 @@ const existsOne = async (commissionId: string) => {
   return !!result;
 }
 
+const removeTransactionFromOne = async (commissionId: string, paymentId: string) => {
+  const collection = await useMongoCollection('commissions');
+  const commission = await collection.findOne({ _id: new ObjectId(commissionId) });
+  if (!commission) throw createError({ statusCode: 404, message: 'Commission not found' });
+  const updatedPayments = (commission.payments || []).filter((pId: string) => pId !== paymentId);
+  const result = await collection.updateOne(
+    { _id: new ObjectId(commissionId) },
+    { $set: { payments: updatedPayments, updated_at: new Date().toISOString() } }
+  );
+  return result;
+}
+
+const addTransactionToOne = async (commissionId: string, paymentId: string) => {
+  const collection = await useMongoCollection('commissions');
+  const commission = await collection.findOne({ _id: new ObjectId(commissionId) });
+  if (!commission) throw createError({ statusCode: 404, message: 'Commission not found' });
+  const updatedPayments = Array.from(new Set([...(commission.payments || []), paymentId]));
+  const result = await collection.updateOne(
+    { _id: new ObjectId(commissionId) },
+    { $set: { payments: updatedPayments, updated_at: new Date().toISOString() } }
+  );
+  return result;
+}
+
 export const useCommissionModel = () => ({
   getAll,
   getOneById,
   existsOne,
   updateOne,
   insertOne,
-  deleteOne
+  deleteOne,
+  removeTransactionFromOne,
+  addTransactionToOne,
 });
