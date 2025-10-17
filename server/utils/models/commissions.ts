@@ -93,6 +93,7 @@ const getOneById = async (commissionId: string) => {
       }
     },
     { $replaceRoot: { newRoot: '$doc' } },
+    { $addFields: { payments: { $ifNull: ['$payments', []] } } },
     { $project: { baseObj: 0 } }
   ]).next();
 
@@ -101,7 +102,7 @@ const getOneById = async (commissionId: string) => {
   return commission as WithId<WithCharacters<WithExistingCustomer<CommissionBase>>>;
 }
 
-const updateOne = async (commissionId: string, updateData: CommissionUpdate) => {
+const updateOne = async (commissionId: string, updateData: Partial<CommissionUpdate>) => {
   const collection = await useMongoCollection('commissions');
   // Correct customer field if it's a string
   if (updateData.customer && typeof updateData.customer === 'string') {
@@ -161,9 +162,16 @@ const deleteOne = async (commissionId: string) => {
   return { success: true };
 }
 
+const existsOne = async (commissionId: string) => {
+  const collection = await useMongoCollection('commissions');
+  const result = await collection.findOne({ _id: new ObjectId(commissionId) });
+  return !!result;
+}
+
 export const useCommissionModel = () => ({
   getAll,
   getOneById,
+  existsOne,
   updateOne,
   insertOne,
   deleteOne
