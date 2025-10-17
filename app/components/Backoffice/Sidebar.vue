@@ -31,7 +31,7 @@ const links:SidebarLink[] = [
 
 <template>
   <aside id="redflare_backoffice_sidebar" class="flex flex-col gap-4 border-r border-r-neutral-800 p-4">
-    <div v-for="link in links as SidebarLink[]" :key="link.to">
+    <div v-for="link in links" :key="link.to">
       <UTooltip :content="{ side: 'right' }" arrow :text="link.label" :delay-duration="0">
         <ULink
           :to="link.to"

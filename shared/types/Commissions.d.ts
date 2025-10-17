@@ -20,6 +20,8 @@ export interface CommissionBase {
   secure_note: string | null;
   created_at: string | Date;
   updated_at: string | Date;
+  characters: CommissionCharacter[];
+  payments: string[];
 }
 
 export type DeserializedCommission = Deserialized<WithId<CommissionBase>>;
@@ -27,10 +29,12 @@ export type DeserializedCommission = Deserialized<WithId<CommissionBase>>;
 export type CommissionOptions = Omit<Commission, 'created_at' | 'updated_at'> & {
   customer: string | ObjectId;
   characters: (CommissionCharacterOptions & { base: string | ObjectId })[];
+  payments: string[];
 };
 export type CommissionUpdate = CommissionOptions & {
   customer: string | ObjectId;
   characters: (CommissionCharacterOptions & { base: string | ObjectId })[];
+  payments: string[];
 };
 export type CommissionInsert = Omit<Commission, 'created_at' | 'updated_at' | 'customer'> & { customer: string; };
 
@@ -39,30 +43,9 @@ export type CommissionFilterOptions = {
   status?: CommissionStatusType | string;
 };
 
-// Payments
-
-export interface CommissionPayment {
-  // Database fields
-  pid: string;
-  commission: string;
-  currency: string;
-  income_amount: number;
-  public_note: string | null;
-  secure_note: string | null;
-  state: CommissionPaymentStatus | string;
-  created_at: string;
-  updated_at: string;
-  // Payment processor fields
-  payment_ext_id: string;
-  payment_ext_url: string;
-  payment_processor: CommissionPaymentProcessor;
-}
-
 export type CommissionPaymentOptions = Pick<CommissionPayment, 'currency' | 'income_amount' | 'public_note' | 'secure_note'> & { commission: string; };
 export type CommissionPaymentUpdate = Partial<Pick<CommissionPayment, 'public_note' | 'secure_note'>> & { state?: CommissionPaymentStatusEditable; };
 export type CommissionPaymentInsert = Omit<CommissionPayment, 'pid' | 'created_at' | 'updated_at'>;
-
-
 
 // Avatar bases
 

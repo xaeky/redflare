@@ -21,12 +21,13 @@ const state = reactive<Schema>({
   secure_note: '',
   status: CommissionStatusType.InSetup,
   characters: [],
+  payments: [],
   created_at: new Date()
 });
 const formTabs = ref<TabsItem[]>([ 
   { label: 'General', slot: 'general' as const }, 
   { label: 'Characters', slot: 'characters' as const }, 
-  { label: 'Payments', slot: 'payments' as const }
+  { label: 'Billing', slot: 'billing' as const }
 ]);
 const formGeneralRef = ref();
 const formCharactersRef = ref();
@@ -187,8 +188,11 @@ defineExpose({
       <template #characters="{ item }">
         <BackofficeCommissionFormCharacters ref="formCharactersRef" v-model:state="state" />
       </template>
-      <template #payments="{ item }">
-        Payments
+      <template #billing="{ item }">
+        <BackofficeCommissionFormBilling v-if="props.commission_id" ref="formBillingRef" v-model:state="state" :commission="props.commission_id" />
+        <div v-else>
+          <p class="text-sm text-gray-500 dark:text-gray-400">You can only manage billing transactions after creating the commission.</p>
+        </div>
       </template>
     </UTabs>
   </div>

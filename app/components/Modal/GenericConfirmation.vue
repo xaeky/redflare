@@ -6,6 +6,7 @@ const props = withDefaults(defineProps<{
   confirmLabel?: string;
   confirmAdditional?: false | null | 'name'
   confirmAdditionalValue?: string;
+  danger?: boolean;
   open?: boolean
 }>(), {
   title: 'Confirmation',
@@ -40,7 +41,7 @@ const actions = {
     <template #footer>
       <div class="flex w-full items-center justify-end gap-4">
         <UButton label="Cancel" variant="subtle" color="neutral" @click="actions.cancel" />
-        <UButton :label="confirmLabel" @click="actions.confirm" />
+        <UButton :label="confirmLabel" :color="danger ? 'error' : 'primary'" @click="actions.confirm" />
       </div>
     </template>
   </UModal>
