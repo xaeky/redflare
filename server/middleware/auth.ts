@@ -3,7 +3,7 @@ import _ from 'lodash';
 export default defineEventHandler(async (event) => {
   const runtime = useRuntimeConfig(event);
   const isAPICall = event.path.startsWith('/api/');
-  const restrictedEndpoints = ['/api/commissions', '/api/customers', '/api/service'];
+  const restrictedEndpoints = ['/api/commissions', '/api/customers', '/api/service', '/api/stats'];
   const isRestrictedRouted = restrictedEndpoints.some(route => event.path.startsWith(route));
   const authenticatedData = await getUserSession(event);
   const isService = getHeader(event, 'X-RF-Service') === runtime.backoffice.service;
