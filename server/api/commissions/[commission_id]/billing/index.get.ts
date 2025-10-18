@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
   await hasPermission(event, 'read:commissions');
-  const commissionId = await validateCommission(event);
+  const { id: commissionId } = await validateCommission(event);
   const billingModel = useBillingModel();
 
   const result = await billingModel.getByCommission(commissionId);

@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   if (!transactionId) throw createError({ statusCode: 400, message: 'Transaction ID is required' });
   const billingModel = useBillingModel();
   const commissionModel = useCommissionModel();
-  const commissionId = await validateCommission(event);
+  const { id: commissionId } = await validateCommission(event);
 
   const result = await billingModel.deleteOne(transactionId);
   if (!result) throw createError({ statusCode: 500, message: 'Failed to delete transaction' });

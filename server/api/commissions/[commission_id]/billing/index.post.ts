@@ -3,7 +3,7 @@ export default defineEventHandler(async (event) => {
   await hasPermission(event, 'create:payment');
   const body = await readValidatedBody(event, commissionPaymentOptionsSchema.safeParse);
   if (!body.success) throw createError({ statusCode: 400, message: 'Invalid body' });
-  const commissionId = await validateCommission(event);
+  const { id: commissionId } = await validateCommission(event);
   // Insert the new payment transaction item
   const billingModel = useBillingModel();
   const result = await billingModel.insertOne({
