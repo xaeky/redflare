@@ -77,7 +77,7 @@ const transactionDropdownItems = ref<DropdownMenuItem[][]>([
 <template>
   <div class="border border-neutral-800 rounded-lg p-4" :class="{ 'opacity-50': billingTransactionDeleteBusy }">
     <div class="space-y-4">
-      <div class="flex items-center justify-between mt-2">
+      <div class="flex items-center justify-between">
         <span v-text="transactionApprovedAt" class="text-sm" />
         <UDropdownMenu :items="transactionDropdownItems">
           <UButton icon="i-heroicons-ellipsis-vertical-20-solid" variant="subtle" color="neutral" />
