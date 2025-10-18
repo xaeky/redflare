@@ -46,7 +46,7 @@ const availableCustomers = computed(() => {
     label: localCustomer.name,
     value: localCustomer._id
   } : null;
-  const sanitizedCustomers = [];
+  let sanitizedCustomers = [];
   if (remoteCommission) sanitizedCustomers.push(sanitizedLocalCustomer)
   if (customerSearchSelected.value) sanitizedCustomers.push({
     label: customerSearchSelected.value.name,
@@ -62,6 +62,8 @@ const availableCustomers = computed(() => {
       customerSearchSelected.value = c;
     }
   })));
+  // Delete empty and null options
+  sanitizedCustomers = sanitizedCustomers.filter(c => c !== null && c.value !== null);
   return sanitizedCustomers;
 });
 // - Commission status options
