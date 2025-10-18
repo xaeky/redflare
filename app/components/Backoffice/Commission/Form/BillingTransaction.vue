@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ModalGenericConfirmation } from '#components';
+import type { DropdownMenuItem } from '@nuxt/ui';
 
 const toast = useToast();
 const overlay = useOverlay();
@@ -37,58 +38,70 @@ const billingTransactionDeleteHandle = () => {
   }
   const billingTransactionDeleteModal = overlay.create(ModalGenericConfirmation);
   billingTransactionDeleteModal.open({
-    title: 'Delete transaction',
-    message: 'Are you sure you want to delete this transaction? This action cannot be undone.',
+    title: 'Delete payment transaction',
+    message: 'Are you sure you want to delete this payment transaction? This action cannot be undone.',
     confirmLabel: 'Delete',
     danger: true,
     onConfirm: tryDelete
   });
 }
+
+const transactionApprovedAt = computed(() => {
+  return new Intl.DateTimeFormat('en-US', { timeStyle: 'medium', dateStyle: 'medium' }).format(new Date(props.transaction.approved_at));
+});
+const transactionLocales: Record<string, string> = {
+  'USD': 'en-US',
+  'ARS': 'es-AR'
+}
+const transactionLocale = computed(() => transactionLocales[props.transaction.payment_currency] || 'en-US');
+const transactionAmounts = {
+  billed: computed(() => {
+    return new Intl.NumberFormat(transactionLocale.value, { style: 'currency', currency: props.transaction.payment_currency }).format(props.transaction.total_paid_amount);
+  }),
+  received: computed(() => {
+    return new Intl.NumberFormat(transactionLocale.value, { style: 'currency', currency: props.transaction.payment_currency }).format(props.transaction.net_received_amount);
+  })
+}
+const transactionDropdownItems = ref<DropdownMenuItem[][]>([
+  [
+    {
+      label: 'Delete transaction',
+      icon: 'i-heroicons-trash-16-solid',
+      color: 'error',
+      onSelect: () => billingTransactionDeleteHandle()
+    }
+  ]
+]);
 </script>
 
 <template>
-  <div class="border border-neutral-800 rounded-lg p-4">
-    <div>
+  <div class="border border-neutral-800 rounded-lg p-4" :class="{ 'opacity-50': billingTransactionDeleteBusy }">
+    <div class="space-y-4">
+      <div class="flex items-center justify-between mt-2">
+        <span v-text="transactionApprovedAt" class="text-sm" />
+        <UDropdownMenu :items="transactionDropdownItems">
+          <UButton icon="i-heroicons-ellipsis-vertical-20-solid" variant="subtle" color="neutral" />
+        </UDropdownMenu>
+      </div>
       <ul class="space-y-2">
-        <li class="flex items-center justify-between">
-          <span>Created at</span>
-          <span
-            v-text="new Intl.DateTimeFormat('en-US', { timeStyle: 'medium', dateStyle: 'medium' }).format(new Date(transaction.created_at))"
-          />
-        </li>
-        <li class="flex items-center justify-between">
-          <span>Approved at</span>
-          <span
-            v-text="new Intl.DateTimeFormat('en-US', { timeStyle: 'medium', dateStyle: 'medium' }).format(new Date(transaction.approved_at))"
-          />
-        </li>
         <li class="flex items-center justify-between">
           <span>Processor and currency</span>
           <span>
             {{ transaction.payment_processor }} ({{ transaction.payment_currency }})
           </span>
         </li>
-        <li class="flex items-center justify-between">
+        <li class="flex items-center justify-between gap-8">
           <span>External payment ID</span>
-          <span v-text="transaction.payment_ext_id" class="font-mono" />
-        </li>
-        <li class="flex items-center justify-between">
-          <span>Amount billed</span>
-          <span>
-            {{ new Intl.NumberFormat('en-US', { style: 'currency', currency: transaction.payment_currency }).format(transaction.total_paid_amount) }}
-          </span>
-        </li>
-        <li class="flex items-center justify-between">
-          <span>Amount received</span>
-          <span>
-            {{ new Intl.NumberFormat('en-US', { style: 'currency', currency: transaction.payment_currency }).format(transaction.net_received_amount) }}
-          </span>
+          <span v-text="transaction.payment_ext_id" class="flex-1 font-mono truncate text-right" />
         </li>
       </ul>
-    </div>
-    <div class="flex items-center justify-between mt-2">
-      <UButton color="error" @click="billingTransactionDeleteHandle()" size="sm" :loading="billingTransactionDeleteBusy">Delete</UButton>
-      <span v-text="transaction._id" class="font-mono text-sm" />
+      <div class="space-y-2">
+        <div>Amount billed/net</div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-2xl font-bold" v-text="transactionAmounts.billed" />
+          <span class=" text-muted" v-text="transactionAmounts.received" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
