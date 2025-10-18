@@ -138,18 +138,6 @@ useSeoMeta({
         <Hx level="2">Notes</Hx>
         <p v-text="commission.public_note" />
       </section>
-      <section class="space-y-4">
-        <Hx level="2">Payments</Hx>
-        <div class="bg-neutral-800 rounded-xl">
-          <UAlert
-            title="Payments are not implemented yet"
-            description="We're going to implement payments soon, we're still migrating to this site!"
-            color="primary"
-            variant="soft"
-            icon="i-lucide-info"
-          />
-        </div>
-      </section>
     </div>
   </div>
 </template>
