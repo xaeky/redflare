@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { ObjectId } from 'mongodb';
 
 const collectionName = 'billing_transactions';
@@ -9,8 +10,8 @@ const getAll = async () => {
 
 const getByCommission = async (commissionId: string) => {
   const commissionsCollection = await useMongoCollection<CommissionBase>('commissions');
-  const commission = await commissionsCollection.findOne({ _id: new ObjectId(commissionId) });
-  if (!commission) return [];
+  const commission = await commissionsCollection.findOne({ _id: new ObjectId(commissionId) }, { projection: { payments: 1 } });
+  if (!commission || _.isEmpty(commission.payments)) return [];
   const paymentIds = commission.payments.map((p: string) => new ObjectId(p));
   const paymentsCollection = await useMongoCollection<PaymentTransaction>(collectionName);
   const payments = await paymentsCollection.find({ _id: { $in: paymentIds } }).toArray();
