@@ -4,6 +4,7 @@ import type { DropdownMenuItem } from '@nuxt/ui';
 
 const toast = useToast();
 const overlay = useOverlay();
+const clipboard = useClipboard();
 const props = defineProps<{
   commission: string,
   transaction: Deserialized<PaymentTransaction>
@@ -38,9 +39,9 @@ const billingTransactionDeleteHandle = () => {
   }
   const billingTransactionDeleteModal = overlay.create(ModalGenericConfirmation);
   billingTransactionDeleteModal.open({
-    title: 'Delete payment transaction',
-    message: 'Are you sure you want to delete this payment transaction? This action cannot be undone.',
-    confirmLabel: 'Delete',
+    title: 'Remove payment transaction',
+    message: 'Are you sure you want to remove this payment transaction? When a transaction has no associated commissions, it will be deleted from the database entirely.',
+    confirmLabel: 'Remove',
     danger: true,
     onConfirm: tryDelete
   });
@@ -65,7 +66,25 @@ const transactionAmounts = {
 const transactionDropdownItems = ref<DropdownMenuItem[][]>([
   [
     {
-      label: 'Delete transaction',
+      label: 'Copy transaction ID',
+      icon: 'i-heroicons-document-duplicate-20-solid',
+      onSelect: async () => {
+        try {
+          await clipboard.copy(props.transaction._id as unknown as string);
+          toast.add({
+            title: 'Transaction ID has been copied to clipboard.',
+            duration: 2000
+          });
+        } catch (error) {
+          toast.add({
+            title: 'Error copying transaction ID to clipboard.',
+            color: 'error'
+          });
+        }
+      }
+    },
+    {
+      label: 'Remove transaction',
       icon: 'i-heroicons-trash-16-solid',
       color: 'error',
       onSelect: () => billingTransactionDeleteHandle()

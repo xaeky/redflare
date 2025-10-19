@@ -5,12 +5,15 @@ export default defineEventHandler(async (event) => {
   const billingModel = useBillingModel();
   const commissionModel = useCommissionModel();
   const { id: commissionId } = await validateCommission(event);
-
-  const result = await billingModel.deleteOne(transactionId);
-  if (!result) throw createError({ statusCode: 500, message: 'Failed to delete transaction' });
-
+  
   // Delete it from the commission object
   await commissionModel.removeTransactionFromOne(commissionId, transactionId);
 
-  return result;
+  // If transaction has no parents, delete it entirely
+  const hasParents = (await billingModel.getParentsByTransaction(transactionId)).length > 0;
+  if (!hasParents) {
+    const result = await billingModel.deleteOne(transactionId);
+    if (!result) throw createError({ statusCode: 500, message: 'Failed to delete transaction' });
+  }
+  return { success: true, deletedCompletely: !hasParents };
 });

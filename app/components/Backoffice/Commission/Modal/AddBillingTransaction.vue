@@ -43,13 +43,12 @@ const billingTransactionFormPostHandle = async () => {
     toast.add({
       title: 'Transaction created',
       description: 'The billing transaction has been created successfully.',
-      color: 'success'
     });
     emit('created');
   } catch (error) {
     toast.add({
       title: 'Error creating transaction',
-      description: (error as Error).message,
+      description: (error as any).data.message || (error as Error).message,
       color: 'error'
     })
   }

@@ -18,6 +18,12 @@ const getByCommission = async (commissionId: string) => {
   return payments;
 }
 
+const getParentsByTransaction = async (transactionId: string) => {
+  const commissionsCollection = await useMongoCollection<CommissionBase>('commissions');
+  const commissions = await commissionsCollection.find({ payments: transactionId }, { projection: { _id: 1 } }).toArray();
+  return commissions;
+}
+
 const insertOne = async (options: PaymentTransactionOptions) => {
   const collection = await useMongoCollection<PaymentTransaction>(collectionName);
   // Make sure approved_at is a ISOString
@@ -39,6 +45,7 @@ const deleteOne = async (id: string) => {
 export const useBillingModel = () => ({
   getAll,
   getByCommission,
+  getParentsByTransaction,
   insertOne,
   deleteOne
 });

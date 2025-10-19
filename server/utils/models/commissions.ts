@@ -184,8 +184,15 @@ const removeTransactionFromOne = async (commissionId: string, paymentId: string)
 
 const addTransactionToOne = async (commissionId: string, paymentId: string) => {
   const collection = await useMongoCollection('commissions');
+  const transactionCollection = await useMongoCollection('billing_transactions');
+  const transaction = await transactionCollection.findOne({ _id: new ObjectId(paymentId) });
+  if (!transaction) throw createError({ statusCode: 404, message: 'Payment transaction not found' });
   const commission = await collection.findOne({ _id: new ObjectId(commissionId) });
   if (!commission) throw createError({ statusCode: 404, message: 'Commission not found' });
+  // Making sure is not already added
+  if (commission.payments && commission.payments.includes(paymentId)) {
+    throw createError({ statusCode: 400, message: 'Payment transaction already linked to this commission' });
+  }
   const updatedPayments = Array.from(new Set([...(commission.payments || []), paymentId]));
   const result = await collection.updateOne(
     { _id: new ObjectId(commissionId) },
