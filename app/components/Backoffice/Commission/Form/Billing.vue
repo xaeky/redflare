@@ -69,7 +69,9 @@ const headerExtraActionsItems: DropdownMenuItem[][] = [
         <BackofficeCommissionFormBillingTransaction
           v-for="transaction in transactions" :key="transaction._id"
           :transaction :commission="(props.commission as string)"
-          @deleted="() => transactionsRefresh()" />
+          @deleted="() => transactionsRefresh()"
+          @updated="() => transactionsRefresh()"
+        />
       </div>
       <div v-else-if="transactionsLoading">
         <SharedGeneralLoader text="Fetching transactions..." />

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ModalGenericConfirmation } from '#components';
+import { ModalGenericConfirmation, BackofficeCommissionModalEditBillingTransaction } from '#components';
 import type { DropdownMenuItem } from '@nuxt/ui';
 
 const toast = useToast();
@@ -10,7 +10,8 @@ const props = defineProps<{
   transaction: Deserialized<PaymentTransaction>
 }>();
 const emit = defineEmits<{
-  (e: 'deleted', id: string): void
+  (e: 'deleted', id: string): void,
+  (e: 'updated'): void
 }>();
 
 // Delete transaction log method
@@ -91,6 +92,21 @@ const transactionDropdownItems = ref<DropdownMenuItem[][]>([
       }
     },
     {
+      label: 'Edit transaction',
+      icon: 'i-heroicons-pencil-16-solid',
+      onSelect: () => {
+        const editModal = overlay.create(BackofficeCommissionModalEditBillingTransaction, { destroyOnClose: true });
+        editModal.open({
+          commission: props.commission,
+          transaction: props.transaction,
+          onSubmitted: () => {
+            editModal.close();
+            emit('updated');
+          }
+        });
+      }
+    },
+    {
       label: 'Remove transaction',
       icon: 'i-heroicons-trash-16-solid',
       color: 'error',
@@ -129,7 +145,7 @@ const transactionDropdownItems = ref<DropdownMenuItem[][]>([
           <span class="text-2xl font-bold">
             {{ transaction.payment_currency }} {{ transactionAmounts.billed }}
           </span>
-          <span class=" text-muted" v-text="transactionAmounts.received" />
+          <span class="text-muted" v-text="transactionAmounts.received" />
         </div>
       </div>
     </div>

@@ -36,6 +36,12 @@ const insertOne = async (options: PaymentTransactionOptions) => {
   return await collection.insertOne(newData);
 };
 
+const updateOne = async (id: string, newData: PaymentTransactionUpdate) => {
+  const collection = await useMongoCollection<PaymentTransaction>(collectionName);
+  const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: newData });
+  return result;
+}
+
 const deleteOne = async (id: string) => {
   const collection = await useMongoCollection<PaymentTransaction>(collectionName);
   const result = await collection.deleteOne({ _id: new ObjectId(id) });
@@ -47,5 +53,6 @@ export const useBillingModel = () => ({
   getByCommission,
   getParentsByTransaction,
   insertOne,
+  updateOne,
   deleteOne
 });

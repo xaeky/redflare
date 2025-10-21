@@ -12,8 +12,8 @@ export interface PaymentTransaction {
   payment_ext_id: string;
   payment_ext_url?: string;
   manual?: boolean;
-  internal_note?: boolean;
+  internal_note?: string | null;
 }
 
 export type PaymentTransactionOptions = Omit<PaymentTransaction, 'created_at' | 'updated_at'>;
-export type PaymentTransactionUpdate = Partial<Omit<PaymentTransaction, 'created_at' | 'updated_at'>>;
+export type PaymentTransactionUpdate = Partial<Pick<PaymentTransaction, 'internal_note'>>;
