@@ -48,6 +48,7 @@ export const commissionPaymentOptionsSchema = z.object({
   payment_ext_id: z.string().min(1, 'External payment ID is required'),
   payment_ext_url: z.string().url('External payment URL must be a valid URL').optional().or(z.literal('')),
   approved_at: z.string().min(1, 'Approval date is required'),
+  internal_note: z.string().nullable().optional()
 });
 
 export const commissionPaymentUpdateSchema = z.object({

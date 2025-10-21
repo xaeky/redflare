@@ -21,6 +21,7 @@ const billingTransactionState = reactive<z.infer<typeof billingTransactionSchema
   payment_ext_id: '',
   payment_ext_url: '',
   approved_at: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`,
+  internal_note: ''
 });
 const billingForm = {
   paymentCurrencyOptions: [
@@ -87,6 +88,9 @@ const billingTransactionFormPostHandle = async () => {
             <UInput type="datetime-local" v-model="billingTransactionState.approved_at" class="w-full" />
           </UFormField>
         </div>
+        <UFormField label="Internal note" name="internal_note">
+          <UInput v-model="billingTransactionState.internal_note" class="w-full" />
+        </UFormField>
       </UForm>
     </template>
     <template #footer>

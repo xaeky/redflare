@@ -54,6 +54,13 @@ const transactionLocales: Record<string, string> = {
   'USD': 'en-US',
   'ARS': 'es-AR'
 }
+const transactionFormattedProcessor = computed(() => {
+  const processors: Record<string, string> = {
+    'paypal': 'PayPal',
+    'mercadopago': 'Mercado Pago'
+  };
+  return processors[props.transaction.payment_processor] || props.transaction.payment_processor;
+})
 const transactionLocale = computed(() => transactionLocales[props.transaction.payment_currency] || 'en-US');
 const transactionAmounts = {
   billed: computed(() => {
@@ -102,12 +109,14 @@ const transactionDropdownItems = ref<DropdownMenuItem[][]>([
           <UButton icon="i-heroicons-ellipsis-vertical-20-solid" variant="subtle" color="neutral" />
         </UDropdownMenu>
       </div>
+      <div v-if="transaction.internal_note" class="p-3 bg-muted rounded-md">
+        <div class="text-sm text-muted mb-1">Internal note</div>
+        <div class="text-sm" v-text="transaction.internal_note" />
+      </div>
       <ul class="space-y-2">
         <li class="flex items-center justify-between">
-          <span>Processor and currency</span>
-          <span>
-            {{ transaction.payment_processor }} ({{ transaction.payment_currency }})
-          </span>
+          <span>Payment processor</span>
+          <span v-text="transactionFormattedProcessor" />
         </li>
         <li class="flex items-center justify-between gap-8">
           <span>External payment ID</span>
@@ -117,7 +126,9 @@ const transactionDropdownItems = ref<DropdownMenuItem[][]>([
       <div class="space-y-2">
         <div>Amount billed/net</div>
         <div class="flex flex-wrap items-center gap-2">
-          <span class="text-2xl font-bold" v-text="transactionAmounts.billed" />
+          <span class="text-2xl font-bold">
+            {{ transaction.payment_currency }} {{ transactionAmounts.billed }}
+          </span>
           <span class=" text-muted" v-text="transactionAmounts.received" />
         </div>
       </div>
