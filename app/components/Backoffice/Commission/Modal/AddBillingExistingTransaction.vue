@@ -30,8 +30,6 @@ const billingTransactionFormPostHandle = async () => {
     });
     emit('created');
   } catch (error) {
-    console.table(error)
-    console.dir(error)
     toast.add({
       title: 'Error adding transaction',
       description: (error as any).data.message || (error as Error).message,
