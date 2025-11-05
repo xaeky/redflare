@@ -16,7 +16,7 @@ const getAll = async ({ page, pageSize = 50, filters, sort }: CommissionGetAllPa
   sort ||= { by: 'created_at', order: 1 };
   let sortStage: Record<string, 1 | -1> = { [sort.by]: sort.order };
 
-  // Prepare pipeline
+  // Prepare main pipeline
   const pipelineObject: Record<string, any>[] = [
     { $match: filterObject },
     {
@@ -33,7 +33,20 @@ const getAll = async ({ page, pageSize = 50, filters, sort }: CommissionGetAllPa
     { $skip: skip },
     { $limit: pageSize },
   ];
-  return await collection.aggregate(pipelineObject).toArray() as WithId<WithCustomer<CommissionBase>>[];
+
+  // Prepare separate pipeline for count
+  const countPipeline = [
+    { $match: filterObject },
+    { $count: 'total' }
+  ];
+
+  // Execute count pipeline
+  const countResult = await collection.aggregate(countPipeline).toArray();
+  const total = countResult[0]?.total || 0;
+
+  // Execute main pipeline
+  const data = await collection.aggregate(pipelineObject).toArray();
+  return { data, total };
 }
 
 const getOneById = async (commissionId: string) => {

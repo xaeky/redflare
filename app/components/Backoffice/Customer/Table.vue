@@ -46,21 +46,6 @@ function handleEditButton(customer: DeserializedCustomer) {
   editSlideoverOverlay.open({ customer });
 }
 
-function sortingHeader(label: string, column: Column<DeserializedCustomer>) {
-  const isSorted = column.getIsSorted();
-  return h(UButton, {
-    label,
-    variant: 'soft',
-    color: isSorted ? (column.getIsSorted() === 'asc' ? 'primary' : 'secondary') : 'neutral',
-    size: 'sm',
-    icon: isSorted ? (isSorted === 'asc'
-        ? 'i-lucide-arrow-up-narrow-wide'
-        : 'i-lucide-arrow-down-wide-narrow')
-      : 'i-lucide-arrow-up-down',
-    onClick: () => column.toggleSorting(),
-  });
-}
-
 const columns: TableColumn<DeserializedCustomer>[] = [
   {
     accessorKey: 'name',
@@ -129,7 +114,7 @@ const columns: TableColumn<DeserializedCustomer>[] = [
 <template>
   <UTable
     v-model:sorting="sorting"
-    :columns="columns"
+    :columns
     :data="customers"
     class="flex-1"
   />

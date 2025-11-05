@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import _ from 'lodash';
 
 type CustomerGetAllParams = { page: number; pageSize?: number; filters: Partial<CustomerFilterOptions>, sort?: { by: string; order: 1 | -1 } };
-const getAll = async ({ page, pageSize = 50, filters, sort }: CustomerGetAllParams) => {
+const getAll = async ({ page, pageSize = 20, filters, sort }: CustomerGetAllParams) => {
   const collection = await useMongoCollection('customers');
   const skip = (page - 1) * pageSize;
 
@@ -35,7 +35,19 @@ const getAll = async ({ page, pageSize = 50, filters, sort }: CustomerGetAllPara
     { $limit: pageSize },
   ];
 
-  return await collection.aggregate(pipelineObject).toArray();
+  // Prepare separate pipeline for count
+  const countPipeline = [
+    { $match: filterObject },
+    { $count: 'total' }
+  ];
+
+  // Execute count pipeline
+  const countResult = await collection.aggregate(countPipeline).toArray();
+  const total = countResult[0]?.total || 0;
+
+  // Execute main pipeline
+  const data = await collection.aggregate(pipelineObject).toArray();
+  return { data, total };
 }
 
 const getById = async (id: string) => {

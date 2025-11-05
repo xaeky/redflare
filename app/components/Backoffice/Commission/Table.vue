@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
-import { commissionsQuery } from '~/queries/commissions';
 import { UButton, UIcon, ULink, SharedCommissionStatusBadge, BackofficeCommissionEditSlideover } from '#components';
 
-const { data:commissions, refetch:refetchCommissions, asyncStatus, state } = useQuery(commissionsQuery);
+defineProps<{
+  commissions: WithCustomer<DeserializedCommission>[]
+}>();
+const sorting = defineModel('sorting', {
+  type: Array as () => { id: string; desc: boolean }[],
+  default: () => [{ id: 'created_at', desc: true }]
+});
 
 // Overlays
 const overlay = useOverlay();
@@ -31,7 +36,6 @@ const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
     cell: ({row}) => {
       const thisCommission = row.original;
       const { name, vrc_id } = thisCommission.customer;
-      // TODO: Make a button to invoke a slideover with customer details and actions
       const items = [ h('span', { class: 'font-semibold' }, name) ];
       if (vrc_id) items.unshift(h(UButton, {
         variant: 'soft',
@@ -53,13 +57,15 @@ const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
   },
   {
     accessorKey: 'created_at',
-    header: 'Created',
-    cell: ({row}) => new Date(row.getValue('created_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+    sortingFn: 'datetime',
+    header: ({ column }) => sortingHeader('Created at', column),
+    cell: ({row}) => new Date(row.getValue('created_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   },
   {
     accessorKey: 'updated_at',
-    header: 'Modified',
-    cell: ({row}) => new Date(row.getValue('updated_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+    sortingFn: 'datetime',
+    header: ({ column }) => sortingHeader('Updated at', column),
+    cell: ({row}) => new Date(row.getValue('updated_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   },
   {
     id: 'actions',
@@ -81,5 +87,9 @@ const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
 </script>
 
 <template>
-  <UTable v-if="commissions" :columns :data="commissions" />
+  <UTable
+    v-model:sorting="sorting"
+    :columns
+    :data="commissions"
+  />
 </template>

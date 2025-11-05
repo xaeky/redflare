@@ -3,12 +3,14 @@ import { customersQuery } from '~/queries/customers';
 import { BackofficeCustomerAddSlideover } from '#components';
 
 const toast = useToast();
-const customerSorting = ref([{ id: 'created_at', desc: true }])
+const tableSorting = ref([{ id: 'created_at', desc: true }]);
+const tablePage = ref(1);
 const { data:customers, refresh, asyncStatus, state } = useQuery(customersQuery, () => ({
   sorting: {
-    by: customerSorting.value[0]?.id || 'created_at',
-    order: customerSorting.value[0]?.desc ? -1 : 1
+    by: tableSorting.value[0]?.id || 'created_at',
+    order: tableSorting.value[0]?.desc ? -1 : 1
   },
+  page: tablePage.value
 }));
 
 // Overlays
@@ -23,7 +25,7 @@ watch(state, newState => {
   });
 });
 
-watch(customerSorting, () => {
+watch(tableSorting, () => {
   refresh();
 }, { immediate: true, deep: true });
 
@@ -57,10 +59,17 @@ definePageMeta({
     <div v-if="asyncStatus === 'loading'" class="space-y-4">
       <USkeleton class="w-full h-12" v-for="_ in new Array(4)" />
     </div>
-    <div v-else-if="customers && customers.length">
-      <BackofficeCustomerTable :customers v-model:sorting="customerSorting" />
+    <div v-else-if="customers && customers.data.length">
+      <BackofficeCustomerTable :customers="customers.data" v-model:sorting="tableSorting" />
+      <div class="flex justify-center">
+        <UPagination
+          v-model:page="tablePage"
+          :items-per-page="20"
+          :total="customers.total"
+        />
+      </div>
     </div>
-    <div v-else-if="customers && !customers.length">
+    <div v-else-if="customers && !customers.data.length">
       No customers found!
     </div>
   </div>

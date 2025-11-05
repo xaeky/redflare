@@ -55,7 +55,7 @@ const availableCustomers = computed(() => {
   // Filters for remote customers
   const notLocalCustomer = (c: DeserializedCustomer) => localCustomer ? c._id !== localCustomer._id : true;
   const notSelectedCustomer = (c: DeserializedCustomer) => c._id !== customerSearchSelected.value?._id;
-  if (customers.value) sanitizedCustomers.push(...customers.value.filter(c => notLocalCustomer(c) && notSelectedCustomer(c)).map(c => ({
+  if (customers.value) sanitizedCustomers.push(...customers.value.data.filter(c => notLocalCustomer(c) && notSelectedCustomer(c)).map(c => ({
     label: c.name,
     value: c._id,
     onSelect: () => {
