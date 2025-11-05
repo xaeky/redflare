@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui';
-import type { Column } from '@tanstack/table-core';
 import { UButton } from '#components';
 import { ModalGenericConfirmation, BackofficeCustomerEditSlideover } from '#components';
 

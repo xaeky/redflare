@@ -33,7 +33,6 @@ const formGeneralRef = ref();
 const formCharactersRef = ref();
 
 // External queries & computed props
-// - Customer search query
 const customerSearchQueryRaw = shallowRef<string>('');
 const customerSearchQuery = refDebounced(customerSearchQueryRaw, 1000);
 const customerSearchSelected = shallowRef<DeserializedCustomer>()
@@ -66,7 +65,7 @@ const availableCustomers = computed(() => {
   sanitizedCustomers = sanitizedCustomers.filter(c => c !== null && c.value !== null);
   return sanitizedCustomers;
 });
-// - Commission status options
+
 const commissionStatusOptions:SelectItem[] = [
   { type: 'label', label: 'Pending' },
   { label: 'In Project Setup', value: CommissionStatusType.InSetup, icon: 'i-lucide-circle-dashed' },
@@ -86,7 +85,7 @@ const commissionStatusOptions:SelectItem[] = [
 ];
 // @ts-expect-error @nuxt/ui should expose SelectItemBase!
 const commissionStatusOptionsIcon = computed(() => commissionStatusOptions.find(o => o.value === state.status)?.icon);
-// - Commission created date
+
 const commissionCreatedDate = computed({
   get: () => {
     const date = state.created_at instanceof Date ? state.created_at : new Date();
@@ -97,8 +96,6 @@ const commissionCreatedDate = computed({
     state.created_at = sanitizedCalendarDate;
   }
 });
-// - Commission characters
-const commissionCharacters = computed(() => remoteCommission.value ? remoteCommission.value.characters : [])
 
 // Watchers
 watch(remoteCommission, (newCommissionData) => {
@@ -128,7 +125,7 @@ watch(() => props.commission_id, async (newCommissionId) => {
 }, { immediate: true });
 
 async function validate() {
-  // Do not report errors, next logic already does that
+  // Do not report errors, validation already does that
   try {
     await formGeneralRef.value?.validate();
     const characterForms = formCharactersRef.value?.forms;
