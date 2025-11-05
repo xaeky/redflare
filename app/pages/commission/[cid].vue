@@ -69,7 +69,7 @@ useSeoMeta({
   <div class="flex flex-col lg:flex-row items-stretch space-y-4 md:space-y-0">
     <div class="md:p-8 flex-1 space-y-8">
       <div class="flex gap-2 flex-col md:flex-row items-start md:items-center md:justify-between">
-        <Hx level="1">Commission</Hx>
+        <h1>Commission</h1>
         <SharedCommissionStatusBadge :status="commission.status" />
       </div>
       <div id="commission_sections" class="space-y-4">
@@ -77,7 +77,7 @@ useSeoMeta({
           <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" />
         </section>
         <section v-if="commission.characters.length" class="space-y-4">
-          <Hx level="2">Characters</Hx>
+          <h2>Characters</h2>
           <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8 select-none">
             <div
               v-for="(char, charIndex) in commission.characters" :key="char.id"
@@ -114,16 +114,16 @@ useSeoMeta({
     <div class="md:p-8 lg:w-md border-t lg:border-l border-neutral-700 lg:border-neutral-800 pt-4 md:border-t-0 space-y-4">
       <div class="grid lg:grid-cols-2 gap-4">
         <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
-          <Hx level="3">Created</Hx>
+          <h3>Created</h3>
           <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.created_at))" />
         </div>
         <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
-          <Hx level="3">Modified</Hx>
+          <h3>Modified</h3>
           <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.updated_at))" />
         </div>
       </div>
       <section class="space-y-4">
-        <Hx level="2">Customer</Hx>
+        <h2>Customer</h2>
         <div class="flex flex-col gap-2 p-4 rounded-xl border border-neutral-700">
           <span class="text-xl" v-text="commission.customer.name" />
           <ULink v-if="commission.customer.vrc_id" :to="`https://vrchat.com/home/user/${commission.customer.vrc_id}`" external target="_blank">
@@ -135,9 +135,23 @@ useSeoMeta({
         </div>
       </section>
       <section class="space-y-4" v-if="commission.public_note && commission.public_note.length">
-        <Hx level="2">Notes</Hx>
+        <h2>Notes</h2>
         <p v-text="commission.public_note" />
       </section>
     </div>
   </div>
 </template>
+
+<style scoped>
+@reference '~/assets/global.css';
+
+h1 {
+  @apply text-3xl font-bold;
+}
+h2 {
+  @apply text-2xl font-bold;
+}
+h3 {
+  @apply text-xl font-bold;
+}
+</style>

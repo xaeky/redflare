@@ -27,7 +27,7 @@ useHead({
           <div id="rf_backoffice_content" class="px-12 py-6 w-full">
             <div id="rf_backoffice_content_header" class="flex items-center justify-between mb-6">
               <div>
-                <Hx level="1">{{ title }}</Hx>
+                <h1 v-text="title" />
                 <span v-if="description" v-text="description" class="text-muted" />
               </div>
             </div>
@@ -56,5 +56,9 @@ useHead({
 
 .rf_backoffice_content_header_actions {
   @apply flex items-center gap-4;
+}
+
+#rf_backoffice_content_header h1 {
+  @apply text-3xl font-bold;
 }
 </style>

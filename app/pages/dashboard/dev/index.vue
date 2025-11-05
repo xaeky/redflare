@@ -1,14 +1,6 @@
 <script setup lang="ts">
 const devLinks = [
   {
-    label: 'Session',
-    to: '/dashboard/dev/session'
-  },
-  {
-    label: 'Endpoint',
-    to: '/dashboard/dev/endpoint'
-  },
-  {
     label: 'Database Health',
     to: '/dashboard/dev/database'
   }
