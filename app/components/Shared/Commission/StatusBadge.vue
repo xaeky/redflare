@@ -21,7 +21,7 @@ const statusLabels:Record<CommissionStatusType, { label: string; color: colorTyp
   [CommissionStatusType.Maintenance]: { label: 'Maintenance', color: 'warning', icon: 'i-lucide-hammer' },
   [CommissionStatusType.Missing]: { label: 'Missing files', color: 'error', icon: 'i-lucide-circle-alert' },
   [CommissionStatusType.NextUp]: { label: 'Next Up', color: 'warning', icon: 'i-lucide-circle-ellipsis' },
-  [CommissionStatusType.Settled]: { label: 'Settled', color: 'neutral', icon: 'i-lucide-circle-check-big' },
+  [CommissionStatusType.Settled]: { label: 'Settled', color: 'success', icon: 'i-lucide-circle-check-big' },
   [CommissionStatusType.Showtime]: { label: 'Showtime', color: 'success', icon: 'i-lucide-sparkles' }
 }
 const thisLabel = statusLabels[props.status as CommissionStatusType] || defaultLabel;
