@@ -25,7 +25,8 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     'nuxt-auth-utils',
     '@pinia/nuxt',
-    '@pinia/colada-nuxt'
+    '@pinia/colada-nuxt',
+    '@nuxt/image'
   ],
   css: ['~/assets/global.css'],
   devServer: {
@@ -59,6 +60,16 @@ export default defineNuxtConfig({
       mongo: '',
       mongoDb: '',
       service: ''
+    },
+    frontoffice: {
+      oauth: {
+        discord: {
+          clientId: '',
+          clientSecret: '',
+          redirectUrl: ''
+        }
+      },
+      sessionPassword: ''
     }
   }
 })

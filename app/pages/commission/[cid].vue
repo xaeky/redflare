@@ -60,84 +60,97 @@ function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[])
   characterChangelogOverlay.open({ changelog });
 }
 
+const { isLoggedIn } = await usePublicUserSession();
+const handleAccountBackClick = () => {
+  navigateTo('/me');
+};
+
 useSeoMeta({
   title: 'Commission Details'
 });
 </script>
 
 <template>
-  <div class="flex flex-col lg:flex-row items-stretch space-y-4 md:space-y-0">
-    <div class="md:p-8 flex-1 space-y-8">
-      <div class="flex gap-2 flex-col md:flex-row items-start md:items-center md:justify-between">
-        <h1>Commission</h1>
-        <SharedCommissionStatusBadge :status="commission.status" />
-      </div>
-      <div id="commission_sections" class="space-y-4">
-        <section v-if="commissionTimelineAllowedValues.includes(commissionRoutedValue as AllowedTimelineValues)">
-          <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" />
-        </section>
-        <section v-if="commission.characters.length" class="space-y-4">
-          <h2>Characters</h2>
-          <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8 select-none">
-            <div
-              v-for="(char, charIndex) in commission.characters" :key="char.id"
-              class="bg-linear-125 from-neutral-800/50 to-primary-500/20 border border-neutral-700/25 p-4 md:p-6 rounded-xl hover:shadow-xl hover:shadow-neutral-950/50 duration-300"
-            >
-              <div class="flex flex-col gap-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-2xl font-bold" v-text="char.name"/>
-                  <UTooltip text="Character's Order ID">
-                    <div class="flex items-center gap-2">
-                      <UIcon name="i-lucide-hash" class="opacity-50 text-primary-300" />
-                      <span class="text-sm font-bold font-mono uppercase select-all">
-                        {{ commission._id.substring(commission._id.length - 6) }}-{{ charIndex }}
-                      </span>
-                    </div>
-                  </UTooltip>
-                </div>
-                <span class="font-bold text-primary" v-text="(char.base as AvatarBase).name"/>
-                <span v-if="char.note && char.note.length" class="text-xs" v-text="char.note" />
-                <div v-if="char.changelog && char.changelog.length" class="flex items-center gap-2">
-                  <UButton
-                    label="View changelog"
-                    icon="i-lucide-list"
-                    variant="soft"
-                    @click="handleCharacterChangelogOpen(char.changelog)"
-                  />
+  <div class="space-y-4">
+    <div v-if="isLoggedIn" class="flex items-center justify-between">
+      <UButton
+        label="Back to My Account" icon="i-heroicons-arrow-left-16-solid" variant="soft" @click="handleAccountBackClick"
+      />
+      <PublicSessionCard size="sm" />
+    </div>
+    <div class="flex flex-col lg:flex-row items-stretch space-y-4 md:space-y-0">
+      <div class="md:p-8 flex-1 space-y-8">
+        <div class="flex gap-2 flex-col md:flex-row items-start md:items-center md:justify-between">
+          <h1>Commission</h1>
+          <SharedCommissionStatusBadge :status="commission.status" />
+        </div>
+        <div id="commission_sections" class="space-y-4">
+          <section v-if="commissionTimelineAllowedValues.includes(commissionRoutedValue as AllowedTimelineValues)">
+            <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" />
+          </section>
+          <section v-if="commission.characters.length" class="space-y-4">
+            <h2>Characters</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8 select-none">
+              <div
+                v-for="(char, charIndex) in commission.characters" :key="char.id"
+                class="bg-linear-125 from-neutral-800/50 to-primary-500/20 border border-neutral-700/25 p-4 md:p-6 rounded-xl hover:shadow-xl hover:shadow-neutral-950/50 duration-300"
+              >
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xl font-bold" v-text="char.name"/>
+                    <UTooltip text="Character's Order ID">
+                      <div class="flex items-center gap-2">
+                        <UIcon name="i-lucide-hash" class="opacity-50 text-primary-300" />
+                        <span class="text-sm font-bold font-mono uppercase select-all">
+                          {{ commission._id.substring(commission._id.length - 6) }}-{{ charIndex }}
+                        </span>
+                      </div>
+                    </UTooltip>
+                  </div>
+                  <span class="font-bold text-primary" v-text="(char.base as AvatarBase).name"/>
+                  <span v-if="char.note && char.note.length" class="text-xs" v-text="char.note" />
+                  <div v-if="char.changelog && char.changelog.length" class="flex items-center gap-2">
+                    <UButton
+                      label="View changelog"
+                      icon="i-lucide-list"
+                      variant="soft"
+                      @click="handleCharacterChangelogOpen(char.changelog)"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
+          </section>
+        </div>
+      </div>
+      <div class="md:p-8 lg:w-md border-t lg:border-l border-neutral-700 lg:border-neutral-800 pt-4 md:border-t-0 space-y-4">
+        <div class="grid lg:grid-cols-2 gap-4">
+          <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
+            <h3>Created</h3>
+            <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.created_at))" />
+          </div>
+          <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
+            <h3>Modified</h3>
+            <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.updated_at))" />
+          </div>
+        </div>
+        <section class="space-y-4">
+          <h2>Customer</h2>
+          <div class="flex flex-col gap-2 p-4 rounded-xl border border-neutral-700">
+            <span class="text-xl" v-text="commission.customer.name" />
+            <ULink v-if="commission.customer.vrc_id" :to="`https://vrchat.com/home/user/${commission.customer.vrc_id}`" external target="_blank">
+              <UButton
+                label="Visit VRChat's profile" color="neutral"
+                icon="i-lucide-external-link" variant="soft"
+              />
+            </ULink>
           </div>
         </section>
+        <section class="space-y-4" v-if="commission.public_note && commission.public_note.length">
+          <h2>Notes</h2>
+          <p v-text="commission.public_note" />
+        </section>
       </div>
-    </div>
-    <div class="md:p-8 lg:w-md border-t lg:border-l border-neutral-700 lg:border-neutral-800 pt-4 md:border-t-0 space-y-4">
-      <div class="grid lg:grid-cols-2 gap-4">
-        <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
-          <h3>Created</h3>
-          <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.created_at))" />
-        </div>
-        <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
-          <h3>Modified</h3>
-          <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.updated_at))" />
-        </div>
-      </div>
-      <section class="space-y-4">
-        <h2>Customer</h2>
-        <div class="flex flex-col gap-2 p-4 rounded-xl border border-neutral-700">
-          <span class="text-xl" v-text="commission.customer.name" />
-          <ULink v-if="commission.customer.vrc_id" :to="`https://vrchat.com/home/user/${commission.customer.vrc_id}`" external target="_blank">
-            <UButton
-              label="Visit VRChat's profile" color="neutral"
-              icon="i-lucide-external-link" variant="soft"
-            />
-          </ULink>
-        </div>
-      </section>
-      <section class="space-y-4" v-if="commission.public_note && commission.public_note.length">
-        <h2>Notes</h2>
-        <p v-text="commission.public_note" />
-      </section>
     </div>
   </div>
 </template>

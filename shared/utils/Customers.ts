@@ -6,6 +6,7 @@ export const customerOptionsSchema = z.object({
     .nonempty('Name cannot be empty.'),
   vrc_id: z.string().optional().nullable(),
   telegram_id: z.string().optional().nullable(),
+  discord_id: z.string().optional().nullable(),
   note: z.string()
     .max(1024, 'Note body is too long.')
     .optional().nullable()

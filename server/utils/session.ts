@@ -41,7 +41,8 @@ export async function needAuth(event: EventUserSession) {
         id_token: refreshResult.data.id_token
       }
     });
-    logger.debug('Session refreshed for user:', newSession.user?.email);
+    const newDecodedIdAuth = decode(refreshResult.data.id_token as string) as JwtPayload;
+    logger.debug('Session refreshed for user:', newDecodedIdAuth.sub);
     return newSession;
   } catch (e) {
     logger.error('Failed to refresh session:', e);
@@ -93,7 +94,6 @@ export async function updateCurrentUserPassword(event: EventUserSession, oldPass
   const a0Auth = new AuthenticationClient({ domain, clientId, clientSecret });
   // Verify user's old password by trying to authenticate
   try {
-    logger.debug('Verifying old password for user:', decodedIdAuth.name);
     const result = await a0Auth.oauth.passwordGrant({
       username: decodedIdAuth.name as string,
       password: oldPassword,
@@ -110,7 +110,6 @@ export async function updateCurrentUserPassword(event: EventUserSession, oldPass
   try {
     const updateResult = await a0Manager.users.update({ id: session.user?.sub as string }, { password: newPassword });
     if (!updateResult.data || updateResult.status !== 200) throw new Error(updateResult.statusText);
-    logger.debug('Password updated for user:', decodedIdAuth.name);
     return true;
   } catch (e) {
     const err = e as Error;
@@ -132,7 +131,6 @@ export async function updateCurrentUserProfile(event: EventUserSession, profileU
     await setUserSession(event as H3Event, {
       user: { nickname: updateResult.data.nickname, picture: updateResult.data.picture }
     });
-    logger.debug('Profile updated for user:', decodedIdAuth.name);
     return true;
   } catch (e) {
     const err = e as Error;

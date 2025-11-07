@@ -1,9 +1,15 @@
 import { ObjectId } from 'mongodb';
 import _ from 'lodash';
 
-type CustomerGetAllParams = { page: number; pageSize?: number; filters: Partial<CustomerFilterOptions>, sort?: { by: string; order: 1 | -1 } };
+type CustomerGetAllParams = {
+  page?: number;
+  pageSize?: number;
+  filters: Partial<CustomerFilterOptions>;
+  sort?: { by: string; order: 1 | -1 };
+};
 const getAll = async ({ page, pageSize = 20, filters, sort }: CustomerGetAllParams) => {
   const collection = await useMongoCollection('customers');
+  page ||= 1;
   const skip = (page - 1) * pageSize;
 
   // Prepare filters
@@ -64,6 +70,13 @@ const getByTelegramId = async (telegramId: string) => {
   return result;
 }
 
+const getByDiscordId = async (discordId: string) => {
+  const collection = await useMongoCollection<Customer>('customers');
+  const result = await collection.findOne({ discord_id: discordId });
+  if (!result) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
+  return result;
+}
+
 const insertOne = async (dataInput: CustomerInsertOptions) => {
   const collection = await useMongoCollection('customers');
   // Initialize customer data with defaults
@@ -92,6 +105,7 @@ export const useCustomerModel = () => ({
   getAll,
   getById,
   getByTelegramId,
+  getByDiscordId,
   insertOne,
   updateOne,
   deleteOne

@@ -1,9 +1,16 @@
 import { ObjectId, WithId } from 'mongodb';
 import _ from 'lodash';
 
-type CommissionGetAllParams = { page: number; pageSize?: number; filters: Partial<CommissionFilterOptions>, sort?: { by: string; order: 1 | -1 } };
+type CommissionGetAllParams = {
+  page?: number;
+  pageSize?: number;
+  filters: Partial<CommissionFilterOptions>;
+  sort?: { by: string; order: 1 | -1 };
+  public?: boolean;
+};
 const getAll = async ({ page, pageSize = 50, filters, sort }: CommissionGetAllParams) => {
   const collection = await useMongoCollection('commissions');
+  page ||= 1;
   const skip = (page - 1) * pageSize;
 
   // Prepare filters

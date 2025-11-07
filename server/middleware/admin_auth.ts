@@ -10,7 +10,6 @@ export default defineEventHandler(async (event) => {
   if (!isRestrictedRouted) return;
   // For restricted endpoints, check if user is authenticated or if service token is valid
   // TODO: Enhance service token validation
-  logger.debug('Checking access for path:', event.method, event.path);
   const isService = getHeader(event, 'X-RF-Service') === runtime.backoffice.service;
   const authenticatedData = isService ? false : await needAuth(event);
   const isAuthenticated = isService || !!_.get(authenticatedData, 'user') || !!_.get(authenticatedData, 'secure.access_token');

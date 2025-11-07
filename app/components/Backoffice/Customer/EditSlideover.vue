@@ -15,7 +15,8 @@ const state = reactive<Schema>({
   name: '',
   vrc_id: '',
   note: '',
-  telegram_id: ''
+  telegram_id: '',
+  discord_id: ''
 });
 
 // Watchers
@@ -50,6 +51,9 @@ const { mutate: updateCustomer, isLoading: updateCustomerBusy } = useMutation({
           </UFormField>
           <UFormField name="telegram_id" label="Telegram ID">
             <UInput label="Telegram ID" v-model="state.telegram_id" class="w-full" />
+          </UFormField>
+          <UFormField name="discord_id" label="Discord ID">
+            <UInput label="Discord ID" v-model="state.discord_id" class="w-full" />
           </UFormField>
           <UFormField name="note" label="Note">
             <UInput label="Note" v-model="state.note" class="w-full" />
