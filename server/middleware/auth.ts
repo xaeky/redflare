@@ -3,12 +3,19 @@ import _ from 'lodash';
 export default defineEventHandler(async (event) => {
   const runtime = useRuntimeConfig(event);
   const isAPICall = event.path.startsWith('/api/');
-  const restrictedEndpoints = ['/api/commissions', '/api/customers', '/api/service', '/api/stats'];
-  const isRestrictedRouted = restrictedEndpoints.some(route => event.path.startsWith(route));
-  const authenticatedData = await getUserSession(event);
+  if (!isAPICall) return;
+  // All endpoints are treated as restricted, except /api/auth/* and /api/public/*
+  const publicEndpoints = ['/api/auth', '/api/_auth', '/api/_nuxt_icon', '/api/public'];
+  const isRestrictedRouted = !publicEndpoints.some(route => event.path.startsWith(route));
+  if (!isRestrictedRouted) return;
+  // For restricted endpoints, check if user is authenticated or if service token is valid
+  // TODO: Enhance service token validation
+  logger.debug('Checking access for path:', event.method, event.path);
   const isService = getHeader(event, 'X-RF-Service') === runtime.backoffice.service;
+  const authenticatedData = isService ? false : await needAuth(event);
   const isAuthenticated = isService || !!_.get(authenticatedData, 'user') || !!_.get(authenticatedData, 'secure.access_token');
-  if (isAPICall && isRestrictedRouted && !isAuthenticated) {
+  if (!isAuthenticated) {
+    logger.warn('Unauthorized access attempt to', event.path);
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   };
 })

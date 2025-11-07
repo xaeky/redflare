@@ -14,20 +14,22 @@ export async function needAuth(event: EventUserSession) {
   if (!_.get(userSession, 'user') || !_.get(userSession, 'secure.access_token')) throw createError({ statusCode: 401, message: 'Unauthorized' });
   // So user exists on session, now we're going to validate it
   const { domain, clientId, clientSecret } = runtime.oauth.auth0;
-  const { access_token, refresh_token, id_token } = userSession.secure as SecureSessionData;
-  const a0User = new UserInfoClient({ domain });
+  const { refresh_token, id_token } = userSession.secure as SecureSessionData;
+  // const a0User = new UserInfoClient({ domain });
+  const a0Manager = new ManagementClient({ domain, clientId, clientSecret });
   const a0Auth = new AuthenticationClient({ domain, clientId, clientSecret });
+  const decodedIdAuth = decode(id_token) as JwtPayload;
   // Get if user exists
   try {
-    const userInfo = await a0User.getUserInfo(access_token);
+    const userInfo = await a0Manager.users.get({ id: decodedIdAuth.sub as string });
     if (!userInfo.data || userInfo.status !== 200) throw new Error(userInfo.statusText);
   } catch (e) {
     const err = e as Error;
-    throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: err.message || 'Failed to fetch user details.' });
+    logger.error('Auth0Error:', e);
+    throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: `Auth0Error: ${err.message}` || 'Failed to fetch user details.' });
   }
   // User exists, now we try to update the token if it's expired
-  const decoded = decode(access_token) as JwtPayload || decode(id_token) as JwtPayload;
-  const isSessionExpired = !decoded.exp || Date.now() >= (decoded.exp as number) * 1000;
+  const isSessionExpired = !decodedIdAuth.exp || Date.now() >= (decodedIdAuth.exp as number) * 1000;
   if (!isSessionExpired) return userSession;
   try {
     const refreshResult = await a0Auth.oauth.refreshTokenGrant({ refresh_token });
@@ -39,8 +41,11 @@ export async function needAuth(event: EventUserSession) {
         id_token: refreshResult.data.id_token
       }
     });
+    logger.debug('Session refreshed for user:', newSession.user?.email);
     return newSession;
   } catch (e) {
+    logger.error('Failed to refresh session:', e);
+    clearUserSession(event as H3Event);
     throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: 'Your session has expired.' });
   }
 }
@@ -76,4 +81,62 @@ export async function hasPermission(event: EventUserSession, permissionName: Per
   const itHasPermission = permissions.includes(permissionName);
   if (throwError && !itHasPermission) throw createError({ statusCode: 403, statusMessage: 'Missing permissions to perform this action' });
   return permissions.includes(permissionName);
+}
+
+export async function updateCurrentUserPassword(event: EventUserSession, oldPassword: string, newPassword: string) {
+  const session = await needAuth(event);
+  const runtime = useRuntimeConfig(event as H3Event);
+  const { domain, clientId, clientSecret } = runtime.oauth.auth0;
+  const { id_token } = session.secure as SecureSessionData;
+  const decodedIdAuth = decode(id_token) as JwtPayload;
+  const a0Manager = new ManagementClient({ domain, clientId, clientSecret });
+  const a0Auth = new AuthenticationClient({ domain, clientId, clientSecret });
+  // Verify user's old password by trying to authenticate
+  try {
+    logger.debug('Verifying old password for user:', decodedIdAuth.name);
+    const result = await a0Auth.oauth.passwordGrant({
+      username: decodedIdAuth.name as string,
+      password: oldPassword,
+      scope: 'openid',
+      realm: 'Username-Password-Authentication',
+    });
+    if (!result.data || result.status !== 200) throw new Error(result.statusText);
+  } catch (e) {
+    const err = e as Error;
+    logger.error('Auth0Error:', e);
+    throw createError({ statusCode: 403, statusMessage: `Auth0Error: ${err.message}` || 'Credentials are invalid or internal Auth0 error.' });
+  }
+  // If we reach this point, the old password is correct, so we can update to the new password
+  try {
+    const updateResult = await a0Manager.users.update({ id: session.user?.sub as string }, { password: newPassword });
+    if (!updateResult.data || updateResult.status !== 200) throw new Error(updateResult.statusText);
+    logger.debug('Password updated for user:', decodedIdAuth.name);
+    return true;
+  } catch (e) {
+    const err = e as Error;
+    logger.error('Auth0Error:', e);
+    throw createError({ statusCode: 500, statusMessage: `Auth0Error: ${err.message}` || 'Failed to update user password.' });
+  }
+};
+
+export async function updateCurrentUserProfile(event: EventUserSession, profileUpdateData: Record<string, any>) {
+  const session = await needAuth(event);
+  const runtime = useRuntimeConfig(event as H3Event);
+  const { domain, clientId, clientSecret } = runtime.oauth.auth0;
+  const { id_token } = session.secure as SecureSessionData;
+  const decodedIdAuth = decode(id_token) as JwtPayload;
+  const a0Manager = new ManagementClient({ domain, clientId, clientSecret });
+  try {
+    const updateResult = await a0Manager.users.update({ id: session.user?.sub as string }, profileUpdateData);
+    if (!updateResult.data || updateResult.status !== 200) throw new Error(updateResult.statusText);
+    await setUserSession(event as H3Event, {
+      user: { nickname: updateResult.data.nickname, picture: updateResult.data.picture }
+    });
+    logger.debug('Profile updated for user:', decodedIdAuth.name);
+    return true;
+  } catch (e) {
+    const err = e as Error;
+    logger.error('Auth0Error:', e);
+    throw createError({ statusCode: 500, statusMessage: `Auth0Error: ${err.message}` || 'Failed to update user profile.' });
+  }
 }

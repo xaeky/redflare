@@ -1,6 +1,6 @@
 import { RedflareStats } from "~~/shared/types/Misc";
 
-export default defineEventHandler(async (event) => {
+export default defineCachedEventHandler(async () => {
   const { getCommissionsCount, getNetRevenue, getCustomersCount } = useStatsModel();
   const countObject: Partial<RedflareStats> = {
     commissions: {
@@ -35,4 +35,6 @@ export default defineEventHandler(async (event) => {
     }
   }
   return countObject
+}, {
+  maxAge: 1800 // cache for 30 minutes
 });

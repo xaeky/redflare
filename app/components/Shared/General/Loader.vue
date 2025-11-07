@@ -1,7 +1,9 @@
 <script setup lang="ts">
-defineProps<{
+withDefaults(defineProps<{
   text?: string
-}>();
+}>(), {
+  text: 'Loading...'
+});
 </script>
 
 <template>

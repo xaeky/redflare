@@ -7,7 +7,8 @@ const userDropdownOpen = ref(false);
 const userDropdownItems: DropdownMenuItem[] = [
   {
     label: 'Settings',
-    icon: 'i-heroicons-cog-16-solid'
+    icon: 'i-heroicons-cog-16-solid',
+    onSelect: () => navigateTo('/dashboard/me')
   },
   {
     label: 'Logout',
