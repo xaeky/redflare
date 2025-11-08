@@ -1,4 +1,4 @@
-import type { WithId } from 'mongodb';
+import type { OptionalId, WithId } from 'mongodb';
 
 export enum CommissionFlagsType {
   None           = 0,
@@ -21,10 +21,14 @@ export interface CommissionBase {
   created_at: string | Date;
   updated_at: string | Date;
   characters: CommissionCharacter[];
-  payments: string[];
+  payments: string[] | OptionalId<PaymentTransaction[]>;
 }
 
-export type DeserializedCommission = Deserialized<WithId<CommissionBase>>;
+export type DeserializedCommission = Deserialized<WithId<CommissionBase>> & {
+  locked_fields?: {
+    characters_count?: number;
+  }
+};
 
 export type CommissionOptions = Omit<Commission, 'created_at' | 'updated_at'> & {
   customer: string | ObjectId;

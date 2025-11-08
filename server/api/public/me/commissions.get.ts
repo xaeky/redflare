@@ -5,6 +5,10 @@ export default defineEventHandler(async (event) => {
   const customersModel = useCustomerModel();
   const commissionsModel = useCommissionModel();
   const customer = await customersModel.getByDiscordId(publicUserDiscordId);
-  const commissions = await commissionsModel.getAll({ filters: { customer: customer._id.toString() }, page: 1 });
+  const commissions = await commissionsModel.getAll({
+    filters: { customer: customer._id.toString() },
+    page: 1,
+    public: true
+  });
   return commissions;
 });

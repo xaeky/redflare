@@ -16,4 +16,6 @@ export type Permission =
   'write:customers' |
   'delete:customers' |
   // Manage
-  'manage:managers'
+  'manage:managers';
+
+export type ViewAs = 'anon' | 'customer' | 'agent';

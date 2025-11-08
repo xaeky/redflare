@@ -8,7 +8,7 @@ type CommissionGetAllParams = {
   sort?: { by: string; order: 1 | -1 };
   public?: boolean;
 };
-const getAll = async ({ page, pageSize = 50, filters, sort }: CommissionGetAllParams) => {
+const getAll = async ({ page, pageSize = 50, filters, sort, public: publicRequest }: CommissionGetAllParams) => {
   const collection = await useMongoCollection('commissions');
   page ||= 1;
   const skip = (page - 1) * pageSize;
@@ -23,6 +23,16 @@ const getAll = async ({ page, pageSize = 50, filters, sort }: CommissionGetAllPa
   sort ||= { by: 'created_at', order: 1 };
   let sortStage: Record<string, 1 | -1> = { [sort.by]: sort.order };
 
+  // Filter project fields
+  const projectStage: Record<string, 0 | 1> = { characters: 0 };
+  if (publicRequest) {
+    // exclude following fields for public requests
+    const excludedFields = ['customer', 'payments', 'secure_note'];
+    _.each(excludedFields, (field) => {
+      projectStage[field] = 0;
+    });
+  }
+
   // Prepare main pipeline
   const pipelineObject: Record<string, any>[] = [
     { $match: filterObject },
@@ -35,7 +45,7 @@ const getAll = async ({ page, pageSize = 50, filters, sort }: CommissionGetAllPa
       }
     },
     { $unwind: { path: '$customer', preserveNullAndEmptyArrays: true } },
-    { $project: { characters: 0 } },
+    { $project: projectStage },
     { $sort: sortStage },
     { $skip: skip },
     { $limit: pageSize },
@@ -56,9 +66,23 @@ const getAll = async ({ page, pageSize = 50, filters, sort }: CommissionGetAllPa
   return { data, total };
 }
 
-const getOneById = async (commissionId: string) => {
+const getOneById = async (commissionId: string, viewAs?: ViewAs) => {
   const collection = await useMongoCollection('commissions');
-  const commission = await collection.aggregate([
+  const projectStage: Record<string, 0 | 1> = { baseObj: 0 };
+  let excludedFields;
+  if (viewAs === 'anon') {
+    // exclude following fields for public requests
+    excludedFields = [
+      'customer.note', 'customer._id', 'customer.updated_at', 'customer.created_at', 'customer.telegram_id', 'customer.discord_id',
+      'payments', 'characters', 'public_note', 'secure_note'];
+  } else if (viewAs === 'customer') {
+    // exclude following fields for customer requests
+    excludedFields = ['customer.note', 'secure_note'];
+  }
+  _.each(excludedFields, (field) => {
+    projectStage[field] = 0;
+  });
+  const commissionPipeline: Record<string, any>[] = [
     { $match: { _id: new ObjectId(commissionId) } },
     {
       $lookup: {
@@ -114,8 +138,32 @@ const getOneById = async (commissionId: string) => {
     },
     { $replaceRoot: { newRoot: '$doc' } },
     { $addFields: { payments: { $ifNull: ['$payments', []] } } },
-    { $project: { baseObj: 0 } }
-  ]).next();
+  ];
+  if (viewAs === 'anon') {
+    // Only get character's count in `locked_fields.characters_count`
+    commissionPipeline.push(
+      { $addFields: { 'locked_fields.characters_count': { $size: '$characters' } } }
+    );
+  }
+  if (viewAs === 'customer') {
+    commissionPipeline.push(
+      { $addFields: { payments_obj_ids: { $map: { input: '$payments', as: 'p', in: { $toObjectId: '$$p' } } } } },
+      {
+        $lookup: {
+          from: 'billing_transactions',
+          let: { ids: '$payments_obj_ids' },
+          pipeline: [
+            { $match: { $expr: { $in: ['$_id', '$$ids'] } } },
+            { $project: { internal_note: 0 } }
+          ],
+          as: 'payments'
+        }
+      },
+      { $project: { payments_obj_ids: 0 } }
+    );
+  }
+  commissionPipeline.push({ $project: projectStage });
+  const commission = await collection.aggregate(commissionPipeline).next();
 
   if (_.isEmpty(commission)) return null;
   if (!commission) return null;
@@ -221,6 +269,32 @@ const addTransactionToOne = async (commissionId: string, paymentId: string) => {
   return result;
 }
 
+const findCustomerByOne = async (commissionId: string) => {
+  const collection = await useMongoCollection('commissions');
+  const commission = await collection.aggregate([
+    { $match: { _id: new ObjectId(commissionId) } },
+    {
+      $lookup: {
+        from: 'customers',
+        localField: 'customer',
+        foreignField: '_id',
+        as: 'customer'
+      },
+    },
+    { $unwind: { path: '$customer', preserveNullAndEmptyArrays: true } },
+    { $project: { customer: 1 } }
+  ]).next();
+
+  if (!commission) return null;
+  return commission.customer as WithId<Customer>;
+}
+
+const checkOwnershipFromOne = async (commissionId: string, evalCustomerId: string) => {
+  const commissionCustomer = await findCustomerByOne(commissionId);
+  if (!commissionCustomer) return false;
+  return commissionCustomer._id.toString() === evalCustomerId;
+}
+
 export const useCommissionModel = () => ({
   getAll,
   getOneById,
@@ -230,4 +304,6 @@ export const useCommissionModel = () => ({
   deleteOne,
   removeTransactionFromOne,
   addTransactionToOne,
+  findCustomerByOne,
+  checkOwnershipFromOne
 });

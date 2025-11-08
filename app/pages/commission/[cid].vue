@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { OptionalId } from 'mongodb';
 import { CommissionStatusType } from '~~/shared/enums/Commissions';
 import { SharedCommissionReadonlyCharacterChangelog } from '#components';
 import type { TimelineItem } from '@nuxt/ui';
@@ -60,7 +61,7 @@ function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[])
   characterChangelogOverlay.open({ changelog });
 }
 
-const { isLoggedIn } = await usePublicUserSession();
+const { isLoggedIn, login } = await usePublicUserSession();
 const handleAccountBackClick = () => {
   navigateTo('/me');
 };
@@ -72,11 +73,16 @@ useSeoMeta({
 
 <template>
   <div class="space-y-4">
-    <div v-if="isLoggedIn" class="flex items-center justify-between">
-      <UButton
-        label="Back to My Account" icon="i-heroicons-arrow-left-16-solid" variant="soft" @click="handleAccountBackClick"
-      />
-      <PublicSessionCard size="sm" />
+    <div class="hidden md:block md:px-8">
+      <div v-if="isLoggedIn" class="flex items-center justify-between">
+        <UButton
+          label="Back to My Account" icon="i-heroicons-arrow-left-16-solid" variant="soft" @click="handleAccountBackClick"
+        />
+        <PublicSessionCard size="sm" />
+      </div>
+      <div v-else class="flex justify-end">
+        <UButton label="Log in with Discord" icon="i-ic-baseline-discord" @click="() => { login() }" />
+      </div>
     </div>
     <div class="flex flex-col lg:flex-row items-stretch space-y-4 md:space-y-0">
       <div class="md:p-8 flex-1 space-y-8">
@@ -88,7 +94,7 @@ useSeoMeta({
           <section v-if="commissionTimelineAllowedValues.includes(commissionRoutedValue as AllowedTimelineValues)">
             <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" />
           </section>
-          <section v-if="commission.characters.length" class="space-y-4">
+          <section v-if="commission.characters && commission.characters.length" class="space-y-4">
             <h2>Characters</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8 select-none">
               <div
@@ -121,30 +127,39 @@ useSeoMeta({
               </div>
             </div>
           </section>
+          <section v-if="commission.locked_fields">
+            <div class="bg-muted p-4 space-y-4 rounded-lg">
+              <div class="flex items-center gap-2 font-bold">
+                <UIcon name="i-heroicons-lock-closed-16-solid" class="text-primary"  />
+                <p>Log in to view more details about this commission</p>
+              </div>
+              <div class="space-y-2">
+                <div v-if="commission.locked_fields.characters_count !== undefined" class="flex items-center gap-2">
+                  <UIcon name="i-heroicons-plus-16-solid" class="text-primary" />
+                  <span>Total Characters: {{ commission.locked_fields.characters_count }}</span>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
       <div class="md:p-8 lg:w-md border-t lg:border-l border-neutral-700 lg:border-neutral-800 pt-4 md:border-t-0 space-y-4">
-        <div class="grid lg:grid-cols-2 gap-4">
-          <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
-            <h3>Created</h3>
+        <section class="space-y-2">
+          <div class="flex items-center gap-2">
+            <UIcon name="i-heroicons-clock-16-solid" class="text-primary" />
             <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.created_at))" />
           </div>
-          <div class="bg-neutral-800 p-4 rounded-xl text-sm space-y-2">
-            <h3>Modified</h3>
-            <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.updated_at))" />
-          </div>
-        </div>
-        <section class="space-y-4">
-          <h2>Customer</h2>
-          <div class="flex flex-col gap-2 p-4 rounded-xl border border-neutral-700">
-            <span class="text-xl" v-text="commission.customer.name" />
+          <div class="flex items-center gap-2">
+            <UIcon name="i-heroicons-user-16-solid" class="text-primary" />
+            <span v-text="commission.customer.name" />
             <ULink v-if="commission.customer.vrc_id" :to="`https://vrchat.com/home/user/${commission.customer.vrc_id}`" external target="_blank">
-              <UButton
-                label="Visit VRChat's profile" color="neutral"
-                icon="i-lucide-external-link" variant="soft"
-              />
+              <UButton size="sm" icon="i-lucide-external-link" variant="soft" color="neutral" />
             </ULink>
           </div>
+        </section>
+        <section class="space-y-4" v-if="commission.payments && (commission.payments as OptionalId<PaymentTransaction>[]).length">
+          <h2>Payments</h2>
+          <SharedCommissionReadonlyPayments :payments="(commission.payments as OptionalId<PaymentTransaction>[])" />
         </section>
         <section class="space-y-4" v-if="commission.public_note && commission.public_note.length">
           <h2>Notes</h2>
