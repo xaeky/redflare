@@ -32,7 +32,11 @@ const hiddenToAnonymous = (!props.allowLogin && !isLoggedIn.value) || (!isLogged
         </div>
       </div>
       <div>
-        <UButton variant="soft" label="Log out" @click="() => { clear() }" size="sm" icon="i-heroicons-arrow-left-start-on-rectangle-16-solid" />
+        <UButton
+          variant="soft" color="neutral" label="Log out" @click="() => { clear() }"
+          size="sm" icon="i-heroicons-arrow-left-start-on-rectangle-16-solid"
+          class="underline hover:no-underline"
+        />
       </div>
     </div>
   </div>

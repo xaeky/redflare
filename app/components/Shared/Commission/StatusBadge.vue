@@ -28,5 +28,5 @@ const thisLabel = statusLabels[props.status as CommissionStatusType] || defaultL
 </script>
 
 <template>
-  <UBadge :color="(thisLabel.color as colorType)" :label="thisLabel.label" :icon="thisLabel.icon" :size variant="soft" />
+  <UBadge :color="(thisLabel.color as colorType)" :label="thisLabel.label" :icon="thisLabel.icon" :size variant="soft" class="rounded-full font-bold" />
 </template>
