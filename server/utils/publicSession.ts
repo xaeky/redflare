@@ -13,7 +13,11 @@ import type { H3Event } from 'h3';
 interface PublicSessionData {
   id: string;
   user: DiscordOAuthUser | null;
-  secure: Record<string, any>;
+  secure: {
+    customer?: string; // Customer ID linked to this public user
+    access_token?: string; // OAuth access token
+    tempAuthorizations?: string[]; // Temporary authorizations for specific actions
+  };
 }
 
 const initPublicSession = async (event: H3Event) => {
@@ -53,4 +57,33 @@ export const getPublicUserSession = async (event: H3Event) => {
 export const clearPublicUserSession = async (event: H3Event) => {
   const session = await initPublicSession(event);
   await session.clear();
+}
+
+export const publicGrantTempAuthorization = async (event: H3Event, authorizationKey: string) => {
+  const currentPublicUser = await getPublicUserSession(event);
+  const currentSecureObject = currentPublicUser.secure || {};
+  currentSecureObject.tempAuthorizations = _.castArray(currentSecureObject.tempAuthorizations);
+  // Add authorization if not already present
+  if (!_.includes(currentSecureObject.tempAuthorizations, authorizationKey)) {
+    currentSecureObject.tempAuthorizations.push(authorizationKey);
+    await setPublicUserSession(event, { secure: currentSecureObject });
+  }
+}
+
+export const publicRevokeTempAuthorization = async (event: H3Event, authorizationKey: string) => {
+  const currentPublicUser = await getPublicUserSession(event);
+  const currentSecureObject = currentPublicUser.secure || {};
+  currentSecureObject.tempAuthorizations = _.castArray(currentSecureObject.tempAuthorizations);
+  // Remove authorization if present
+  if (_.includes(currentSecureObject.tempAuthorizations, authorizationKey)) {
+    currentSecureObject.tempAuthorizations = _.without(currentSecureObject.tempAuthorizations, authorizationKey);
+    await setPublicUserSession(event, { secure: currentSecureObject });
+  }
+}
+
+export const publicHasTempAuthorization = async (event: H3Event, authorizationKey: string) => {
+  const currentPublicUser = await getPublicUserSession(event);
+  const currentSecureObject = currentPublicUser.secure || {};
+  currentSecureObject.tempAuthorizations = _.castArray(currentSecureObject.tempAuthorizations);
+  return _.includes(currentSecureObject.tempAuthorizations, authorizationKey);
 }

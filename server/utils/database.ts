@@ -16,5 +16,5 @@ export const validateCommission = async (event: H3Event<EventHandlerRequest>, re
   let viewAs: ViewAs = isOwner ? 'customer' : 'anon';
   if (await commissionModel.existsOne(commissionId) === false) throw createError({ statusCode: 404, message: 'Commission not found' });
   if (returnData) data = await commissionModel.getOneById(commissionId, viewAs);
-  return { id: commissionId, data };
+  return { id: commissionId, data, viewAs };
 }

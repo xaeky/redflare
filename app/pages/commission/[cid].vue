@@ -58,7 +58,7 @@ const commissionRoutedValue = routeCommissionStatus(commission.status as Commiss
 const commissionRoutedValueString = computed(() => commissionRoutedValue.toString());
 
 function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[]) {
-  characterChangelogOverlay.open({ changelog });
+  characterChangelogOverlay.open({ changelog, commission: commission._id });
 }
 
 const { isLoggedIn, login } = await usePublicUserSession();
@@ -117,9 +117,7 @@ useSeoMeta({
                   <span v-if="char.note && char.note.length" class="text-xs" v-text="char.note" />
                   <div v-if="char.changelog && char.changelog.length" class="flex items-center gap-2">
                     <UButton
-                      label="View changelog"
-                      icon="i-lucide-list"
-                      variant="soft"
+                      label="View releases" icon="i-lucide-list" variant="soft"
                       @click="handleCharacterChangelogOpen(char.changelog)"
                     />
                   </div>

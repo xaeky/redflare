@@ -50,7 +50,7 @@ async function handleSave() {
   const errors = await formRef.value.validate();
   const upsertData = toRaw(formRef.value.state);
   if (errors) {
-    toast.add({ title: 'Please fix the errors in the form.', color: 'error' });
+    toast.add({ title: 'Unable to save changes, review your fields!', color: 'error' });
     return;
   }
   updateCommission(upsertData);

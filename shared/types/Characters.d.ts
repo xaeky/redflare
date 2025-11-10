@@ -8,7 +8,9 @@ export enum CommissionCharacterFlags {
 
 export interface CommissionCharacterChangelog {
   date: string;
+  version: string;
   items: string[];
+  file_id?: string | null;
 }
 
 export interface CommissionCharacter {

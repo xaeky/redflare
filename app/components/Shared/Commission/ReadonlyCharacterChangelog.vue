@@ -1,20 +1,60 @@
 <script setup lang="ts">
-defineProps<{
+import type { FetchError } from 'ofetch';
+
+const props = defineProps<{
+  commission: string;
   changelog: CommissionCharacterChangelog[];
 }>();
+
+const toast = useToast();
+
+const handleAttachmentDownload = async (fileId: string) => {
+  const prepareToast = toast.add({ description: 'Preparing download...', progress: false, type: 'foreground', icon: 'i-lucide-download', duration: 20000 });
+  const encoded = encodeURIComponent(fileId);
+  const url = `/api/public/commissions/${props.commission}/retrieve_attachment?file_id=${encoded}`;
+  try {
+    await $fetch.raw(url, { method: 'HEAD', credentials: 'same-origin' });
+    location.assign(url);
+    toast.remove(prepareToast.id);
+    toast.add({ description: 'Download started.', icon: 'i-lucide-circle-check-big', color: 'success' });
+  } catch (error) {
+    toast.remove(prepareToast.id);
+    const fetchError = error as FetchError;
+    if (!fetchError.status) {
+      toast.add({ description: 'Network error occurred while preparing download.', color: 'error' });
+      return;
+    }
+    if (fetchError.status === 403) toast.add({ description: 'You do not have permission to download this file.', color: 'error' });
+    else if (fetchError.status === 404) toast.add({ description: 'File not found.', color: 'error' });
+    else toast.add({ description: 'Failed to prepare download.', color: 'error' });
+  }
+};
+
+const formatTime = (t: string) => useTimeAgo(new Date(t)).value;
 </script>
 
 <template>
-  <UModal title="Character changelog">
+  <UModal title="Character releases">
     <template #body>
       <div class="rf_shared_ro_character_changelog">
         <div v-for="(entry, index) in changelog" :key="index" class="changelog_entry">
-          <div class="changelog_date">
-            <span v-text="new Date(entry.date).toLocaleDateString()" />
+          <div class="changelog_title">
+            <span v-text="entry.version" />
+          </div>
+          <div>
+            <span class="text-sm text-muted">
+              Released {{ formatTime(entry.date) }}
+            </span>
           </div>
           <ul class="changelog_items">
             <li v-for="(item, itemIndex) in entry.items" :key="itemIndex">{{ item }}</li>
           </ul>
+          <div v-if="entry.file_id" class="release_files">
+            <UButton
+              label="Get avatar package" icon="i-lucide-download" variant="soft"
+              @click="handleAttachmentDownload(entry.file_id)"
+            />
+          </div>
         </div>
       </div>
     </template>
@@ -25,8 +65,9 @@ defineProps<{
 @reference '~/assets/global.css';
 
 .rf_shared_ro_character_changelog {
-  .changelog_entry { @apply space-y-2; }
-  .changelog_date { @apply text-2xl font-bold text-primary; }
+  @apply space-y-4;
+  .changelog_entry { @apply space-y-2 p-4 border border-muted/50 rounded-xl; }
+  .changelog_title { @apply text-2xl font-bold text-primary; }
   .changelog_items { @apply list-disc pl-6 space-y-1; }
 }
 

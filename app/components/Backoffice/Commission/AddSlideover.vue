@@ -31,7 +31,7 @@ async function handleSave() {
   const errors = await formRef.value.validate();
   const insertData = toRaw(formRef.value.state);
   if (errors) {
-    toast.add({ title: 'Please fix the errors in the form.', color: 'error' });
+    toast.add({ title: 'Unable to create an entry, review your fields!', color: 'error' });
     return;
   }
   addCommission(insertData);

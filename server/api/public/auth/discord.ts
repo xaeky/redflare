@@ -46,13 +46,14 @@ export default defineEventHandler(async (event) => {
   }
 
   const discordAccessToken = 'Bearer ' + tokens.access_token;
-  const discordUser = await $fetch(discordUrls.userInfo, {
+  const discordUser = await $fetch<DiscordOAuthUser>(discordUrls.userInfo, {
     headers: {
       'user-agent': 'RedflareApi',
       'Authorization': discordAccessToken
     }
   });
 
-  await setPublicUserSession(event, { user: discordUser, secure: { access_token: discordAccessToken } });
+  const customerUser = await useCustomerModel().getByDiscordId(discordUser.id);
+  await setPublicUserSession(event, { user: discordUser, secure: { access_token: discordAccessToken, customer: customerUser._id.toString() } });
   return sendRedirect(event, '/me');
 });
