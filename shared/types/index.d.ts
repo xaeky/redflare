@@ -1,3 +1,8 @@
+export interface AgentUserSettings {
+  forceAgentView?: boolean;
+  [key: string]: any;
+}
+
 declare module '#app' {
   interface PageMeta {
     description?: string;
@@ -11,6 +16,7 @@ declare module '#auth-utils' {
     name: string;
     picture: string;
     updated_at: string;
+    settings: AgentUserSettings
   }
   interface SecureSessionData {
     access_token: string;

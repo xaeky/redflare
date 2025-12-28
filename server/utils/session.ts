@@ -138,3 +138,41 @@ export async function updateCurrentUserProfile(event: EventUserSession, profileU
     throw createError({ statusCode: 500, statusMessage: `Auth0Error: ${err.message}` || 'Failed to update user profile.' });
   }
 }
+
+// Agent user settings
+
+export async function initCurrentUserSettings(event: EventUserSession) {
+  const session = await needAuth(event);
+  const userSettings = session?.user?.settings || {};
+  const defaultSettings: AgentUserSettings = {
+    forceAgentView: false
+  };
+  const mergedSettings = _.merge({}, defaultSettings, userSettings);
+  await setUserSession(event as H3Event, {
+    user: { settings: mergedSettings }
+  });
+  return mergedSettings;
+}
+
+export async function updateCurrentUserSetting(event: EventUserSession, settingKey: keyof AgentUserSettings, settingValue: any) {
+  const userSettings = await initCurrentUserSettings(event);
+  userSettings[settingKey] = settingValue;
+  await setUserSession(event as H3Event, {
+    user: { settings: userSettings }
+  });
+  return true;
+}
+
+export async function replaceCurrentUserSettings(event: EventUserSession, newSettings: Partial<AgentUserSettings>) {
+  const userSettings = await initCurrentUserSettings(event);
+  const updatedSettings = { ...userSettings, ...newSettings };
+  await setUserSession(event as H3Event, {
+    user: { settings: updatedSettings }
+  });
+  return true;
+}
+
+export async function getCurrentUserSetting(event: EventUserSession, settingKey: keyof AgentUserSettings) {
+  const userSettings = await initCurrentUserSettings(event);
+  return userSettings[settingKey];
+}

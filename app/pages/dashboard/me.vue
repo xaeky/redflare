@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { User } from '#auth-utils';
+import _ from 'lodash';
+import type { AgentUserSettings } from '~~/shared/types';
 
 const { user, fetch: userFetch } = useUserSession();
 const toast = useToast();
@@ -68,6 +70,29 @@ const meProfileUpdate = async () => {
   }
 };
 
+const meSettingUpdate = async () => {
+  try {
+    await useAPI('/api/me/settings', {
+      method: 'PUT',
+      body: JSON.stringify(clonedUserSettings)
+    });
+    toast.add({
+      title: 'Success',
+      description: 'Your settings have been updated successfully.',
+      color: 'success'
+    });
+    await userFetch();
+  } catch (error) {
+    toast.add({
+      title: 'Error',
+      description: (error as any).data.message || 'An error occurred while updating your settings.',
+      color: 'error'
+    });
+  }
+};
+
+const clonedUserSettings = reactive<AgentUserSettings>(_.cloneDeep(user.value?.settings) as AgentUserSettings);
+
 onMounted(() => {
   if (user.value) {
     meProfileUpdateState.nickname = user.value.nickname || '';
@@ -116,6 +141,28 @@ onMounted(() => {
               <UButton icon="i-heroicons-pencil-16-solid" label="Update password" type="submit" :loading />
             </div>
           </UForm>
+        </div>
+      </div>
+      <div class="rf-profile-section" v-if="clonedUserSettings">
+        <div class="flex gap-2 items-center">
+          <UIcon name="i-heroicons-cog-16-solid" class="text-primary" :size="20" />
+          <h2>Settings</h2>
+        </div>
+        <div>
+          <UAlert color="neutral" variant="outline" title="Session-based settings" icon="i-heroicons-clock-16-solid" class="mb-4">
+            <template #description>
+              These settings are saved for your user account and will persist across sessions.
+            </template>
+          </UAlert>
+        </div>
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium mb-2">Commission Details</h3>
+          <div class="space-y-4">
+            <UFormField>
+              <USwitch name="setting.forceAgentView" label="Force view as owner in commission detail pages."
+              v-model="clonedUserSettings.forceAgentView" @change="() => meSettingUpdate()" />
+            </UFormField>
+          </div>
         </div>
       </div>
     </div>

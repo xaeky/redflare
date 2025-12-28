@@ -62,6 +62,7 @@ function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[])
 }
 
 const { isLoggedIn, login } = await usePublicUserSession();
+const { user:agentUser } = await useUserSession();
 const handleAccountBackClick = () => {
   navigateTo('/me');
 };
@@ -83,6 +84,16 @@ useSeoMeta({
       <div v-else class="flex justify-end">
         <UButton label="Log in with Discord" icon="i-ic-baseline-discord" @click="() => { login() }" />
       </div>
+    </div>
+    <div v-if="agentUser && agentUser.settings.forceAgentView" class="md:p-8">
+      <UAlert
+        variant="outline" color="warning" title="Viewing as Commission Owner"
+        icon="i-heroicons-eye-16-solid"
+      >
+        <template #description>
+          You are currently viewing this commission as the owner. To see the public view, please disable the "Force view as owner in commission detail pages" setting in your account settings.
+        </template>
+      </UAlert>
     </div>
     <div class="flex flex-col lg:flex-row items-stretch space-y-4 md:space-y-0">
       <div class="md:p-8 flex-1 space-y-8">
