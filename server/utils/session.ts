@@ -3,30 +3,36 @@ import { useSession, createError, H3Event } from 'h3';
 import { UserInfoClient, AuthenticationClient, ManagementClient } from 'auth0';
 import type { SecureSessionData } from '#auth-utils';
 import { decode, JwtPayload } from 'jsonwebtoken';
+import cache from './cache';
 
 type EventUserSession = Parameters<typeof useSession>[0];
 
 export async function needAuth(event: EventUserSession) {
-  // Get app config
   const runtime = useRuntimeConfig(event as H3Event);
   // Get user session, check if defined or not, if not throw 401 error
   const userSession = await getUserSession(event);
   if (!_.get(userSession, 'user') || !_.get(userSession, 'secure.access_token')) throw createError({ statusCode: 401, message: 'Unauthorized' });
-  // So user exists on session, now we're going to validate it
+  // So user exists on session, now we're going to validate it, use cache to avoid multiple calls
+  const cacheKey = `auth0-session-${userSession.user?.sub}`;
+  let cachedSession = await cache.get<boolean>(cacheKey);
   const { domain, clientId, clientSecret } = runtime.oauth.auth0;
   const { refresh_token, id_token } = userSession.secure as SecureSessionData;
   // const a0User = new UserInfoClient({ domain });
   const a0Manager = new ManagementClient({ domain, clientId, clientSecret });
   const a0Auth = new AuthenticationClient({ domain, clientId, clientSecret });
   const decodedIdAuth = decode(id_token) as JwtPayload;
-  // Get if user exists
-  try {
-    const userInfo = await a0Manager.users.get({ id: decodedIdAuth.sub as string });
-    if (!userInfo.data || userInfo.status !== 200) throw new Error(userInfo.statusText);
-  } catch (e) {
-    const err = e as Error;
-    logger.error('Auth0Error:', e);
-    throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: `Auth0Error: ${err.message}` || 'Failed to fetch user details.' });
+  // If no cache is present, validate the user by fetching its details
+  if (!cachedSession) {
+    try {
+      const userInfo = await a0Manager.users.get({ id: decodedIdAuth.sub as string });
+      if (!userInfo.data || userInfo.status !== 200) throw new Error(userInfo.statusText);
+      await cache.set<boolean>(cacheKey, true);
+      logger.debug('User session validated for user:', decodedIdAuth.sub);
+    } catch (e) {
+      const err = e as Error;
+      logger.error('Auth0Error:', e);
+      throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: `Auth0Error: ${err.message}` || 'Failed to fetch user details.' });
+    }
   }
   // User exists, now we try to update the token if it's expired
   const isSessionExpired = !decodedIdAuth.exp || Date.now() >= (decodedIdAuth.exp as number) * 1000;
