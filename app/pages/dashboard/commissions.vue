@@ -48,16 +48,16 @@ definePageMeta({
       </div>
       <div v-else-if="commissions && commissions.data.length">
         <BackofficeCommissionTable :commissions="commissions.data" v-model:sorting="tableSorting" />
-        <div class="flex justify-center">
-          <UPagination
-            v-model:page="tablePage"
-            :items-per-page="20"
-            :total="commissions.total"
-          />
-        </div>
       </div>
       <div v-else-if="commissions && !commissions.data.length">
         No commissions found!
+      </div>
+      <div v-if="commissions" class="flex justify-center">
+        <UPagination
+          v-model:page="tablePage"
+          :items-per-page="50"
+          :total="commissions.total"
+        />
       </div>
     </div>
   </div>
