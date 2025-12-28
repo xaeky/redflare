@@ -128,8 +128,6 @@ export async function updateCurrentUserProfile(event: EventUserSession, profileU
   const session = await needAuth(event);
   const runtime = useRuntimeConfig(event as H3Event);
   const { domain, clientId, clientSecret } = runtime.oauth.auth0;
-  const { id_token } = session.secure as SecureSessionData;
-  const decodedIdAuth = decode(id_token) as JwtPayload;
   const a0Manager = new ManagementClient({ domain, clientId, clientSecret });
   try {
     const updateResult = await a0Manager.users.update({ id: session.user?.sub as string }, profileUpdateData);
