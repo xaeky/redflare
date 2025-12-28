@@ -1,0 +1,16 @@
+{
+  "servers": {
+    "nuxt": {
+      "type": "sse",
+      "url": "https://localhost:3000/__mcp/sse"
+    },
+    "nuxt-docs": {
+      "type": "sse",
+      "url": "https://nuxt.com/mcp"
+    },
+    "nuxt-ui": {
+      "type": "http",
+      "url": "https://ui.nuxt.com/mcp"
+    }
+  }
+}

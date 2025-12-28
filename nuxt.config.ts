@@ -19,6 +19,7 @@ export default defineNuxtConfig({
     '#models': fileURLToPath(new URL('./server/utils/models', import.meta.url)),
   },
   modules: [
+    'nuxt-mcp-dev',
     '@nuxt/fonts',
     '@nuxt/icon',
     '@nuxt/ui',
