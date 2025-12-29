@@ -163,64 +163,52 @@ const getOneById = async (commissionId: string, viewAs?: ViewAs) => {
     );
   }
   commissionPipeline.push({ $project: projectStage });
-  const commission = await collection.aggregate(commissionPipeline).next();
+  const commission = await collection.aggregate<CommissionBaseRaw>(commissionPipeline).next();
 
   if (_.isEmpty(commission)) return null;
   if (!commission) return null;
-  return commission as WithId<WithCharacters<WithExistingCustomer<CommissionBase>>>;
+  return commission;
 }
 
-const updateOne = async (commissionId: string, updateData: Partial<CommissionUpdate>) => {
+const updateOne = async (commissionId: string, requestData: Partial<CommissionUpdate>) => {
   const collection = await useMongoCollection('commissions');
-  // Correct customer field if it's a string
-  if (updateData.customer && typeof updateData.customer === 'string') {
-    updateData.customer = new ObjectId(updateData.customer);
-  }
-  // Correct base field for characters
-  if (updateData.characters) {
-    updateData.characters = updateData.characters.map(character => {
-      const sanitizedCharacter = character;
+  const newData:Partial<CommissionUpdate> = {
+    ...requestData,
+    ...(requestData.customer ? { customer: new ObjectId(requestData.customer) } : {}),
+    ...(requestData.characters ? { characters: requestData.characters.map(c => {
+      const sanitizedCharacter = c;
       // Ensure base is an ObjectId
-      sanitizedCharacter.base = new ObjectId(character.base as string);
+      sanitizedCharacter.base = new ObjectId(c.base as string);
       return sanitizedCharacter;
-    });
-  }
-  // Set updated_at to current time
-  updateData.updated_at = new Date().toISOString();
-  // Remove payments from updateData since Billing controller handles it
-  if (updateData.payments) delete updateData.payments;
+    }) } : {}),
+    updated_at: new Date().toISOString(),
+  };
+  // Remove payments from newData since Billing controller handles it
+  if (newData.payments) delete newData.payments;
   const result = await collection.updateOne(
     { _id: new ObjectId(commissionId) },
-    { $set: updateData }
+    { $set: newData }
   );
 
   return result;
 }
 
-const insertOne = async (data: CommissionOptions) => {
+const insertOne = async (requestData: CommissionOptions) => {
   const collection = await useMongoCollection('commissions');
-  // Ensure customer is an ObjectId
-  if (data.customer && typeof data.customer === 'string') {
-    data.customer = new ObjectId(data.customer);
-  }
-  // Ensure characters have base as ObjectId
-  if (data.characters) {
-    data.characters = data.characters.map(character => {
-      const sanitizedCharacter = character;
+  const newData:CommissionInsert = {
+    ...requestData,
+    customer: new ObjectId(requestData.customer),
+    characters: requestData.characters.map(c => {
+      const sanitizedCharacter = c;
       // Ensure base is an ObjectId
-      sanitizedCharacter.base = new ObjectId(character.base as string);
+      sanitizedCharacter.base = new ObjectId(c.base as string);
       return sanitizedCharacter;
-    });
-  }
-  
-  // Initialize commission data with defaults
-  const commissionData: CommissionOptions = {
-    ...data,
+    }),
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  };
+  }
   
-  return await collection.insertOne(commissionData);
+  return await collection.insertOne(newData);
 }
 
 const deleteOne = async (commissionId: string) => {

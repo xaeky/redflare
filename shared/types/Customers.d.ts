@@ -1,6 +1,6 @@
 import type { ObjectId, WithId } from 'mongodb';
 
-export interface Customer {
+export type CustomerRaw = WithId<{
   name: string;
   vrc_id: string | null;
   note: string | null;
@@ -8,7 +8,9 @@ export interface Customer {
   discord_id: string | null;
   created_at: string;
   updated_at: string;
-}
+}>;
+
+export type Customer = CustomerRaw;
 
 export type CustomerInsertOptions = Omit<Customer, 'created_at' | 'updated_at'> & {
   vrc_id?: string | null;

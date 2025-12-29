@@ -5,13 +5,15 @@ import { customerFilterQuery } from '~/queries/customers';
 import { CalendarDate } from '@internationalized/date';
 import type { TabsItem, SelectItem } from '@nuxt/ui';
 import { CommissionStatusType } from '~~/shared/enums/Commissions';
+import type { CommissionUpdate } from '~~/shared/types/Commissions';
 
 const toast = useToast();
 const props = defineProps<{
   commission_id?: string
 }>();
-const remoteCommission = ref<WithCharacters<WithExistingCustomer<DeserializedCommission>> | null>(null);
-const remoteCommissionBusy = ref<boolean>(true);
+const { data: remoteCommission, pending: remoteCommissionBusy } = useLazyAsyncData('commission-form-data', async () =>
+  useAPI<CommissionBaseRaw>(`/api/commissions/${props.commission_id}`)
+);
 
 const schema = commissionUpdateSchema;
 type Schema = z.output<typeof schema>;
@@ -52,7 +54,7 @@ const availableCustomers = computed(() => {
     value: customerSearchSelected.value._id
   });
   // Filters for remote customers
-  const notLocalCustomer = (c: DeserializedCustomer) => localCustomer ? c._id !== localCustomer._id : true;
+  const notLocalCustomer = (c: DeserializedCustomer) => localCustomer ? c._id !== localCustomer._id.toString() : true;
   const notSelectedCustomer = (c: DeserializedCustomer) => c._id !== customerSearchSelected.value?._id;
   if (customers.value) sanitizedCustomers.push(...customers.value.data.filter(c => notLocalCustomer(c) && notSelectedCustomer(c)).map(c => ({
     label: c.name,
@@ -97,32 +99,30 @@ const commissionCreatedDate = computed({
   }
 });
 
-// Watchers
-watch(remoteCommission, (newCommissionData) => {
-  if (!newCommissionData) return;
-  const sanitizedData = _.cloneDeep(newCommissionData) as CommissionUpdate;
-  sanitizedData.customer = newCommissionData.customer._id;
-  sanitizedData.created_at = new Date(newCommissionData.created_at);
-  sanitizedData.characters = newCommissionData.characters.map(c => ({
-    ...c,
-    base: c.base._id // Ensure base is an ID
-  }));
-  // Assign the sanitized data to state, only existing fields with lodash
-  _.assign(state, _.pick(sanitizedData, Object.keys(schema.shape)));
-}, { immediate: true, deep: true });
+// Utility methods
+function toUpdateData(remoteData: CommissionBaseRaw): CommissionUpdate {
+  const rawClone = _.cloneDeep(remoteData);
+  const localData: CommissionUpdate = {
+    ...rawClone,
+    customer: rawClone.customer._id.toString(),
+    created_at: new Date(rawClone.created_at),
+    characters: rawClone.characters.map(c => ({
+      name: c.name,
+      base: c.base._id.toString(), // Ensure base is an ID
+      note: c.note,
+      changelog: c.changelog,
+    })) as CommissionCharacterOptions[],
+    payments: rawClone.payments.map(p => p.toString()),
+  };
+  return localData;
+}
 
-watch(() => props.commission_id, async (newCommissionId) => {
-  if (!newCommissionId) return;
-  remoteCommissionBusy.value = true;
-  try {
-    const data = await useAPI<WithCharacters<WithExistingCustomer<DeserializedCommission>>>(`/api/commissions/${newCommissionId}`);
-    remoteCommission.value = data;
-  } catch (error) {
-    toast.add({ title: 'Failed to load commission data.', color: 'error' });
-  } finally {
-    remoteCommissionBusy.value = false;
-  }
-}, { immediate: true });
+// Watchers
+watch(remoteCommission, (remoteData) => {
+  if (!remoteData) return;
+  const localData = toUpdateData(remoteData);
+  _.assign(state, _.pick(localData, Object.keys(schema.shape)));
+}, { immediate: true, deep: true });
 
 async function validate() {
   // Do not report errors, validation already does that
