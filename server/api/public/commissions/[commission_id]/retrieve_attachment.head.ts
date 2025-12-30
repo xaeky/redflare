@@ -18,7 +18,6 @@ export default defineEventHandler(async (event) => {
   const query = await getQuery<{ file_id: string }>(event);
   if (!query.file_id || !query.file_id.length) throw createError({ statusCode: 400, statusMessage: 'No file_id provided' });
   const decodedFileId = Buffer.from(query.file_id, 'base64').toString('utf-8');
-  logger.debug(`Public commission attachment HEAD request for file ID: ${decodedFileId}`);
   const [exists] = await useStorageBucket().file(decodedFileId).exists();
   if (!exists) throw createError({ statusCode: 404, statusMessage: 'File not found' });
   await publicGrantTempAuthorization(event, `retrieve_commission_attachment:${decodedFileId}`);
