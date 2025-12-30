@@ -157,8 +157,7 @@ watch(tempFile, async (newFile) => {
           <UFileUpload
             v-model="tempFile"
             variant="button"
-            accept="application/octet-stream,.unitypackage"
-            placeholder="Upload package file (.unitypackage)"
+            :accept="getAllowedAttachmentExtensions().map(ext => '.' + ext).join(',')"
             class="w-16 h-16"
             :disabled="tempFileUploading"
           />
