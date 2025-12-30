@@ -47,12 +47,31 @@ const formatTime = (t: string) => useTimeAgo(new Date(t)).value;
               Released {{ formatTime(entry.date) }}
             </span>
           </div>
-          <ul class="changelog_items">
-            <li v-for="(item, itemIndex) in entry.items" :key="itemIndex">{{ item }}</li>
-          </ul>
+          <div>
+            <UCollapsible class="flex flex-col gap-2 w-48">
+              <UButton label="View changes" color="neutral" variant="subtle" trailing-icon="i-lucide-chevron-down" block/>
+              <template #content>
+                <ul class="changelog_items">
+                  <li v-for="(item, itemIndex) in entry.items" :key="itemIndex">{{ item }}</li>
+                </ul>
+              </template>
+            </UCollapsible>
+          </div>
           <div v-if="entry.attachments && entry.attachments.length" class="release_files">
             <div v-for="attachment in entry.attachments" :key="attachment">
-              {{ attachments[attachment]?.filename || attachment }}
+              <div class="release_attachment group" @click="handleAttachmentDownload(attachment)">
+                <div>
+                  <div class="bg-neutral-950/50 rounded-full w-12 h-12 flex items-center justify-center group-hover:text-primary group-active:scale-90 duration-100">
+                    <UIcon name="i-lucide-download" size="16"/>
+                  </div>
+                </div>
+                <div>
+                  <div class="filename" v-text="attachments[attachment]?.filename" />
+                  <div class="details">
+                    {{ attachments[attachment]?.filetype }} • {{ formatFileSize(attachments[attachment]?.size as number) }}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -69,6 +88,11 @@ const formatTime = (t: string) => useTimeAgo(new Date(t)).value;
   .changelog_entry { @apply space-y-2 p-4 border border-muted/50 rounded-xl; }
   .changelog_title { @apply text-2xl font-bold text-primary; }
   .changelog_items { @apply list-disc pl-6 space-y-1; }
+  .release_files { @apply flex flex-col gap-4; }
+  .release_attachment {
+    @apply p-4 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted duration-100 flex items-center gap-4 select-none;
+    .filename { @apply font-mono; }
+    .details { @apply text-sm text-muted; }
+  }
 }
-
 </style>

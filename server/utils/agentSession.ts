@@ -85,7 +85,7 @@ export async function hasPermission(event: EventUserSession, permissionName: Per
   const runtime = useRuntimeConfig();
   // Skip permission check if runtime config allows it
   if (runtime.backoffice.skipRoles) {
-    logger.warn('⚠️', `Skipping permission check for "${permissionName}" due to runtime config setting.`);
+    logger.warn(`Skipping permission check for "${permissionName}" due to runtime config setting.`);
     return true;
   }
   const permissions = await getPermissions(event, false);
