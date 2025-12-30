@@ -1,4 +1,4 @@
-import { Storage } from '@google-cloud/storage';
+import { type FileMetadata, Storage } from '@google-cloud/storage';
 
 const tryParseJson = (value: string) => {
   try {
@@ -54,7 +54,7 @@ export const bucketUploadFile = async ({ destinationPath, fileBuffer, metadata }
     throw new Error(`Failed to set metadata for file: ${error.message}`);
   });
   const fileId = Buffer.from(destinationPath).toString('base64');
-  return { id: fileId };
+  return { id: fileId, storageId: file.id };
 }
 
 export const bucketDeleteFile = async (fileId: string) => {
@@ -65,4 +65,19 @@ export const bucketDeleteFile = async (fileId: string) => {
     throw new Error(`Failed to delete file from bucket: ${error.message}`);
   });
   return { success: true };
+}
+
+export const bucketGetFilesDetails = async (fileIds: string[]): Promise<Record<string, FileMetadata>> => {
+  const bucket = useStorageBucket();
+  const files: Record<string, FileMetadata> = {};
+  // TODO: Cache files metadata to reduce API calls
+  for (const fileId of fileIds) {
+    const destinationPath = Buffer.from(fileId, 'base64').toString('utf-8');
+    const file = bucket.file(destinationPath);
+    const [metadata] = await file.getMetadata().catch((error) => {
+      throw new Error(`Failed to get metadata for file ${fileId}: ${error.message}`);
+    });
+    files[fileId] = metadata;
+  }
+  return files;
 }

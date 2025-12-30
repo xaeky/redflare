@@ -57,21 +57,21 @@ const getAll = async ({ page, pageSize = 20, filters, sort }: CustomerGetAllPara
 }
 
 const getById = async (id: string) => {
-  const collection = await useMongoCollection('customers');
+  const collection = await useMongoCollection<CustomerRaw>('customers');
   const result = await collection.findOne({ _id: new ObjectId(id) });
   if (!result) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
   return result;
 }
 
 const getByTelegramId = async (telegramId: string) => {
-  const collection = await useMongoCollection<Customer>('customers');
+  const collection = await useMongoCollection<CustomerRaw>('customers');
   const result = await collection.findOne({ telegram_id: telegramId });
   if (!result) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
   return result;
 }
 
 const getByDiscordId = async (discordId: string) => {
-  const collection = await useMongoCollection<Customer>('customers');
+  const collection = await useMongoCollection<CustomerRaw>('customers');
   const result = await collection.findOne({ discord_id: discordId });
   if (!result) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
   return result;

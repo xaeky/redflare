@@ -4,13 +4,14 @@ import type { FetchError } from 'ofetch';
 const props = defineProps<{
   commission: string;
   changelog: CommissionCharacterChangelog[];
+  attachments: Record<string, CommissionCharacterAttachmentRaw>;
 }>();
 
 const toast = useToast();
 
-const handleAttachmentDownload = async (fileId: string) => {
+const handleAttachmentDownload = async (attachmentId: string) => {
   const prepareToast = toast.add({ description: 'Preparing download...', progress: false, type: 'foreground', icon: 'i-lucide-download', duration: 20000 });
-  const encoded = encodeURIComponent(fileId);
+  const encoded = encodeURIComponent(attachmentId);
   const url = `/api/public/commissions/${props.commission}/retrieve_attachment?file_id=${encoded}`;
   try {
     await $fetch.raw(url, { method: 'HEAD', credentials: 'same-origin' });
@@ -49,11 +50,10 @@ const formatTime = (t: string) => useTimeAgo(new Date(t)).value;
           <ul class="changelog_items">
             <li v-for="(item, itemIndex) in entry.items" :key="itemIndex">{{ item }}</li>
           </ul>
-          <div v-if="entry.file_id" class="release_files">
-            <UButton
-              label="Get avatar package" icon="i-lucide-download" variant="soft"
-              @click="handleAttachmentDownload(entry.file_id)"
-            />
+          <div v-if="entry.attachments && entry.attachments.length" class="release_files">
+            <div v-for="attachment in entry.attachments" :key="attachment">
+              {{ attachments[attachment]?.filename || attachment }}
+            </div>
           </div>
         </div>
       </div>

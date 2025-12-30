@@ -1,6 +1,7 @@
 import type { ObjectId, WithId } from 'mongodb';
 
 export type CustomerRaw = WithId<{
+  id: string;
   name: string;
   vrc_id: string | null;
   note: string | null;

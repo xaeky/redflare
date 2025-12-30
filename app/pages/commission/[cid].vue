@@ -6,7 +6,7 @@ import type { TimelineItem } from '@nuxt/ui';
 
 const thisRoute = useRoute();
 const commissionId = thisRoute.params.cid;
-const commission = await useAPI<Omit<WithCharacters<WithCustomer<DeserializedCommission>>, 'secure_note'>>(`/api/public/commissions/${commissionId}`);
+const commission = await useAPI<PublicSerializedCommission>(`/api/public/commissions/${commissionId}`);
 type AllowedTimelineValues = CommissionStatusType.InSetup | CommissionStatusType.NextUp | CommissionStatusType.InDevelopment | CommissionStatusType.Showtime;
 const commissionTimelineAllowedValues:AllowedTimelineValues[] = [CommissionStatusType.InSetup, CommissionStatusType.NextUp, CommissionStatusType.InDevelopment, CommissionStatusType.Showtime]
 const commissionTimeline = ref<TimelineItem[]>([
@@ -54,11 +54,11 @@ function routeCommissionStatus(status: CommissionStatusType): CommissionStatusTy
   }
   return status; // fallback if not found
 }
-const commissionRoutedValue = routeCommissionStatus(commission.status as CommissionStatusType);
+const commissionRoutedValue = routeCommissionStatus(commission.data.status as CommissionStatusType);
 const commissionRoutedValueString = computed(() => commissionRoutedValue.toString());
 
 function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[]) {
-  characterChangelogOverlay.open({ changelog, commission: commission._id });
+  characterChangelogOverlay.open({ changelog, commission: commission.data._id?.toString() || '', attachments: commission.attachments || {} });
 }
 
 const { isLoggedIn, login } = await usePublicUserSession();
@@ -99,17 +99,17 @@ useSeoMeta({
       <div class="md:p-8 flex-1 space-y-8">
         <div class="flex gap-2 flex-col md:flex-row items-start md:items-center md:justify-between">
           <h1>Commission</h1>
-          <SharedCommissionStatusBadge :status="commission.status" />
+          <SharedCommissionStatusBadge :status="commission.data.status" />
         </div>
         <div id="commission_sections" class="space-y-4">
           <section v-if="commissionTimelineAllowedValues.includes(commissionRoutedValue as AllowedTimelineValues)">
             <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" />
           </section>
-          <section v-if="commission.characters && commission.characters.length" class="space-y-4">
+          <section v-if="commission.data.characters && commission.data.characters.length" class="space-y-4">
             <h2>Characters</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8 select-none">
               <div
-                v-for="(char, charIndex) in commission.characters" :key="char.id"
+                v-for="(char, charIndex) in commission.data.characters" :key="char.id"
                 class="bg-linear-125 from-neutral-800/50 to-primary-500/20 border border-neutral-700/25 p-4 md:p-6 rounded-xl hover:shadow-xl hover:shadow-neutral-950/50 duration-300"
               >
                 <div class="flex flex-col gap-2">
@@ -119,7 +119,7 @@ useSeoMeta({
                       <div class="flex items-center gap-2">
                         <UIcon name="i-lucide-hash" class="opacity-50 text-primary-300" />
                         <span class="text-sm font-bold font-mono uppercase select-all">
-                          {{ commission._id.substring(commission._id.length - 6) }}-{{ charIndex }}
+                          {{ commission.data._id?.toString().substring(commission.data._id.toString().length - 6) }}-{{ charIndex }}
                         </span>
                       </div>
                     </UTooltip>
@@ -136,16 +136,16 @@ useSeoMeta({
               </div>
             </div>
           </section>
-          <section v-if="commission.locked_fields">
+          <section v-if="commission.data.locked_fields">
             <div class="bg-muted p-4 space-y-4 rounded-lg">
               <div class="flex items-center gap-2 font-bold">
                 <UIcon name="i-heroicons-lock-closed-16-solid" class="text-primary"  />
                 <p>Log in to view more details about this commission</p>
               </div>
               <div class="space-y-2">
-                <div v-if="commission.locked_fields.characters_count !== undefined" class="flex items-center gap-2">
+                <div v-if="commission.data.locked_fields.characters_count !== undefined" class="flex items-center gap-2">
                   <UIcon name="i-heroicons-plus-16-solid" class="text-primary" />
-                  <span>Total Characters: {{ commission.locked_fields.characters_count }}</span>
+                  <span>Total Characters: {{ commission.data.locked_fields.characters_count }}</span>
                 </div>
               </div>
             </div>
@@ -156,7 +156,7 @@ useSeoMeta({
         <section class="space-y-2">
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-clock-16-solid" class="text-primary" />
-            <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.created_at))" />
+            <span v-text="new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(new Date(commission.data.created_at))" />
           </div>
           <div class="flex items-center gap-2">
             <UIcon name="i-heroicons-user-16-solid" class="text-primary" />
@@ -166,13 +166,13 @@ useSeoMeta({
             </ULink>
           </div>
         </section>
-        <section class="space-y-4" v-if="commission.payments && (commission.payments as OptionalId<PaymentTransaction>[]).length">
+        <section class="space-y-4" v-if="commission.data.payments && (commission.data.payments as OptionalId<PaymentTransaction>[]).length">
           <h2>Payments</h2>
-          <SharedCommissionReadonlyPayments :payments="(commission.payments as OptionalId<PaymentTransaction>[])" />
+          <SharedCommissionReadonlyPayments :payments="(commission.data.payments as OptionalId<PaymentTransaction>[])" />
         </section>
-        <section class="space-y-4" v-if="commission.public_note && commission.public_note.length">
+        <section class="space-y-4" v-if="commission.data.public_note && commission.data.public_note.length">
           <h2>Notes</h2>
-          <p v-text="commission.public_note" />
+          <p v-text="commission.data.public_note" />
         </section>
       </div>
     </div>

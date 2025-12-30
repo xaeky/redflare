@@ -2,10 +2,10 @@ import * as z from 'zod';
 import { CommissionStatusType } from '../enums/Commissions';
 
 export const commissionChangelogSchema = z.object({
-  date: z.date().or(z.string()),
+  date: z.string(),
   version: z.string().regex(/^\d+\.\d+\.\d+(-[0-9A-Za-z-.]+)?(\+[0-9A-Za-z-.]+)?$/, 'Version must be in SemVer format'),
   items: z.array(z.string().min(1, 'Change item is required')).min(1, 'At least one change item is required'),
-  file_id: z.string().nullable().optional()
+  attachments: z.array(z.string()).optional()
 });
 
 export const commissionOptionsSchema = z.object({

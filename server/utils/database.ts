@@ -6,7 +6,7 @@ export const validateCommission = async (event: H3Event<EventHandlerRequest>, re
   const agentSession = await getUserSession(event);
   const commissionModel = useCommissionModel();
   const customerModel = useCustomerModel();
-  const commissionId = getRouterParam(event, 'commission_id');
+  const commissionId = getRouterParam(event, 'commission_id') as string;
   if (forceAgentView && returnData) {
     const data = await commissionModel.getOneById(commissionId as string, 'agent');
     return { id: commissionId, data };

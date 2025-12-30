@@ -18,18 +18,16 @@ export enum CommissionCharacterFlags {
 export interface CommissionCharacterAttachmentRaw {
   id: string;
   filename: string;
-  mime_type: string;
+  filetype: string;
   size: number; // in bytes
 }
 export interface CommissionCharacterChangelogRaw {
   date: string;
   version: string;
   items: string[];
-  // @deprecated
-  file_id?: string | null;
   attachments?: CommissionCharacterAttachmentRaw[];
 }
-export type CommissionCharacterChangelog = CommissionCharacterChangelogRaw & {
+export type CommissionCharacterChangelog = Omit<CommissionCharacterChangelogRaw, 'attachments'> & {
   attachments?: string[]; // Array of file IDs
 }
 export interface CommissionCharacterRaw {

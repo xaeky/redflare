@@ -12,7 +12,7 @@ export type CommissionPaymentStatusEditable = 'paid_manual' | 'cancelled' | 'ref
 export type CommissionPaymentCurrency = 'ARS' | 'USD'; // ISO 4217 currency codes
 export type CommissionPaymentProcessor = 'mercadopago' | 'paypal';
 // Shared
-export interface CommissionBaseRaw {
+export type CommissionBaseRaw = OptionalId<{
   status: CommissionStatusType | number;
   flags: CommissionFlagsType | number;
   public_note: string | null;
@@ -20,12 +20,11 @@ export interface CommissionBaseRaw {
   created_at: string | Date;
   updated_at: string | Date;
   characters: CommissionCharacterRaw[];
-  customer: CustomerRaw;
-  payments: string[] | OptionalId<PaymentTransaction[]>;
-}
-export type CommissionBase = Omit<CommissionBaseRaw, 'characters' | 'customer'> & {
+  customer: string;
+  payments: string[] | OptionalId<PaymentTransaction>[];
+}>;
+export type CommissionBase = Omit<CommissionBaseRaw, 'characters'> & {
   characters: CommissionCharacter[];
-  customer: string | ObjectId;
 }
 export type DeserializedCommission = Deserialized<WithId<CommissionBase>> & {
   locked_fields?: {
@@ -78,13 +77,18 @@ export type SerializedCommission = Omit<CommissionBase, 'customer'> & {
 export type SerializedCommissionCharacterOptions = Omit<CommissionCharacterOptions, 'commission'>;
 
 // Front-end types @ Frontoffice
-export type PublicSerializedCommission = Omit<CommissionBase, 'public_note' | 'secure_note'> & {
-  note: string;
-  n_characters: number;
-  customer: {
-    id: string;
-    name: string;
-    vrc_id: string | null;
-  };
-  latest_payment: CommissionPayment;
+export type PublicSerializedCommission = {
+  data: CommissionBase & {
+    locked_fields?: {
+      characters_count: number;
+    }
+  },
+  attachments?: Record<string, CommissionCharacterAttachmentRaw>;
+  customer: DeserializedCustomer;
+}
+
+export type SingleCommissionResponse = {
+  data: CommissionBaseRaw;
+  attachments?: Record<string, CommissionCharacterAttachmentRaw>;
+  customer: CustomerRaw;
 }

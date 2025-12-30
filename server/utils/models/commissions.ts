@@ -1,5 +1,6 @@
 import { ObjectId, WithId } from 'mongodb';
 import _ from 'lodash';
+import type { FileMetadata } from '@google-cloud/storage';
 
 type CommissionGetAllParams = {
   page?: number;
@@ -66,7 +67,7 @@ const getAll = async ({ page, pageSize = 50, filters, sort, public: publicReques
   return { data, total };
 }
 
-const getOneById = async (commissionId: string, viewAs?: ViewAs) => {
+const getOneById = async (commissionId: string, viewAs?: ViewAs): Promise<SingleCommissionResponse | null> => {
   const collection = await useMongoCollection('commissions');
   const projectStage: Record<string, 0 | 1> = { baseObj: 0 };
   let excludedFields;
@@ -84,15 +85,6 @@ const getOneById = async (commissionId: string, viewAs?: ViewAs) => {
   });
   const commissionPipeline: Record<string, any>[] = [
     { $match: { _id: new ObjectId(commissionId) } },
-    {
-      $lookup: {
-        from: 'customers',
-        localField: 'customer',
-        foreignField: '_id',
-        as: 'customer'
-      },
-    },
-    { $unwind: { path: '$customer', preserveNullAndEmptyArrays: true } },
     { $unwind: { path: '$characters', preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
@@ -164,17 +156,36 @@ const getOneById = async (commissionId: string, viewAs?: ViewAs) => {
   }
   commissionPipeline.push({ $project: projectStage });
   const commission = await collection.aggregate<CommissionBaseRaw>(commissionPipeline).next();
-
-  if (_.isEmpty(commission)) return null;
-  if (!commission) return null;
-  return commission;
+  if (!commission || _.isEmpty(commission)) return null;
+  const customer = await useCustomerModel().getById(commission.customer.toString() || '');
+  // Fetch file details for each attachment of each character changelog
+  const fileIds = _.uniq(
+    _.flatMap(commission.characters ?? [], (char) =>
+      _.flatMap(char.changelog ?? [], (changelog) => changelog.attachments ?? [] )
+    )
+  );
+  let filesDetails: Record<string, FileMetadata> = {};
+  if (fileIds.length > 0) filesDetails = await bucketGetFilesDetails(fileIds as unknown as string[]);
+  // Minify details to each attachment ID
+  const minifiedFilesDetails: Record<string, CommissionCharacterAttachmentRaw> = _.mapValues(filesDetails, (file) => ({
+    id: file.id,
+    filename: file.metadata?.originalName,
+    filetype: getContentTypeByExtension(file.metadata?.originalName as string || ''),
+    size: parseInt(file.size as string, 10),
+  } as CommissionCharacterAttachmentRaw));
+  let returnData = {
+    data: commission,
+    attachments: viewAs === 'customer' || viewAs === 'agent' ? minifiedFilesDetails : undefined,
+    customer: customer
+  }
+  return returnData;
 }
 
 const updateOne = async (commissionId: string, requestData: Partial<CommissionUpdate>) => {
   const collection = await useMongoCollection('commissions');
   const newData:Partial<CommissionUpdate> = {
     ...requestData,
-    ...(requestData.customer ? { customer: new ObjectId(requestData.customer) } : {}),
+    ...(requestData.customer ? { customer: new ObjectId(requestData.customer as string) } : {}),
     ...(requestData.characters ? { characters: requestData.characters.map(c => {
       const sanitizedCharacter = c;
       // Ensure base is an ObjectId

@@ -1,21 +1,23 @@
 <script setup lang="ts">
-import { z } from 'zod';
+const commissionFormStore = useCommissionFormStore();
 
-const changelogItemState = defineModel<CommissionCharacterChangelog>('changelogItemState', {
-  required: true
-});
+const props = defineProps<{
+  changelogIndex: number
+  characterIndex: number
+}>();
+
+const changelogItemState = commissionFormStore.formState.characters[props.characterIndex]?.changelog[props.changelogIndex];
 
 const emit = defineEmits<{
   (e: 'remove'): void
 }>();
-const schema = commissionChangelogSchema;
 const toast = useToast();
 const tempFile = ref<File | null>(null);
 const tempFileUploading = ref(false);
 const pad = (n: number) => String(n).padStart(2, '0');
 const dateForInput = computed({
   get() {
-    const raw = changelogItemState.value?.date;
+    const raw = changelogItemState?.date;
     if (!raw) return '';
     const hasTZ = /[zZ]|[+\-]\d{2}:?\d{2}$/.test(raw);
     const d = hasTZ ? new Date(raw) : new Date(raw + 'Z');
@@ -23,14 +25,14 @@ const dateForInput = computed({
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   },
   set(val: string) {
-    if (!changelogItemState.value) return;
+    if (!changelogItemState) return;
     if (!val) return;
     // Parse local datetime into a Date, then use toISOString() (UTC) and strip ms + 'Z'
     const [datePart, timePart = '00:00:00'] = val.split('T');
     const [y, m, day] = (datePart as string).split('-').map(Number);
     const [hh = 0, mm = 0, ss = 0] = timePart.split(':').map(Number);
     const localDate = new Date((y as number), (m ?? 1) - 1, day ?? 1, hh, mm, ss);
-    changelogItemState.value.date = localDate.toISOString().replace(/\.\d{3}Z$/, 'Z');
+    changelogItemState.date = localDate.toISOString().replace(/\.\d{3}Z$/, 'Z');
   }
 });
 
@@ -39,36 +41,36 @@ const handleFileUpload = async (file: File) => {
   const form = new FormData();
   form.append('file', file);
   form.append('prefix', 'avatars');
-  const result = await $fetch<{ success: boolean, id: string }>('/api/storage', { method: 'PUT', body: form }).catch(() => {
+  const result = await $fetch<{ success: boolean, id: string, storageId: string }>('/api/storage', { method: 'PUT', body: form }).catch(() => {
     success = false;
   });
   if (!success) return null;
   return result;
 };
-const handleFileDelete = async (fileId: string) => {
+const handleFileDelete = async (attachmentId: string) => {
   let success = true;
-  await $fetch('/api/storage', { method: 'DELETE', body: { id: fileId } }).catch(() => {
+  await $fetch('/api/storage', { method: 'DELETE', body: { id: attachmentId } }).catch(() => {
     success = false;
   });
   return success;
 };
-const handleFileRemove = async () => {
-  if (!changelogItemState.value) return;
-  const fileId = changelogItemState.value.file_id;
-  if (!fileId) return;
+const handleFileRemove = async (attachmentId: string) => {
+  if (!changelogItemState) return;
+  if (!attachmentId) return;
   const secondaryModal = toast.add({ description: 'Removing file...', color: 'neutral' });
-  const result = await handleFileDelete(fileId);
+  const result = await handleFileDelete(attachmentId);
   if (result) toast.add({ description: 'Removed file successfully', color: 'success' });
   else toast.add({ description: 'Failed to remove file', color: 'error' });
   toast.remove(secondaryModal.id);
-  changelogItemState.value.file_id = null;
+  changelogItemState.attachments = changelogItemState.attachments?.filter(a => a !== attachmentId) || [];
 };
-const handleFileRemoveForm = () => {
+const handleFileRemoveForm = (attachmentId: string) => {
+  const thisAttachment = commissionFormStore.additionalState.attachments[attachmentId];
   useConfirmationModal({
-    message: 'Are you sure you want to remove the uploaded file? This action cannot be undone.',
+    message: `Are you sure you want to remove the ${thisAttachment?.filename}? This action cannot be undone.`,
     confirmLabel: 'Remove file',
     danger: true,
-    onConfirm: () => { handleFileRemove(); }
+    onConfirm: () => handleFileRemove(attachmentId)
   });
 };
 const handleVersionRemove = async () => {
@@ -78,7 +80,10 @@ const handleVersionRemove = async () => {
     danger: true,
     onConfirm: async () => {
       try {
-        await handleFileRemove();
+        // Remove all attached files by using Promise.all
+        if (changelogItemState?.attachments && changelogItemState.attachments.length > 0) {
+          await Promise.all(changelogItemState.attachments.map(attId => handleFileDelete(attId)));
+        }
         emit('remove');
       } catch (e) {
         toast.add({ description: 'Failed to remove version', color: 'error' });
@@ -94,17 +99,26 @@ watch(tempFile, async (newFile) => {
   const result = await handleFileUpload(newFile);
   tempFileUploading.value = false;
   if (result && result.success) toast.add({ description: 'Uploaded file successfully', color: 'success' });
-  else toast.add({ description: 'Failed to upload file', color: 'error' });
+  else return toast.add({ description: 'Failed to upload file', color: 'error' });
   const toastToRemove = toast.toasts.value.find(t => t.description === 'Uploading file...');
   if (toastToRemove) toast.remove(toastToRemove.id);
-  if (!changelogItemState.value) return;
-  changelogItemState.value.file_id = result ? result.id : null;
+  if (!changelogItemState) return;
+  changelogItemState.attachments ||= [];
+  // Append file details to store
+  commissionFormStore.addAttachmentMetadata(result.id as string, {
+    id: result.storageId as string,
+    filename: newFile.name,
+    filetype: getContentTypeByExtension(newFile.name),
+    size: newFile.size,
+  });
+  // Push attachment ID to changelog attachments
+  changelogItemState.attachments?.push(result?.id as string);
   tempFile.value = null;
 });
 </script>
 
 <template>
-  <UForm class="space-y-2 p-4 bg-muted/50 rounded-lg shadow-md" :state="changelogItemState" :schema>
+  <div class="space-y-2 p-4 bg-muted/50 rounded-lg shadow-md" v-if="changelogItemState">
     <div class="flex gap-4">
       <UFormField label="Date" name="date" :required="true" class="flex-1">
         <UInput v-model="dateForInput" class="w-full" type="datetime-local" />
@@ -130,9 +144,16 @@ watch(tempFile, async (newFile) => {
       </div>
     </div>
     <div class="space-y-2">
-      <div>Package file</div>
-      <div>
-        <div class="flex items-center gap-4" v-if="!changelogItemState.file_id">
+      <h3>Attachments</h3>
+      <div class="flex items-center gap-4">
+        <div v-for="attachment in changelogItemState.attachments" :key="attachment">
+          <UTooltip class="w-full h-full" :text="commissionFormStore.additionalState.attachments[attachment]?.filename || 'Unknown file'">
+            <div class="rf-backoffice-commission-modal-file" @click.stop="handleFileRemoveForm(attachment)">
+              <UIcon name="i-lucide-file-text" />
+            </div>
+          </UTooltip>
+        </div>
+        <div class="rf-backoffice-commission-modal-file empty">
           <UFileUpload
             v-model="tempFile"
             variant="button"
@@ -141,21 +162,22 @@ watch(tempFile, async (newFile) => {
             class="w-16 h-16"
             :disabled="tempFileUploading"
           />
-          <div v-if="tempFileUploading">
-            <SharedGeneralLoader text="Uploading package..." />
-          </div>
-        </div>
-        <div
-          v-if="changelogItemState.file_id && changelogItemState.file_id !== null && !(tempFileUploading)"
-          class="space-y-1 p-2 border border-muted rounded-lg"
-        >
-          <UButton color="error" variant="soft" @click="handleFileRemoveForm" label="Remove uploaded file" icon="i-lucide-package-x" />
-          <div class="font-mono w-96 text-ellipsis overflow-hidden text-xs" v-text="changelogItemState.file_id" />
         </div>
       </div>
     </div>
     <div v-if="changelogItemState" class="flex justify-end">
       <UButton color="error" variant="soft" @click="handleVersionRemove" label="Remove version" icon="i-lucide-trash-2" />
     </div>
-  </UForm>
+  </div>
 </template>
+
+<style scoped>
+@reference '~/assets/global.css';
+
+.rf-backoffice-commission-modal-file {
+  @apply w-16 h-16 rounded-lg cursor-pointer flex items-center justify-center bg-muted/50 hover:bg-muted/70 duration-150;
+  &.empty {
+    @apply border border-dashed border-muted/50;
+  }
+}
+</style>

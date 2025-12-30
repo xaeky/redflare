@@ -1,16 +1,16 @@
 <script setup lang="ts">
 type OverlayInstance = ReturnType<ReturnType<typeof useOverlay>['create']>;
-
-const state = defineModel<CommissionCharacterChangelog[]>('changelogState', {
-  required: true
-});
+const commissionFormStore = useCommissionFormStore();
 
 const props = defineProps<{
+  characterIndex: number,
   overlay: OverlayInstance
 }>();
 
+const state = commissionFormStore.formState.characters[props.characterIndex]?.changelog;
+
 const handleAddVersion = () => {
-  state.value.push({ date: new Date().toISOString(), version: '0.0.0', items: [''] });
+  state?.push({ date: new Date().toISOString(), version: '0.0.0', items: [''] });
 };
 const handleClose = () => props.overlay.close();
 </script>
@@ -18,11 +18,11 @@ const handleClose = () => props.overlay.close();
 <template>
   <UModal title="Edit character release" :dismissible="false">
     <template #body>
-      <div class="space-y-4" v-if="state.length">
+      <div class="space-y-4" v-if="state?.length">
         <BackofficeCommissionModalEditCharacterChangelogItem
-          v-for="(changelogItem, index) in state" :key="index"
-          v-model:changelogItemState="(state[index] as CommissionCharacterChangelog)"
-          @remove="() => { state.splice(index, 1) }"
+          v-for="(_changelogItem, changelogIndex) in state" :key="changelogIndex"
+          :changelogIndex="changelogIndex" :characterIndex="characterIndex"
+          @remove="() => { state?.splice(changelogIndex, 1) }"
         />
       </div>
       <div v-else class="text-center text-sm text-muted-foreground">

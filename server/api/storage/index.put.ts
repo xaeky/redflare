@@ -11,6 +11,6 @@ export default defineEventHandler(async (event) => {
   const fileBuffer = Buffer.from(fileField.data);
   const fileId = ObjectId.createFromTime(Math.floor(Date.now() / 1000));
   const destinationPath = `${prefixValue}/${fileId.toString()}`;
-  const { id } = await bucketUploadFile({ destinationPath, fileBuffer, metadata: { originalName: fileField.filename } });
-  return { success: true, id };
+  const { id, storageId } = await bucketUploadFile({ destinationPath, fileBuffer, metadata: { originalName: fileField.filename } });
+  return { success: true, id, storageId };
 });

@@ -3,15 +3,13 @@ import { BackofficeCommissionModalAddBillingTransaction, BackofficeCommissionMod
 import type { DropdownMenuItem } from '@nuxt/ui';
 
 const overlay = useOverlay();
-const props = defineProps<{
-  commission?: string
-}>();
+const commissionFormStore = useCommissionFormStore();
 
 // Query remote commission's billing transactions
 const { data: transactions, isLoading: transactionsLoading, error, refetch: transactionsRefresh } = useQuery<Deserialized<PaymentTransaction>[]>({
-  key: () => ['commission-billing', props.commission as string],
-  query: () => useAPI(`/api/commissions/${props.commission}/billing`),
-  enabled: () => !!props.commission,
+  key: () => ['commission-billing', commissionFormStore.additionalState.id],
+  query: () => useAPI(`/api/commissions/${commissionFormStore.additionalState.id}/billing`),
+  enabled: () => !!commissionFormStore.additionalState.id,
   refetchOnWindowFocus: false
 });
 
@@ -22,7 +20,7 @@ const openAddTransactionModal = (existing?: boolean) => {
     destroyOnClose: true
   });
   modalOverlay.open({
-    commission: props.commission,
+    commission: commissionFormStore.additionalState.id as string,
     onCreated: () => {
       transactionsRefresh();
       modalOverlay.close();
@@ -68,7 +66,7 @@ const headerExtraActionsItems: DropdownMenuItem[][] = [
       <div v-if="!transactionsLoading && transactions && transactions.length" class="space-y-4">
         <BackofficeCommissionFormBillingTransaction
           v-for="transaction in transactions" :key="transaction._id"
-          :transaction :commission="(props.commission as string)"
+          :transaction :commission="(commissionFormStore.additionalState.id as string)"
           @deleted="() => transactionsRefresh()"
           @updated="() => transactionsRefresh()"
         />

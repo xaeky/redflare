@@ -4,12 +4,9 @@ import * as z from 'zod';
 import { avatarBasesQuery } from '~/queries/commissions';
 import { BackofficeCommissionModalEditCharacterChangelog } from '#components';
 
-const schema = commissionUpdateSchema;
+const commissionFormStore = useCommissionFormStore();
+
 const characterSchema = commissionCharacterOptionsSchema;
-type Schema = z.output<typeof schema>;
-const state = defineModel<Schema>('state', {
-  default: {}
-});
 const formsCharacterRef = ref();
 
 // Overlays
@@ -36,14 +33,13 @@ function addCharacterObject() {
     note: '',
     changelog: []
   };
-  state.value.characters.push(characterObject);
+  commissionFormStore.formState.characters.push(characterObject);
 }
 
 function handleCharacterChangelogEdit(characterIndex: number) {
-  if (!state.value.characters[characterIndex]) return;
+  if (!commissionFormStore.formState.characters[characterIndex]) return;
   editChangelogModalOverlay.open({
-    changelogState: state.value.characters[characterIndex].changelog,
-    overlay: editChangelogModalOverlay
+    characterIndex, overlay: editChangelogModalOverlay
   });
 } 
 
@@ -55,7 +51,7 @@ defineExpose({
 <template>
   <div class="space-y-4">
     <div class="space-y-4">
-      <div v-for="(character, index) in state.characters" :key="index" class="space-y-4 bg-muted/50 p-4 rounded-lg shadow-xl">
+      <div v-for="(character, index) in commissionFormStore.formState.characters" :key="index" class="space-y-4 bg-muted/50 p-4 rounded-lg shadow-xl">
         <UForm ref="formsCharacterRef" :state="character" :schema="characterSchema" class="space-y-2">
           <UFormField label="Character name" name="name">
             <UInput v-model="character.name" placeholder="Character name" class="w-full" />
@@ -78,7 +74,7 @@ defineExpose({
             icon="i-heroicons-trash-16-solid"
             color="error"
             variant="subtle"
-            @click="state.characters.splice(index, 1)"
+            @click="commissionFormStore.formState.characters.splice(index, 1)"
             class="mb-2"
           />
           <UButton

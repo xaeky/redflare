@@ -2,7 +2,6 @@
 import _ from 'lodash';
 import z from 'zod';
 import { commissionsQuery } from '~/queries/commissions';
-import type { BackofficeCommissionFormExposed } from '~/components/Backoffice/Commission/Form/Index.vue';
 import { ModalGenericConfirmation } from '#components';
 
 const props = defineProps<{
@@ -11,18 +10,16 @@ const props = defineProps<{
 
 const toast = useToast();
 const queryCache = useQueryCache();
-const schema = commissionUpdateSchema;
-type Schema = z.output<typeof schema>;
-const formRef = ref<BackofficeCommissionFormExposed>();
+const commissionFormStore = useCommissionFormStore();
 
 // Overlays
 const overlay = useOverlay();
 const confirmationOverlay = overlay.create(ModalGenericConfirmation);
 
 const { mutate: updateCommission, isLoading: updateCommissionBusy } = useMutation({
-  mutation: (upsertData: Schema) => useAPI(`/api/commissions/${props.commission_id}`, {
+  mutation: () => useAPI(`/api/commissions/${props.commission_id}`, {
     method: 'PUT',
-    body: _.mapValues(upsertData, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
+    body: _.mapValues(commissionFormStore.formState, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
   }),
   onSuccess: () => {  
     queryCache.invalidateQueries(commissionsQuery);
@@ -46,14 +43,7 @@ function handleCancel() {
 }
 
 async function handleSave() {
-  if (!formRef.value) return;
-  const errors = await formRef.value.validate();
-  const upsertData = toRaw(formRef.value.state);
-  if (errors) {
-    toast.add({ title: 'Unable to save changes, review your fields!', color: 'error' });
-    return;
-  }
-  updateCommission(upsertData);
+  updateCommission();
 }
 
 function handleDelete() {
