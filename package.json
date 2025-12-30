@@ -45,6 +45,7 @@
     "@types/lodash": "^4.17.16",
     "cross-env": "^7.0.3",
     "dotenv": "^17.0.0",
-    "nuxt-mcp-dev": "^0.3.1"
+    "nuxt-mcp-dev": "^0.3.1",
+    "vite-svg-loader": "^5.1.0"
   }
 }

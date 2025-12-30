@@ -36,6 +36,9 @@ export default defineNuxtConfig({
       cert: 'localhost.pem'
     }
   },
+  vite: {
+    plugins: [require('vite-svg-loader')()]
+  },
   runtimeConfig: {
     mp: {
       public: '', // PublicToken

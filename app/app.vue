@@ -8,7 +8,7 @@ useHead({
 
 <template>
   <main id="redflare_root">
-    <NuxtLoadingIndicator color="#e7a904" />
+    <NuxtLoadingIndicator color="#00d3f2" />
     <NuxtLayout>
       <NuxtPage/>
     </NuxtLayout>

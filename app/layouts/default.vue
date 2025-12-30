@@ -13,8 +13,8 @@ useHead({
 <template>
   <UApp>
     <div id="rf-default">
-      <div class="p-4 text-center w-full">
-        <img :src="xaLogotypeSvg" class="h-18 inline-block" />
+      <div class="p-2 flex justify-center w-full">
+        <HeaderLogo />
       </div>
       <div class="container mx-auto px-6 md:px-12 py-6 flex-1 grid">
         <slot />
