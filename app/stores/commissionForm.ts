@@ -81,7 +81,6 @@ export const useCommissionFormStore = defineStore('commissionForm', () => {
       });
       errors.value = {};
     } catch (error: any) {
-      errors.value.general = error.message || 'Failed to fetch commission data';
       toast.add({
         color: 'error',
         description: errors.value.general,

@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import _ from 'lodash';
 import type { TableColumn } from '@nuxt/ui';
 import { UButton } from '#components';
-import { ModalGenericConfirmation, BackofficeCustomerEditSlideover } from '#components';
+import { BackofficeCustomerEditSlideover } from '#components';
 
 const props = defineProps<{
   customers: DeserializedCustomer[]
@@ -11,38 +12,20 @@ const sorting = defineModel('sorting', {
   default: () => [{ id: 'created_at', desc: true }]
 });
 const customers = computed(() => props.customers);
-const toast = useToast();
-const queryCache = useQueryCache();
-
-// Overlays
 const overlay = useOverlay();
-const confirmationOverlay = overlay.create(ModalGenericConfirmation);
-const editSlideoverOverlay = overlay.create(BackofficeCustomerEditSlideover);
-
-// Mutations
-const { mutate: deleteCustomer, isLoading: deleteCustomerBusy } = useMutation({
-  mutation: (id: string) => useAPI(`/api/customers/${id}`, { method: 'DELETE' }),
-  onSuccess() {
-    queryCache.invalidateQueries({ key: ['customers'] });
-    toast.add({
-      description: 'Customer deleted.'
-    });
-  }
-})
+const customerFormStore = useCustomerFormStore();
 
 function handleVRCProfileVisit(id: string) {
   const baseURI = 'https://vrchat.com/home/user';
   navigateTo(`${baseURI}/${id}`, { external: true, open: { target: '_blank' } });
 }
 
-function handleDeleteButton(id: string) {
-  confirmationOverlay.open({
-    onConfirm: () => deleteCustomer(id),
-  });
-}
-
 function handleEditButton(customer: DeserializedCustomer) {
-  editSlideoverOverlay.open({ customer });
+  _.assign(customerFormStore.formState, _.pick(customer, Object.keys(customerFormStore.schema.shape)));
+  customerFormStore.additionalState.id = customer._id as string;
+  overlay.create(BackofficeCustomerEditSlideover, {
+    destroyOnClose: true
+  }).open();
 }
 
 const columns: TableColumn<DeserializedCustomer>[] = [
@@ -94,14 +77,6 @@ const columns: TableColumn<DeserializedCustomer>[] = [
             size: 'lg',
             variant: 'soft',
             onClick: () => handleEditButton(row.original)
-          }),
-          h(UButton, {
-            icon: 'i-heroicons-trash-20-solid',
-            size: 'lg',
-            color: 'error',
-            variant: 'soft',
-            disabled: deleteCustomerBusy.value,
-            onClick: () => handleDeleteButton(row.original._id as string)
           })
         ]
       )

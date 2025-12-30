@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { CommissionUpdate } from '~~/shared/types/Commissions';
-import type { FileMetadata } from '@google-cloud/storage';
 import type { TabsItem, SelectItem } from '@nuxt/ui';
 import _ from 'lodash';
 import * as z from 'zod';
@@ -8,11 +6,11 @@ import { customerFilterQuery } from '~/queries/customers';
 import { CalendarDate } from '@internationalized/date';
 import { CommissionStatusType } from '~~/shared/enums/Commissions';
 import { useCommissionFormStore } from '~/stores/commissionForm';
+const commissionFormStore = useCommissionFormStore();
 
 const props = defineProps<{
   commission_id?: string
 }>();
-const commissionFormStore = useCommissionFormStore();
 
 const formTabs = ref<TabsItem[]>([ 
   { label: 'General', slot: 'general' as const }, 
@@ -88,6 +86,7 @@ const commissionCreatedDate = computed({
   }
 });
 
+// TODO: Refactor this to use it with current store.
 async function validate() {
   // Do not report errors, validation already does that
   try {

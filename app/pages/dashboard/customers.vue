@@ -61,16 +61,16 @@ definePageMeta({
     </div>
     <div v-else-if="customers && customers.data.length">
       <BackofficeCustomerTable :customers="customers.data" v-model:sorting="tableSorting" />
-      <div class="flex justify-center">
-        <UPagination
-          v-model:page="tablePage"
-          :items-per-page="20"
-          :total="customers.total"
-        />
-      </div>
     </div>
     <div v-else-if="customers && !customers.data.length">
       No customers found!
+    </div>
+    <div v-if="customers" class="flex justify-center">
+      <UPagination
+        v-model:page="tablePage"
+        :items-per-page="20"
+        :total="customers.total"
+      />
     </div>
   </div>
 </template>
