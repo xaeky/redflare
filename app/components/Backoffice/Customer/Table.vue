@@ -53,7 +53,7 @@ const columns: TableColumn<DeserializedCustomer>[] = [
           }, {
             default: () => h(UButton, {
               icon: 'i-bi-headset-vr', size: 'sm', variant: 'soft',
-              onClick: () => handleVRCProfileVisit(row.getValue('vrc_id'))
+              onClick: () => handleVRCProfileVisit(row.original.vrc_id as string)
             })
           }) : null,
           hasDiscord ? h(UButton, {
