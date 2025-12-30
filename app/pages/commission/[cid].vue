@@ -12,7 +12,7 @@ const commissionTimelineAllowedValues:AllowedTimelineValues[] = [CommissionStatu
 const commissionTimeline = ref<TimelineItem[]>([
   {
     title: 'In project setup',
-    description: 'We\'ve received your order and it was approved. We are making the project workspace (folders).',
+    description: 'We\'ve received your order and we are making the project workspace.',
     icon: 'i-lucide-folder-open',
     value: CommissionStatusType.InSetup.toString()
   },
@@ -103,7 +103,7 @@ useSeoMeta({
         </div>
         <div id="commission_sections" class="space-y-4">
           <section v-if="commissionTimelineAllowedValues.includes(commissionRoutedValue as AllowedTimelineValues)">
-            <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" />
+            <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" orientation="horizontal" />
           </section>
           <section v-if="commission.data.characters && commission.data.characters.length" class="space-y-4">
             <h2>Characters</h2>
