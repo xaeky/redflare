@@ -17,7 +17,6 @@ export async function needAuth(event: EventUserSession) {
   let cachedSession = await cache.get<boolean>(cacheKey);
   const { domain, clientId, clientSecret } = runtime.oauth.auth0;
   const { refresh_token, id_token } = userSession.secure as SecureSessionData;
-  // const a0User = new UserInfoClient({ domain });
   const a0Manager = new ManagementClient({ domain, clientId, clientSecret });
   const a0Auth = new AuthenticationClient({ domain, clientId, clientSecret });
   const decodedIdAuth = decode(id_token) as JwtPayload;
@@ -37,8 +36,13 @@ export async function needAuth(event: EventUserSession) {
   // User exists, now we try to update the token if it's expired
   const isSessionExpired = !decodedIdAuth.exp || Date.now() >= (decodedIdAuth.exp as number) * 1000;
   if (!isSessionExpired) return userSession;
+  if (isSessionExpired && !refresh_token) {
+    clearUserSession(event as H3Event);
+    throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: 'Your refresh token is missing or expired.' });
+  }
   try {
-    const refreshResult = await a0Auth.oauth.refreshTokenGrant({ refresh_token });
+    logger.debug('Session expired, attempting to refresh for user:', decodedIdAuth.sub);
+    const refreshResult = await a0Auth.oauth.refreshTokenGrant({ refresh_token, scope: 'offline_access openid profile email' });
     if (!refreshResult.data) throw new Error();
     const newSession = await replaceUserSession(event as H3Event, {
       secure: {
@@ -81,7 +85,7 @@ export async function hasPermission(event: EventUserSession, permissionName: Per
   const runtime = useRuntimeConfig();
   // Skip permission check if runtime config allows it
   if (runtime.backoffice.skipRoles) {
-    console.warn('⚠️', `Skipping permission check for "${permissionName}" due to runtime config setting.`);
+    logger.warn('⚠️', `Skipping permission check for "${permissionName}" due to runtime config setting.`);
     return true;
   }
   const permissions = await getPermissions(event, false);
