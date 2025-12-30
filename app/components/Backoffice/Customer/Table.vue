@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import _ from 'lodash';
 import type { TableColumn } from '@nuxt/ui';
-import { UButton } from '#components';
+import { UButton, UTooltip } from '#components';
 import { BackofficeCustomerEditSlideover } from '#components';
 
 const props = defineProps<{
@@ -36,19 +36,34 @@ const columns: TableColumn<DeserializedCustomer>[] = [
     cell: ({row}) => row.getValue('name')
   },
   {
-    accessorKey: 'vrc_id',
-    header: 'VRC Profile',
+    accessorKey: 'socials',
+    header: 'Socials',
     cell: ({row}) => {
-      const thisValue:string | null = row.getValue('vrc_id')
-      const isEmpty = !thisValue || !thisValue.length;
-      return isEmpty ? '' : h(UButton, {
-        label: 'See profile',
-        variant: 'soft',
-        color: 'neutral',
-        size: 'sm',
-        icon: 'i-heroicons-arrow-up-right-20-solid',
-        onClick() { handleVRCProfileVisit(row.getValue('vrc_id')) }
-      });
+      const hasVRC = !!row.original.vrc_id;
+      const hasDiscord = !!row.original.discord_id;
+      const hasTelegram = !!row.original.telegram_id;
+      return h('div',
+        {
+          class: 'flex items-center gap-2'
+        },
+        [
+          hasVRC ? h(UTooltip, {
+            text: 'Visit VRChat Profile',
+            placement: 'top'
+          }, {
+            default: () => h(UButton, {
+              icon: 'i-bi-headset-vr', size: 'sm', variant: 'soft',
+              onClick: () => handleVRCProfileVisit(row.getValue('vrc_id'))
+            })
+          }) : null,
+          hasDiscord ? h(UButton, {
+            icon: 'i-bi-discord', size: 'sm', variant: 'soft'
+          }) : null,
+          hasTelegram ? h(UButton, {
+            icon: 'i-bi-telegram', size: 'sm', variant: 'soft'
+          }) : null
+        ]
+      )
     },
   },
   {

@@ -3,6 +3,7 @@ import { customersQuery } from '~/queries/customers';
 import { BackofficeCustomerAddSlideover } from '#components';
 
 const toast = useToast();
+const overlay = useOverlay();
 const tableSorting = ref([{ id: 'created_at', desc: true }]);
 const tablePage = ref(1);
 const { data:customers, refresh, asyncStatus, state } = useQuery(customersQuery, () => ({
@@ -12,10 +13,6 @@ const { data:customers, refresh, asyncStatus, state } = useQuery(customersQuery,
   },
   page: tablePage.value
 }));
-
-// Overlays
-const overlay = useOverlay();
-const addSlideoverOverlay = overlay.create(BackofficeCustomerAddSlideover);
 
 watch(state, newState => {
   const isError = newState.status === 'error';
@@ -35,12 +32,12 @@ const actions:PageAction[] = [
     icon: 'i-heroicons-arrow-path-16-solid',
     color: 'neutral',
     variant: 'subtle',
-    action: () => { refresh(); }
+    action: refresh
   },
   {
     label: 'Add customer',
     icon: 'i-heroicons-plus-16-solid',
-    action: () => { addSlideoverOverlay.open(); }
+    action: () => { overlay.create(BackofficeCustomerAddSlideover, { destroyOnClose: true }).open(); }
   }
 ];
 
