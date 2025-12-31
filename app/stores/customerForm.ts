@@ -7,7 +7,6 @@ type Schema = z.output<typeof customerOptionsSchema>;
 type AdditionalState = {
   id: string | null;
 }
-
 const defaultState = (): Schema => ({
   name: '',
   vrc_id: '',
@@ -15,7 +14,6 @@ const defaultState = (): Schema => ({
   telegram_id: '',
   discord_id: ''
 });
-
 const defaultAdditionalState = (): AdditionalState => ({
   id: null
 })

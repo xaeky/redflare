@@ -1,31 +1,19 @@
 <script setup lang="ts">
-import { avatarBasesQuery } from '~/queries/commissions';
+import { BackofficeBasesEditSlideover } from '#components';
+import _ from 'lodash';
 
-// Props
 const props = defineProps<{
   base: DeserializedAvatarBase 
 }>();
 
-// Emits
-const emit = defineEmits<{
-  (e: 'edit', value: DeserializedAvatarBase): void
-}>();
+const avatarBaseFormStore = useAvatarBaseFormStore();
+const overlay = useOverlay();
 
-// Misc vars
-const queryCache = useQueryCache();
-const toast = useToast();
-
-// Mutations
-const { mutate:deleteBase, isLoading:deleteBaseBusy  } = useMutation({
-  mutation: () => useAPI(`/api/commissions/bases/${props.base._id}`, { method: 'DELETE' }),
-  onSuccess() {
-    queryCache.invalidateQueries(avatarBasesQuery);
-    toast.add({
-      icon: 'i-lucide-check',
-      description: 'Base deleted.'
-    })
-  }
-})
+function handleEditButton() {
+  _.assign(avatarBaseFormStore.formState, _.pick(props.base, Object.keys(avatarBaseFormStore.schema.shape)));
+  avatarBaseFormStore.additionalState.id = props.base._id as string;
+  overlay.create(BackofficeBasesEditSlideover, { destroyOnClose: true }).open();
+}
 </script>
 
 <template>
@@ -40,8 +28,7 @@ const { mutate:deleteBase, isLoading:deleteBaseBusy  } = useMutation({
     <div class="flex justify-between items-center">
       <span v-text="base._id" class="font-mono text-xs select-all" />
       <div class="flex items-center gap-2">
-        <UButton icon="i-lucide-trash-2" variant="soft" color="error" size="xl" @click="() => { deleteBase() }" :loading="deleteBaseBusy" :disable="deleteBaseBusy" />
-        <UButton label="Edit base" icon="i-lucide-pencil" variant="soft" :disable="deleteBaseBusy" @click="emit('edit', base)" />
+        <UButton label="Edit base" icon="i-lucide-pencil" variant="soft" @click="handleEditButton" />
       </div>
     </div>
   </li>
