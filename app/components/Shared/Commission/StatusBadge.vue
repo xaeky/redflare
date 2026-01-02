@@ -15,7 +15,7 @@ const statusLabels:Record<CommissionStatusType, { label: string; color: colorTyp
   [CommissionStatusType.None]: { label: 'None', color: 'neutral', icon: 'i-lucide-circle-question-mark' },
   [CommissionStatusType.Backlog]: { label: 'Backlog', color: 'neutral', icon: 'i-lucide-circle-question-mark' },
   [CommissionStatusType.Cancelled]: { label: 'Cancelled', color: 'neutral', icon: 'i-lucide-circle-minus' },
-  [CommissionStatusType.InCooldown]: { label: 'In Cooldown', color: 'secondary', icon: 'i-lucide-circle-stop' },
+  [CommissionStatusType.AwaitingResponse]: { label: 'Awaiting Response', color: 'secondary', icon: 'i-lucide-message-circle-warning' },
   [CommissionStatusType.InDevelopment]: { label: 'In Development', color: 'info', icon: 'i-lucide-circle-play' },
   [CommissionStatusType.InSetup]: { label: 'In Project Setup', color: 'neutral', icon: 'i-lucide-circle-dashed' },
   [CommissionStatusType.Maintenance]: { label: 'Maintenance', color: 'warning', icon: 'i-lucide-hammer' },

@@ -64,7 +64,7 @@ const commissionStatusOptions:SelectItem[] = [
   { type: 'separator' },
   { type: 'label', label: 'In progress' },
   { label: 'In Development', value: CommissionStatusType.InDevelopment, icon: 'i-lucide-circle-play' },
-  { label: 'In Cooldown', value: CommissionStatusType.InCooldown, icon: 'i-lucide-circle-stop' },
+  { label: 'Awaiting Response', value: CommissionStatusType.AwaitingResponse, icon: 'i-lucide-message-circle-warning' },
   { type: 'separator' },
   { type: 'label', label: 'Complete' },
   { label: 'Showtime', value: CommissionStatusType.Showtime, icon: 'i-lucide-sparkles' },

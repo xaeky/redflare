@@ -38,7 +38,7 @@ const commissionTimeline = ref<TimelineItem[]>([
 const commissionRoutedValues:Record<AllowedTimelineValues, CommissionStatusType[]> = {
   [CommissionStatusType.InSetup]: [CommissionStatusType.InSetup],
   [CommissionStatusType.NextUp]: [CommissionStatusType.NextUp],
-  [CommissionStatusType.InDevelopment]: [CommissionStatusType.InDevelopment, CommissionStatusType.InCooldown, CommissionStatusType.Maintenance],
+  [CommissionStatusType.InDevelopment]: [CommissionStatusType.InDevelopment, CommissionStatusType.AwaitingResponse, CommissionStatusType.Maintenance],
   [CommissionStatusType.Showtime]: [CommissionStatusType.Showtime, CommissionStatusType.Settled]
 }
 
