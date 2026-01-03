@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { useSession, createError, H3Event } from 'h3';
-import { UserInfoClient, AuthenticationClient, ManagementClient } from 'auth0';
+import { AuthenticationClient, ManagementClient } from 'auth0';
 import type { SecureSessionData } from '#auth-utils';
 import { decode, JwtPayload } from 'jsonwebtoken';
 import cache from './cache';
@@ -11,6 +11,8 @@ export async function needAuth(event: EventUserSession) {
   const runtime = useRuntimeConfig(event as H3Event);
   // Get user session, check if defined or not, if not throw 401 error
   const userSession = await getUserSession(event);
+  // On test environment, skip auth checks
+  if (isTestEnv) return userSession;
   if (!_.get(userSession, 'user') || !_.get(userSession, 'secure.access_token')) throw createError({ statusCode: 401, message: 'Unauthorized' });
   // So user exists on session, now we're going to validate it, use cache to avoid multiple calls
   const cacheKey = `auth0-session-${userSession.user?.sub}`;

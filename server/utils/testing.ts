@@ -1,0 +1,1 @@
+export const isTestEnv = process.env.PLAYWRIGHT_TEST === '1' && process.env.PLAYWRIGHT_TEST_IGNORE !== '1';

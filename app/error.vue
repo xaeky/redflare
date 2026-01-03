@@ -21,7 +21,7 @@ const handleError = () => clearError({ redirect: '/' });
     <div id="redflare_error" class="container mx-auto px-12 min-h-screen flex flex-col justify-center">
       <div v-if="props.error" class="font-mono">
         <h1 v-text="props.error.statusCode" />
-        <div v-text="mapErrors[props.error.statusCode] || 'Unknown error'"/>
+        <div v-text="props.error.statusMessage || mapErrors[props.error.statusCode] || 'Unknown error'"/>
       </div>
       <div class="my-4" v-if="props.error && props.error.stack">
         <pre v-text="props.error.stack" />
