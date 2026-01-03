@@ -48,11 +48,11 @@ const formatTime = (t: string) => useTimeAgo(new Date(t)).value;
             </span>
           </div>
           <div>
-            <UCollapsible class="flex flex-col gap-2 w-48">
+            <UCollapsible class="flex flex-col gap-2">
               <UButton label="View changes" color="neutral" variant="subtle" trailing-icon="i-lucide-chevron-down" block/>
               <template #content>
                 <ul class="changelog_items">
-                  <li v-for="(item, itemIndex) in entry.items" :key="itemIndex">{{ item }}</li>
+                  <li v-for="(item, itemIndex) in entry.items" :key="itemIndex" class="wrap-break-word">{{ item }}</li>
                 </ul>
               </template>
             </UCollapsible>
