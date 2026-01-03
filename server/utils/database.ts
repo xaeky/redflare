@@ -13,9 +13,9 @@ export const validateCommission = async (event: H3Event<EventHandlerRequest>, re
   }
   const currentCustomerUser = publicSession.user ? await customerModel.getByDiscordId(publicSession?.user?.id || '') : null;
   if (!commissionId) throw createError({ statusCode: 400, message: 'Commission ID is required' });
-  let isOwner = currentCustomerUser ? await commissionModel.checkOwnershipFromOne(commissionId, currentCustomerUser?._id.toString() as string) : false;
+  let isOwner = currentCustomerUser !== null ? await commissionModel.checkOwnershipFromOne(commissionId, currentCustomerUser?._id.toString() as string) : false;
   // Override isOwner if agent is logged in and their settings allow it
-  const agentViewModeIsForced = await getCurrentUserSetting(event, 'forceAgentView');
+  const agentViewModeIsForced = agentSession.user?.sub ? await getCurrentUserSetting(event, 'forceAgentView') : false;
   if (agentSession.user && agentViewModeIsForced) isOwner = true;
   let viewAs: ViewAs = isOwner ? 'customer' : 'anon';
   if (await commissionModel.existsOne(commissionId) === false) throw createError({ statusCode: 404, message: 'Commission not found' });
