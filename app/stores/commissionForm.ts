@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import _ from 'lodash';
 import z from 'zod';
 import { CommissionStatusType } from '~~/shared/enums/Commissions';
+import { commissionsQuery } from '~/queries/commissions';
 
 function toUpdateData(remoteData: CommissionBaseRaw): CommissionUpdate {
   const rawClone = _.cloneDeep(remoteData);
@@ -49,6 +50,7 @@ export const useCommissionFormStore = defineStore('commissionForm', () => {
   const busy = ref(false);
   const formState = reactive<Schema>(defaultState());
   const additionalState = reactive<AdditionalState>(defaultAdditionalState());
+  const queryCache = useQueryCache();
 
   function reset() {
     _.assign(formState, defaultState());
@@ -62,6 +64,18 @@ export const useCommissionFormStore = defineStore('commissionForm', () => {
   function removeAttachmentMetadata(attachmentId: string) {
     delete additionalState.attachments[attachmentId];
   }
+
+  const { mutate: insert, isLoading: insertBusy } = useMutation({
+    mutation: () => useAPI(`/api/commissions`, {
+      method: 'POST',
+      body: _.mapValues(formState, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
+    }),
+    async onSuccess() { 
+      await queryCache.invalidateQueries(commissionsQuery({}));
+      useOverlay().closeAll();
+      toast.add({ description: 'Commission created.' });
+    }
+  });
 
   async function fetch(commissionId: string) {
     if (!commissionId) {
@@ -90,5 +104,8 @@ export const useCommissionFormStore = defineStore('commissionForm', () => {
     busy.value = false;
   };
 
-  return { formState, additionalState, addAttachmentMetadata, removeAttachmentMetadata, schema, reset, errors, fetch, busy };
+  return {
+    formState, additionalState, addAttachmentMetadata, removeAttachmentMetadata, schema, reset, errors, fetch, busy,
+    insert, insertBusy
+  };
 });

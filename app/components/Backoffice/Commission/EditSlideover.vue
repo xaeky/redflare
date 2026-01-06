@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import _ from 'lodash';
-import z from 'zod';
 import { commissionsQuery } from '~/queries/commissions';
 import { ModalGenericConfirmation } from '#components';
 
@@ -22,7 +21,7 @@ const { mutate: updateCommission, isLoading: updateCommissionBusy } = useMutatio
     body: _.mapValues(commissionFormStore.formState, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
   }),
   onSuccess: () => {  
-    queryCache.invalidateQueries(commissionsQuery);
+    queryCache.invalidateQueries(commissionsQuery({}));
     useOverlay().closeAll();
   },
   onError() { toast.add({ title: 'Failed to update commission.', color: 'error' }) }
@@ -31,7 +30,7 @@ const { mutate: updateCommission, isLoading: updateCommissionBusy } = useMutatio
 const { mutate: deleteCommission, isLoading: deleteCommissionBusy } = useMutation({
   mutation: () => useAPI(`/api/commissions/${props.commission_id}`, { method: 'DELETE' }),
   onSuccess() {
-    queryCache.invalidateQueries(commissionsQuery);
+    queryCache.invalidateQueries(commissionsQuery({}));
     toast.add({ description: 'Commission deleted.' });
     useOverlay().closeAll();
   },
