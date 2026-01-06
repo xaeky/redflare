@@ -4,10 +4,6 @@ test('Agent is able to create commissions, no characters', async ({ page, goto }
   await goto('/api/test/claimAgentSession'); // Not available on production!
   await page.waitForURL(/\/dashboard/);
   await goto('/dashboard/commissions');
-  // Wait for page to load commissions
-  await page.waitForResponse((response) =>
-    response.url().includes('/api/commissions') && response.status() === 200
-  );
   // Invoke "New commission" action
   await page.click('button:has-text("New commission")');
   await page.waitForSelector('div:has-text("Add commission")');
