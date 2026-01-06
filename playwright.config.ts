@@ -21,7 +21,7 @@ export default defineConfig<ConfigOptions>({
     colorScheme: 'dark',
   },
   projects: [
-    { use: { ...devices['Desktop Firefox'] } }
+    { use: { ...devices['Desktop Chrome'] } }
   ],
   webServer: [
     {

@@ -1,5 +1,4 @@
 import { expect, test } from '@nuxt/test-utils/playwright';
-import _ from 'lodash';
 
 test('Anon user is able to see commission details', async ({ page, goto }) => {
   await goto(`/commission/${process.env.TEST_PUBLIC_COMMISSIONID}`);

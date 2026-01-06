@@ -130,6 +130,7 @@ defineExpose({
               :loading="getCustomersBusy"
               placeholder="Select a customer"
               class="w-full"
+              data-testid="customer-select-menu"
             />
           </UFormField>
           <UFormField name="status" label="Status">
