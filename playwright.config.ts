@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 import type { ConfigOptions } from '@nuxt/test-utils/playwright';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: ['.env', '.env.test'] });
+dotenv.config({ path: ['.env', '.env.test'], quiet: true });
 const TEST_URL = process.env.TEST_URL || 'https://localhost:3000';
 
 export default defineConfig<ConfigOptions>({
