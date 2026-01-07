@@ -2,7 +2,7 @@
 This web app is focused to avatar artists, a replacement for kanban-board apps like Trello and Notion. Redflare is a commission organizer web app that includes dashboard for artists and customers, billing and attachment organization.
 
 ## Why Redflare?
-Many note-taking applications charges to the final user for general usage, those apps are customizable for artists but with a lot of options that doesn't follow a proper standard, giving to the artist the freedom but at the same time the decision of what "format/style" to use when organizing their commissions. This is why I made Redflare, to create a stardard for organize stuff for avatar artists, you can find it as a "template" for artists if you want, with billing features and storage management.
+Many note-taking applications charges to the final user for general usage, those apps are customizable for artists but with a lot of options that doesn't follow a proper standard, giving to the artist the freedom but at the same time the decision of what "format/style" to use when organizing their commissions. This is why I made Redflare, to create a standard to organize stuff for avatar artists, you can find it as a "template" for artists if you want, with billing features and storage management.
 
 ## Features & planned ideas
 - Management for billing and asset storage (`.unitypackage`, `.spp`, etc.).
@@ -13,7 +13,7 @@ Many note-taking applications charges to the final user for general usage, those
   - UI isn't customizable in-app.
 
 ## Deployment and stack required
-Redflare uses many services to work, it will depend on a **MongoDB** database (MongoDB Atlas cloud solution works fine), a **Auth0 tenant** for artist authentication, a **Discord OAuth App** for customer authentication, and a **Google Cloud Platform Bucket** for file storage. Additional "native" plugins you will find are **PayPal** for global payments and **Mercado Pago** for Argentina payments. You'll have to emit local SSL certificates for local development, `mkcert` command can help you with that. I recommend **Bun** for package management for this project.
+Redflare uses many services to work, it will depend on a **MongoDB** database (MongoDB Atlas cloud solution works fine), a **Auth0 tenant** for artist authentication, a **Discord OAuth App** for customer authentication, and a **Google Cloud Platform Bucket** for file storage. Additional "native" plugins you will find are **PayPal** for global payments and **Mercado Pago** for Argentina payments. You'll have to make local SSL certificates for local development, `mkcert` command can help you with that. I recommend **Bun** for package management for this project.
 - Clone and `cd` into the project root folder.
 - Make sure to copy the `.env.example` file, paste and rename it to `.env`. You'll have to fill every field to make the app work properly.
 - **For testing**, same step but for `.env.test.example`.
