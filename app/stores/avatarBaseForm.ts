@@ -11,7 +11,8 @@ type AdditionalState = {
 const defaultState = (): Schema => ({
   name: '',
   creator_name: '',
-  storefront_url: ''
+  storefront_url: '',
+  blacklisted: false
 });
 const defaultAdditionalState = (): AdditionalState => ({
   id: null

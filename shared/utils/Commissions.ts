@@ -52,5 +52,6 @@ export const commissionCharacterOptionsSchema = z.object({
 export const avatarBaseOptionsSchema = z.object({
   name: z.string().min(1),
   creator_name: z.string().min(1),
-  storefront_url: z.string().url()
+  storefront_url: z.string().url(),
+  blacklisted: z.boolean().default(false)
 })

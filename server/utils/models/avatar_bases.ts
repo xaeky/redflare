@@ -2,9 +2,10 @@ import { ObjectId } from 'mongodb';
 
 const collectionName = 'avatar_bases';
 
-const getAll = async () => {
+const getAll = async (excludeBlacklisted = false) => {
   const collection = await useMongoCollection<AvatarBase>(collectionName);
-  return collection.find().toArray();
+  const query = excludeBlacklisted ? { blacklisted: { $ne: true } } : {};
+  return collection.find(query).toArray();
 };
 
 const insertOne = async (data: AvatarBaseInsertOptions) => {
