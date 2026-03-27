@@ -84,29 +84,30 @@ jobs:
           image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
           env_vars: |
             NUXT_MP_PUBLIC=${{ vars.MP_PUBLIC }}
-            NUXT_MP_SERVICE=${{ secrets.MP_SERVICE }}
             NUXT_MP_MARKETPLACE=${{ vars.MP_MARKETPLACE }}
             NUXT_MP_ENDPOINT_BASE=${{ vars.MP_BASE }}
             NUXT_PP_CID=${{ vars.PP_CID }}
-            NUXT_PP_SID=${{ secrets.PP_SID }}
             NUXT_PP_ENDPOINT_BASE=${{ vars.PP_BASE }}
             NUXT_GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
             NUXT_GCP_BUCKET_AVATARFILES_NAME=${{ vars.GCP_BUCKET_AVATARFILES_NAME }}
             NUXT_OAUTH_AUTH0_CLIENT_ID=${{ vars.A0_CLIENT_ID }}
-            NUXT_OAUTH_AUTH0_CLIENT_SECRET=${{ secrets.A0_CLIENT_SECRET }}
             NUXT_OAUTH_AUTH0_DOMAIN=${{ vars.A0_TENANT }}
             NUXT_OAUTH_AUTH0_REDIRECT_URL=${{ vars.A0_CALLBACK }}
             NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_ID=${{ vars.FO_DISCORD_CLIENT }}
-            NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_SECRET=${{ secrets.FO_DISCORD_SECRET }}
             NUXT_FRONTOFFICE_OAUTH_DISCORD_REDIRECT_URL=${{ vars.FO_DISCORD_REDIRECT }}
-            NUXT_FRONTOFFICE_SESSION_PASSWORD=${{ secrets.FO_SESSION_PASSWORD }}
             NUXT_PUBLIC_CREATOR_MARKET_NAME=${{ vars.MARKET_NAME }}
             NUXT_PUBLIC_CREATOR_CALLBACK_URI=${{ vars.MARKET_CALLBACK }}
-            NUXT_SESSION_PASSWORD=${{ secrets.SESSION_PASSWORD }}
             NUXT_BACKOFFICE_SKIP_ROLES=${{ vars.BO_SKIP_ROLES }}
-            NUXT_BACKOFFICE_MONGO=${{ secrets.BO_MONGO }}
-            NUXT_BACKOFFICE_MONGO_DB=${{ vars.BO_MONGO_DB }}
             NUXT_PUBLIC_REDFLARE_ENV=${{ vars.ENV }}
+          secrets: |
+            NUXT_MP_SERVICE=STAGING_MP_SERVICE:latest
+            NUXT_PP_SID=STAGING_PP_SID:latest
+            NUXT_OAUTH_AUTH0_CLIENT_SECRET=STAGING_A0_CLIENT_SECRET:latest
+            NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_SECRET=STAGING_FO_DISCORD_SECRET:latest
+            NUXT_FRONTOFFICE_SESSION_PASSWORD=STAGING_FO_SESSION_PASSWORD:latest
+            NUXT_SESSION_PASSWORD=STAGING_BO_SESSION_PASSWORD:latest
+            NUXT_BACKOFFICE_MONGO=STAGING_BO_MONGO:latest
+            NUXT_BACKOFFICE_MONGO_DB=STAGING_BO_MONGO_DB:latest
           region: us-west1
           flags: >
             --service-account=${{ vars.SERVICE_ACCOUNT }}
