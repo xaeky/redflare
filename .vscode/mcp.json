@@ -2,7 +2,7 @@
   "servers": {
     "nuxt": {
       "type": "sse",
-      "url": "https://localhost:3000/__mcp/sse"
+      "url": "http://localhost:3000/__mcp/sse"
     },
     "nuxt-docs": {
       "type": "sse",

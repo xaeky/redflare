@@ -90,8 +90,8 @@ jobs:
             NUXT_PP_CID=${{ vars.PP_CID }}
             NUXT_PP_SID=${{ secrets.PP_SID }}
             NUXT_PP_ENDPOINT_BASE=${{ vars.PP_BASE }}
-            NUXT_BUCKET_NAME=${{ vars.BUCKET_NAME }}
-            NUXT_BUCKET_AUTH=${{ secrets.BUCKET_AUTH }}
+            NUXT_GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+            NUXT_GCP_BUCKET_AVATARFILES_NAME=${{ vars.GCP_BUCKET_AVATARFILES_NAME }}
             NUXT_OAUTH_AUTH0_CLIENT_ID=${{ vars.A0_CLIENT_ID }}
             NUXT_OAUTH_AUTH0_CLIENT_SECRET=${{ secrets.A0_CLIENT_SECRET }}
             NUXT_OAUTH_AUTH0_DOMAIN=${{ vars.A0_TENANT }}

@@ -4,9 +4,6 @@ import { fileURLToPath } from "node:url";
 export default defineNuxtConfig({
   compatibilityDate: '2025-06-27',
   devtools: { enabled: false },
-  future: {
-    compatibilityVersion: 4
-  },
   nitro: {
     imports: {
       dirs: ['server/utils/services', 'server/utils/models'],
@@ -32,13 +29,13 @@ export default defineNuxtConfig({
   ],
   css: ['~/assets/global.css'],
   devServer: {
-    https: {
-      key: 'localhost-key.pem',
-      cert: 'localhost.pem'
-    }
+    port: parseInt(process.env.NUXT_PORT as string) || 3000,
   },
   vite: {
-    plugins: [require('vite-svg-loader')()]
+    plugins: [require('vite-svg-loader')()],
+    server: {
+      allowedHosts: ['local.xavis.redflare']
+    }
   },
   runtimeConfig: {
     mp: {

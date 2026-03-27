@@ -31,3 +31,6 @@ playwright-report
 
 # Internal files
 scripts/internal
+
+# Credential files
+.credentials

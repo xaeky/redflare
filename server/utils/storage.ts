@@ -1,27 +1,7 @@
 import { type FileMetadata, Storage } from '@google-cloud/storage';
 
-const tryParseJson = (value: string) => {
-  try {
-    const parse = JSON.parse(value);
-    return parse;
-  } catch(e) {
-    return false;
-  }
-};
-
-// For development environment, we use base64 encoded JSON credentials
-// In production, we rely on GCP Secret Manager.
-const safeParseCredentials = (value: string) => {
-  if (!value || !value.length) throw new Error('No storage credentials provided');
-  const jsonString = Buffer.from(value, 'base64').toString('utf-8').replace(/\n/g, '\\n');
-  const parsed = tryParseJson(jsonString);
-  if (!parsed) throw new Error('Failed to parse storage credentials');
-  return parsed;
-};
-
 const getBucketName = () => {
-  const runtime = useRuntimeConfig();
-  const nameProvided = runtime.bucket.name || process.env.NUXT_BUCKET_NAME;
+  const nameProvided = process.env.NUXT_GCP_BUCKET_AVATARFILES_NAME;
   if (!nameProvided || !nameProvided.length) {
     throw new Error('No bucket name provided');
   }
@@ -29,12 +9,9 @@ const getBucketName = () => {
 }
 
 export const useStorageBucket = () => {
-  const runtime = useRuntimeConfig();
   const bucketName = getBucketName();
-  const bucketAuth = runtime.bucket.auth || process.env.NUXT_BUCKET_AUTH || '';
-  const storage = new Storage({
-    credentials: safeParseCredentials(bucketAuth)
-  });
+  const keyFilename = process.env.NUXT_GCP_PROJECT_SERVICE_KEY_PATH;
+  const storage = new Storage({ keyFilename });
   return storage.bucket(bucketName);
 }
 
