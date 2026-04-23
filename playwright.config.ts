@@ -25,7 +25,7 @@ export default defineConfig<ConfigOptions>({
   ],
   webServer: [
     {
-      command: 'bun run devs',
+      command: 'bun dev',
       url: TEST_URL,
       wait: {
         stdout: /Nitro server built/,

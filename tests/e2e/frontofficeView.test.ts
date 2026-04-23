@@ -5,14 +5,14 @@ test('Anon user is able to see commission details', async ({ page, goto }) => {
   await expect(page.getByRole('heading', { name: 'Commission' })).toBeVisible();
 });
 
-test('Public user is able to fetch commissions', async ({ page, goto }) => {
+test('Public user is able to fetch their own commissions', async ({ page, goto }) => {
   await goto('/api/test/claimPublicSession');
   await page.waitForURL('/me');
   page.on('response', async (response) => {
     if (response.url().includes('/api/commissions') && response.status() === 200) {
-      const data = await response.json();
-      expect(data.data).toBeDefined();
-      expect(Array.isArray(data.data)).toBe(true);
+      const rawData = await response.json();
+      expect(rawData.data).toBeDefined();
+      expect(Array.isArray(rawData.data)).toBe(true);
     }
   });
 });
