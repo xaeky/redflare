@@ -24,14 +24,8 @@ const billingTransactionState = reactive<z.infer<typeof billingTransactionSchema
   internal_note: ''
 });
 const billingForm = {
-  paymentCurrencyOptions: [
-    { label: 'USD', value: 'USD' },
-    { label: 'ARS', value: 'ARS' },
-  ],
-  paymentProcessorOptions: [
-    { label: 'PayPal', value: 'paypal' },
-    { label: 'Mercado Pago', value: 'mercadopago' },
-  ]
+  paymentCurrencyOptions: getBillingCurrencies(),
+  paymentProcessorOptions: getBillingProcessors()
 }
 const billingTransactionFormBusy = ref(false);
 const billingTransactionFormPostHandle = async () => {

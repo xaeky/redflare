@@ -2,12 +2,11 @@ import _ from "lodash";
 
 interface PaymentAttachment {
   id: string;
-  currency: 'ARS' | 'USD';
+  currency: CommissionPaymentCurrency;
   amount: number;
   init_point: string;
-  processor: 'mercadopago' | 'paypal';
+  processor: CommissionPaymentProcessor;
 }
-
 
 export const createPaymentPreference = async (options: CreatePaymentLinkOptions, runtimeConfig: any) => {
   const { title, currency, amount } = options;

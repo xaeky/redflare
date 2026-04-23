@@ -9,8 +9,8 @@ export enum CommissionFlagsType {
 }
 export type CommissionPaymentStatus = 'pending' | 'paid_auto' | 'paid_manual' | 'cancelled' | 'refunded' | 'chargeback' | 'disputed';
 export type CommissionPaymentStatusEditable = 'paid_manual' | 'cancelled' | 'refunded' | 'chargeback' | 'disputed';
-export type CommissionPaymentCurrency = 'ARS' | 'USD'; // ISO 4217 currency codes
-export type CommissionPaymentProcessor = 'mercadopago' | 'paypal';
+export type CommissionPaymentCurrency = 'ARS' | 'USD' | 'USDT' | 'USDC' | 'CRYPTO';
+export type CommissionPaymentProcessor = 'mercadopago' | 'paypal' | 'crypto';
 // Shared
 export type CommissionBaseRaw = OptionalId<{
   status: CommissionStatusType | number;
