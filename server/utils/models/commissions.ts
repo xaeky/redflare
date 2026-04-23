@@ -158,21 +158,24 @@ const getOneById = async (commissionId: string, viewAs?: ViewAs): Promise<Single
   const commission = await collection.aggregate<CommissionBaseRaw>(commissionPipeline).next();
   if (!commission || _.isEmpty(commission)) return null;
   const customer = await useCustomerModel().getById(commission.customer.toString() || '');
-  // Fetch file details for each attachment of each character changelog
-  const fileIds = _.uniq(
-    _.flatMap(commission.characters ?? [], (char) =>
-      _.flatMap(char.changelog ?? [], (changelog) => changelog.attachments ?? [] )
-    )
-  );
+  // Fetch file details for each attachment of each character changelog, prefix "avatars/" to each attachment ID since that's the path where attachments are stored in the bucket. 
+  const fileIds = _.flatMap(commission.characters ?? [], (char) =>
+    _.flatMap(char.changelog ?? [], (changelog) => changelog.attachments as string[] ?? [])
+  ).map((attachmentId) => `avatars/${attachmentId}`);
   let filesDetails: Record<string, FileMetadata> = {};
   if (fileIds.length > 0) filesDetails = await bucketGetFilesDetails(fileIds as unknown as string[]);
+  // Rename filesDetails keys, split "avatars/" prefix from each key.
+  filesDetails = _.mapKeys(filesDetails, (_, key) => key.replace('avatars/', ''));
   // Minify details to each attachment ID
-  const minifiedFilesDetails: Record<string, CommissionCharacterAttachmentRaw> = _.mapValues(filesDetails, (file) => ({
-    id: file.id,
-    filename: file.metadata?.originalName,
-    filetype: getContentTypeByExtension(file.metadata?.originalName as string || ''),
-    size: parseInt(file.size as string, 10),
-  } as CommissionCharacterAttachmentRaw));
+  const minifiedFilesDetails: Record<string, CommissionCharacterAttachmentRaw> = _.mapValues(filesDetails, (file) => {
+    return ({
+      id: file.name,
+      filename: file.metadata?.originalname,
+      filetype: getContentTypeByExtension(file.metadata?.originalname as string || ''),
+      size: parseInt(file.size as string, 10),
+      unconfirmed: false
+    } as CommissionCharacterAttachmentRaw)
+  });
   let returnData = {
     data: commission,
     attachments: viewAs === 'customer' || viewAs === 'agent' ? minifiedFilesDetails : undefined,
@@ -294,6 +297,32 @@ const checkOwnershipFromOne = async (commissionId: string, evalCustomerId: strin
   return commissionCustomer._id.toString() === evalCustomerId;
 }
 
+const confirmAllAttachmentsFromOne = async (commissionId: string) => {
+  const collection = await useMongoCollection<CommissionBaseRaw>('commissions');
+  const commission = await collection.findOne({ _id: new ObjectId(commissionId) });
+  if (!commission) throw createError({ statusCode: 404, message: 'Commission not found' });
+  // Attachments in changelogs are stored only as strings (Object ID)
+  const allAttachments = _.flatMap(commission.characters ?? [], (char) =>
+    _.flatMap(char.changelog ?? [], (changelog) => changelog.attachments as string[] ?? [])
+  );
+  allAttachments.forEach((attachmentId) => {
+    const destinationPath = `avatars/${attachmentId}`;
+    // Verify if the attachment is still unconfirmed (exists in temp bucket), if so, move it to the default bucket. If it doesn't exist in temp bucket, it means it's already confirmed.
+    bucketFilesExists([destinationPath], 'temp').then((existence) => {
+      if (existence[destinationPath]) {
+        logger.info('Confirming attachment by moving it to permanent storage', { destinationPath });
+        return bucketMoveFileToPermanent(destinationPath);
+      } else {
+        logger.debug('Attachment already confirmed, skipping', { destinationPath });
+        return null;
+      }
+    }).catch((error) => {
+      logger.error('Failed to confirm attachment', { destinationPath, error });
+      throw createError({ statusCode: 500, message: `Failed to confirm attachment ${attachmentId}` });
+    });
+  });
+};
+
 export const useCommissionModel = () => ({
   getAll,
   getOneById,
@@ -304,5 +333,6 @@ export const useCommissionModel = () => ({
   removeTransactionFromOne,
   addTransactionToOne,
   findCustomerByOne,
-  checkOwnershipFromOne
+  checkOwnershipFromOne,
+  confirmAllAttachmentsFromOne
 });

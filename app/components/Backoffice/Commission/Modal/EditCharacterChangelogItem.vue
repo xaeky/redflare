@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { success } from 'zod/v4';
+
 const commissionFormStore = useCommissionFormStore();
 
 const props = defineProps<{
@@ -36,33 +38,40 @@ const dateForInput = computed({
   }
 });
 
-const handleFileUpload = async (file: File) => {
-  let success = true;
-  const form = new FormData();
-  form.append('file', file);
-  form.append('prefix', 'avatars');
-  const result = await $fetch<{ success: boolean, id: string, storageId: string }>('/api/storage', { method: 'PUT', body: form }).catch(() => {
-    success = false;
+const getUploadSignedUrl = async (file: File) => {
+  return useAPI<{ success: boolean, url?: string, id?: string }>('/api/storage/signedUpload', {
+    method: 'POST',
+    body: { destinationPrefix: 'avatars', fileName: file.name, fileContentType: file.type }
   });
-  if (!success) return null;
-  return result;
 };
-const handleFileDelete = async (attachmentId: string) => {
-  let success = true;
-  await $fetch('/api/storage', { method: 'DELETE', body: { id: attachmentId } }).catch(() => {
-    success = false;
+const handleFileUpload = async (file: File) => {
+  const { url, id } = await getUploadSignedUrl(file);
+  if (!url || !id) return { success: false };
+  const uploadResult = await $fetch(url, {
+    method: 'PUT', body: file,
+    headers: {
+      'Content-Type': file.type,
+      'x-goog-meta-originalname': file.name
+    }
+  }).catch(() => {
+    throw new Error('Failed to upload file to storage');
   });
-  return success;
+  return { success: true, result: uploadResult, id };
 };
 const handleFileRemove = async (attachmentId: string) => {
   if (!changelogItemState) return;
   if (!attachmentId) return;
+  const thisAttachment = commissionFormStore.additionalState.attachments[attachmentId];
   const secondaryModal = toast.add({ description: 'Removing file...', color: 'neutral' });
-  const result = await handleFileDelete(attachmentId);
-  if (result) toast.add({ description: 'Removed file successfully', color: 'success' });
-  else toast.add({ description: 'Failed to remove file', color: 'error' });
-  toast.remove(secondaryModal.id);
-  changelogItemState.attachments = changelogItemState.attachments?.filter(a => a !== attachmentId) || [];
+  try {
+    await useAPI('/api/storage', { method: 'DELETE', body: { id: attachmentId, fileType: 'avatarFile', bucketType: thisAttachment?.unconfirmed ? 'temp' : 'default' } });
+    toast.add({ description: `File ${thisAttachment?.filename} has been removed`, color: 'success' });
+  } catch {
+    toast.add({ description: 'Failed to remove file', color: 'error' });
+  } finally {
+    toast.remove(secondaryModal.id);
+    changelogItemState.attachments = changelogItemState.attachments?.filter(a => a !== attachmentId) || [];
+  }
 };
 const handleFileRemoveForm = (attachmentId: string) => {
   const thisAttachment = commissionFormStore.additionalState.attachments[attachmentId];
@@ -82,7 +91,7 @@ const handleVersionRemove = async () => {
       try {
         // Remove all attached files by using Promise.all
         if (changelogItemState?.attachments && changelogItemState.attachments.length > 0) {
-          await Promise.all(changelogItemState.attachments.map(attId => handleFileDelete(attId)));
+          await Promise.all(changelogItemState.attachments.map(attId => handleFileRemove(attId)));
         }
         emit('remove');
       } catch (e) {
@@ -106,10 +115,11 @@ watch(tempFile, async (newFile) => {
   changelogItemState.attachments ||= [];
   // Append file details to store
   commissionFormStore.addAttachmentMetadata(result.id as string, {
-    id: result.storageId as string,
+    id: result.id as string,
     filename: newFile.name,
     filetype: getContentTypeByExtension(newFile.name),
     size: newFile.size,
+    unconfirmed: true // Mark as unconfirmed since this file is not saved in the permanent storage yet.
   });
   // Push attachment ID to changelog attachments
   changelogItemState.attachments?.push(result?.id as string);

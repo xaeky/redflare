@@ -72,10 +72,6 @@ export default defineNuxtConfig({
         }
       },
       sessionPassword: ''
-    },
-    bucket: {
-      name: '',
-      auth: ''
     }
   }
 })

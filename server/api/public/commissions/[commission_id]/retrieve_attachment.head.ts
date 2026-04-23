@@ -17,9 +17,9 @@ export default defineEventHandler(async (event) => {
   if (!isOwner) throw createError({ statusCode: 403, statusMessage: 'Unauthorized to access attachment' });
   const query = await getQuery<{ file_id: string }>(event);
   if (!query.file_id || !query.file_id.length) throw createError({ statusCode: 400, statusMessage: 'No file_id provided' });
-  const decodedFileId = Buffer.from(query.file_id, 'base64').toString('utf-8');
-  const [exists] = await useStorageBucket().file(decodedFileId).exists();
+  const destinationPath = `avatars/${query.file_id}`;
+  const [exists] = await useStorageBucket().file(destinationPath).exists();
   if (!exists) throw createError({ statusCode: 404, statusMessage: 'File not found' });
-  await publicGrantTempAuthorization(event, `retrieve_commission_attachment:${decodedFileId}`);
+  await publicGrantTempAuthorization(event, `retrieve_commission_attachment:${query.file_id}`);
   return true
 });

@@ -20,12 +20,14 @@ export interface CommissionCharacterAttachmentRaw {
   filename: string;
   filetype: string;
   size: number; // in bytes
+  // This value is true if the attachment doesn't come from the permanent storage bucket yet, and is still in the temp bucket.
+  unconfirmed: boolean;
 }
 export interface CommissionCharacterChangelogRaw {
   date: string;
   version: string;
   items: string[];
-  attachments?: CommissionCharacterAttachmentRaw[];
+  attachments?: string[] | CommissionCharacterAttachmentRaw[];
 }
 export type CommissionCharacterChangelog = Omit<CommissionCharacterChangelogRaw, 'attachments'> & {
   attachments?: string[]; // Array of file IDs

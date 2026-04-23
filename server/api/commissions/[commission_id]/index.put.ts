@@ -15,5 +15,14 @@ export default defineEventHandler(async (event) => {
     ...body.data,
     characters: safeCharacters,
   });
+
+  // Confirm attachments ownership and move them to permanent storage
+  try {
+    logger.info('Confirming attachments for commission', { commissionId });
+    await useCommissionModel().confirmAllAttachmentsFromOne(commissionId);
+  } catch (error) {
+    logger.error('Failed to confirm attachments for commission', { commissionId, error });
+    throw createError({ statusCode: 500, message: 'Failed to confirm attachments' });
+  }
   return result;
 });
