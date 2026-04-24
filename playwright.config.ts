@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: ['.env', '.env.test'], quiet: true });
 const TEST_URL = process.env.TEST_URL || 'https://localhost:3000';
+const LOCAL_HOSTS = ['local.xavis', 'localhost', '127.0.0.1'];
+const isRemote = !LOCAL_HOSTS.some(host => TEST_URL.includes(host));
 
 export default defineConfig<ConfigOptions>({
   testDir: './tests/e2e',
@@ -23,7 +25,7 @@ export default defineConfig<ConfigOptions>({
   projects: [
     { use: { ...devices['Desktop Chrome'] } }
   ],
-  webServer: [
+  webServer: isRemote ? [] : [
     {
       command: 'bun dev',
       url: TEST_URL,

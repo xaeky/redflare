@@ -58,16 +58,17 @@ jobs:
             REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
             SOURCE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.source'] }}
   
-  cloud-run-deploy:
+  deploy-canary:
     runs-on: ubuntu-latest
-    environment: 
+    environment:
       name: staging
-      url: https://avatars-console-staging.xaeky.cloud
     permissions:
       contents: 'read'
       id-token: 'write'
     needs:
       - build
+    outputs:
+      url: ${{ steps.canary-url.outputs.url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -76,7 +77,115 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-      
+
+      - id: 'deploy'
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ vars.SERVICE_NAME }}
+          image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
+          env_vars: |
+            NUXT_MP_PUBLIC=${{ vars.MP_PUBLIC }}
+            NUXT_MP_MARKETPLACE=${{ vars.MP_MARKETPLACE }}
+            NUXT_MP_ENDPOINT_BASE=${{ vars.MP_BASE }}
+            NUXT_PP_CID=${{ vars.PP_CID }}
+            NUXT_PP_ENDPOINT_BASE=${{ vars.PP_BASE }}
+            NUXT_GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}
+            NUXT_GCP_BUCKET_AVATARFILES_NAME=${{ vars.GCP_BUCKET_AVATARFILES_NAME }}
+            NUXT_OAUTH_AUTH0_CLIENT_ID=${{ vars.A0_CLIENT_ID }}
+            NUXT_OAUTH_AUTH0_DOMAIN=${{ vars.A0_TENANT }}
+            NUXT_OAUTH_AUTH0_REDIRECT_URL=${{ vars.CANARY_A0_CALLBACK }}
+            NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_ID=${{ vars.FO_DISCORD_CLIENT }}
+            NUXT_FRONTOFFICE_OAUTH_DISCORD_REDIRECT_URL=${{ vars.FO_DISCORD_REDIRECT }}
+            NUXT_PUBLIC_CREATOR_MARKET_NAME=${{ vars.MARKET_NAME }}
+            NUXT_PUBLIC_CREATOR_CALLBACK_URI=${{ vars.MARKET_CALLBACK }}
+            NUXT_BACKOFFICE_SKIP_ROLES=${{ vars.BO_SKIP_ROLES }}
+            NUXT_PUBLIC_REDFLARE_ENV=${{ vars.ENV }}
+            PLAYWRIGHT_TEST=1
+          secrets: |
+            NUXT_MP_SERVICE=STAGING_MP_SERVICE:latest
+            NUXT_PP_SID=STAGING_PP_SID:latest
+            NUXT_OAUTH_AUTH0_CLIENT_SECRET=STAGING_A0_CLIENT_SECRET:latest
+            NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_SECRET=STAGING_FO_DISCORD_SECRET:latest
+            NUXT_FRONTOFFICE_SESSION_PASSWORD=STAGING_FO_SESSION_PASSWORD:latest
+            NUXT_SESSION_PASSWORD=STAGING_BO_SESSION_PASSWORD:latest
+            NUXT_BACKOFFICE_MONGO=STAGING_BO_MONGO:latest
+            NUXT_BACKOFFICE_MONGO_DB=STAGING_BO_MONGO_DB:latest
+          region: us-west1
+          flags: >
+            --service-account=${{ vars.SERVICE_ACCOUNT }}
+            --platform=managed
+            --cpu=1
+            --cpu-throttling
+            --memory=1024Mi
+            --max-instances=1
+            --allow-unauthenticated
+            --no-traffic
+            --tag=canary
+
+      - name: Get canary URL
+        id: canary-url
+        run: |
+          URL=$(gcloud run services describe ${{ vars.SERVICE_NAME }} --region=us-west1 --format='value(status.traffic[?tag="canary"].url)')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    permissions:
+      contents: 'read'
+    needs:
+      - build
+      - deploy-canary
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        env:
+          CI: true
+          TEST_URL: ${{ needs.deploy-canary.outputs.url }}
+          TEST_AGENT_OAUTH_USER: ${{ secrets.TEST_AGENT_OAUTH_USER }}
+          TEST_AGENT_OAUTH_PASS: ${{ secrets.TEST_AGENT_OAUTH_PASS }}
+          TEST_PUBLIC_CUSTOMERID: ${{ vars.TEST_PUBLIC_CUSTOMERID }}
+          TEST_PUBLIC_DISCORDID: ${{ vars.TEST_PUBLIC_DISCORDID }}
+          TEST_PUBLIC_COMMISSIONID: ${{ vars.TEST_PUBLIC_COMMISSIONID }}
+        run: bun test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://avatars-console-staging.xaeky.cloud
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs:
+      - build
+      - test-e2e
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: 'auth'
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
       - id: 'deploy'
         uses: google-github-actions/deploy-cloudrun@v2
         with:
@@ -99,6 +208,7 @@ jobs:
             NUXT_PUBLIC_CREATOR_CALLBACK_URI=${{ vars.MARKET_CALLBACK }}
             NUXT_BACKOFFICE_SKIP_ROLES=${{ vars.BO_SKIP_ROLES }}
             NUXT_PUBLIC_REDFLARE_ENV=${{ vars.ENV }}
+            PLAYWRIGHT_TEST=0
           secrets: |
             NUXT_MP_SERVICE=STAGING_MP_SERVICE:latest
             NUXT_PP_SID=STAGING_PP_SID:latest
@@ -117,6 +227,9 @@ jobs:
             --memory=1024Mi
             --max-instances=1
             --allow-unauthenticated
-      
+
       - name: Send all traffic to this new version
         run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --to-latest --region=us-west1 --quiet
+
+      - name: Remove canary tag
+        run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --remove-tags=canary --region=us-west1 --quiet
