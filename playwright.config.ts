@@ -13,11 +13,13 @@ export default defineConfig<ConfigOptions>({
   reporter: 'html',
   timeout: 60 * 1000 * 5, // 5 minutes 
   use: {
-    nuxt: {
-      rootDir: fileURLToPath(new URL('.', import.meta.url)),
-      build: false,
-      host: TEST_URL
-    },
+    ...(isRemote ? {} : {
+      nuxt: {
+        rootDir: fileURLToPath(new URL('.', import.meta.url)),
+        build: false,
+        host: TEST_URL
+      },
+    }),
     baseURL: TEST_URL,
     ignoreHTTPSErrors: true,
     colorScheme: 'dark',
