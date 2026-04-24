@@ -128,6 +128,7 @@ jobs:
           URL=$(gcloud run services describe ${{ vars.SERVICE_NAME }} --region=us-west1 --format=json \
             | jq -r '.status.traffic[] | select(.tag == "canary") | .url')
           echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "Canary URL: $URL"
 
   test-e2e:
     runs-on: ubuntu-latest
