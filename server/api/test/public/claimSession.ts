@@ -1,17 +1,18 @@
 export default defineEventHandler(async (event) => {
+  const customer = await useCustomerModel().findOneWithCommission();
   await setPublicUserSession(event, {
     user: {
-      username: 'PublicUser',
-      id: process.env.TEST_PUBLIC_DISCORDID || '000000000000000000',
+      username: customer.name,
+      id: customer.discord_id!,
       discriminator: '0',
-      global_name: 'PublicUser'
+      global_name: customer.name
     } as DiscordOAuthUser,
     secure: {
       access_token: 'test',
-      customer: process.env.TEST_PUBLIC_CUSTOMERID || ''
+      customer: customer._id.toString()
     }
   });
   await initCurrentUserSettings(event);
-  logger.info('Test public session claimed');
+  logger.info(`Test public session claimed for customer ${customer._id}`);
   return sendRedirect(event, '/me');
 });

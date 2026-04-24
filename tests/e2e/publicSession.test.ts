@@ -1,6 +1,7 @@
 import { expect, test } from '@nuxt/test-utils/playwright';
+import { claimSession, getRedirectUrl } from './utils/sessions';
 
 test('Claim public session in test environment', async ({ page, goto }) => {
-  await goto('/api/test/claimPublicSession');
-  await expect(page).toHaveURL(/\/me/);
+  await claimSession(page, 'public');
+  await expect(page).toHaveURL(getRedirectUrl('public'));
 });

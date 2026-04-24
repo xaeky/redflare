@@ -1,4 +1,5 @@
 import { expect, test } from '@nuxt/test-utils/playwright';
+import { claimSession } from './utils/sessions';
 
 test.describe.serial('Commission management with new customer', () => {
   let testState = {
@@ -11,8 +12,7 @@ test.describe.serial('Commission management with new customer', () => {
   });
 
   test('Agent is able to create customers', async ({ page, goto }) => {
-    await goto('/api/test/claimAgentSession');
-    await page.waitForURL(/\/dashboard/);
+    await claimSession(page, 'agent');
     await goto('/dashboard/customers');
     await page.waitForLoadState('networkidle');
     // Invoke "Add customer" action
@@ -32,8 +32,7 @@ test.describe.serial('Commission management with new customer', () => {
   });
 
   test('Agent is able to create commissions with the generated customer', async ({ page, goto }) => {
-    await goto('/api/test/claimAgentSession');
-    await page.waitForURL(/\/dashboard/);
+    await claimSession(page, 'agent');
     await goto('/dashboard/commissions');
     await page.waitForLoadState('networkidle');
     // Invoke "New commission" action
@@ -69,8 +68,7 @@ test.describe.serial('Commission management with new customer', () => {
   });
 
   test('Agent should not be able to delete customers that are linked to commissions', async ({ page, goto }) => {
-    await goto('/api/test/claimAgentSession');
-    await page.waitForURL(/\/dashboard/);
+    await claimSession(page, 'agent');
     await goto('/dashboard/customers');
     await page.waitForLoadState('networkidle');
     const trRow = page.locator(`tr:has-text("${testState.createdCustomerName}")`);

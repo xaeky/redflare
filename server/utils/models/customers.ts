@@ -117,6 +117,19 @@ const filterManyByName = async (name: string) => {
   return result;
 }
 
+const findOneWithCommission = async () => {
+  const collection = await useMongoCollection<CustomerRaw>('customers');
+  const result = await collection.aggregate([
+    { $match: { discord_id: { $exists: true, $nin: [null, ''] } } },
+    { $lookup: { from: 'commissions', localField: '_id', foreignField: 'customer', as: 'commissions' } },
+    { $match: { 'commissions.0': { $exists: true } } },
+    { $sample: { size: 1 } },
+    { $project: { commissions: 0 } }
+  ]).toArray();
+  if (!result[0]) throw createError({ statusCode: 404, statusMessage: 'No eligible test customer found' });
+  return result[0] as CustomerRaw;
+}
+
 export const useCustomerModel = () => ({
   getAll,
   getById,
@@ -125,5 +138,6 @@ export const useCustomerModel = () => ({
   insertOne,
   updateOne,
   deleteOne,
-  filterManyByName
+  filterManyByName,
+  findOneWithCommission
 });

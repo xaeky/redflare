@@ -1,14 +1,16 @@
 import { expect, test } from '@nuxt/test-utils/playwright';
+import { claimSession } from './utils/sessions';
 
-test('Anon user is able to see commission details', async ({ page, goto }) => {
-  await goto(`/commission/${process.env.TEST_PUBLIC_COMMISSIONID}`);
+test('Anon user is able to see any commission', async ({ page, goto, request }) => {
+  const randomCommission = await request.get('/api/test/public/commissions/findAnyOne');
+  const randomCommissionId = (await randomCommission.json())._id;
+  await goto(`/commission/${randomCommissionId}`);
   await page.waitForLoadState('networkidle');
   await expect(page.getByRole('heading', { name: 'Commission' })).toBeVisible();
 });
 
 test('Public user is able to fetch their own commissions', async ({ page, goto }) => {
-  await goto('/api/test/claimPublicSession');
-  await page.waitForURL('/me');
+  await claimSession(page, 'public');
   page.on('response', async (response) => {
     if (response.url().includes('/api/commissions') && response.status() === 200) {
       const rawData = await response.json();
@@ -18,9 +20,10 @@ test('Public user is able to fetch their own commissions', async ({ page, goto }
   });
 });
 
-test('Public user is able to fetch own commission', async ({ page, goto }) => {
-  await goto('/api/test/claimPublicSession');
-  await page.waitForURL('/me');
-  await goto(`/commission/${process.env.TEST_PUBLIC_COMMISSIONID}`);
+test('Public user is able to fetch their own commission', async ({ page, goto }) => {
+  await claimSession(page, 'public'); // On browser context
+  const randomOwnCommission = await page.request.get('/api/test/public/me/commissions/findAnyOne'); // On server(?) context
+  const randomOwnCommissionId = (await randomOwnCommission.json())._id;
+  await goto(`/commission/${randomOwnCommissionId}`);
   await expect(page.getByRole('heading', { name: 'Commission' })).toBeVisible();
 });
