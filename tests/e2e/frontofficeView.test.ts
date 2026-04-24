@@ -2,6 +2,7 @@ import { expect, test } from '@nuxt/test-utils/playwright';
 
 test('Anon user is able to see commission details', async ({ page, goto }) => {
   await goto(`/commission/${process.env.TEST_PUBLIC_COMMISSIONID}`);
+  await page.waitForLoadState('networkidle');
   await expect(page.getByRole('heading', { name: 'Commission' })).toBeVisible();
 });
 
