@@ -28,9 +28,6 @@ export default defineNuxtConfig({
     '@nuxt/image'
   ],
   css: ['~/assets/global.css'],
-  devServer: {
-    port: parseInt(process.env.NUXT_PORT as string) || 3000,
-  },
   vite: {
     plugins: [require('vite-svg-loader')()],
     server: {
