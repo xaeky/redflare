@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
     user: {
       name: 'Test Agent',
       nickname: 'test_agent',
-      picture: 'https://avatar.iran.liara.run/public',
+      picture: 'https://api.dicebear.com/9.x/glass/png',
       sub: 'auth0|test_agent_123',
     },
     secure: {
