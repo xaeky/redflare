@@ -61,6 +61,10 @@ export const useCustomerFormStore = defineStore('customerForm', () => {
       queryCache.invalidateQueries({ key: ['customers'] });
       useOverlay().closeAll();
       toast.add({ description: 'Customer deleted.' });
+    },
+    onError(error: Error) {
+      const errorMessage = (error as any)?.response?._data?.message || error.message || 'Failed to delete customer.';
+      toast.add({ color: 'error', description: errorMessage });
     }
   });
 

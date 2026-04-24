@@ -95,9 +95,25 @@ const updateOne = async (id: string, data: CustomerUpdateOptions) => {
   return result;
 }
 
-const deleteOne = async (id: string) => {
+const deleteOne = async (id: string, force = false) => {
   const collection = await useMongoCollection('customers');
+  // Make sure customer exists before deleting
+  const existing = await collection.findOne({ _id: new ObjectId(id) });
+  if (!existing) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
+  // Make sure customer is not linked to any commissions before deleting
+  const commissionsCollection = await useMongoCollection('commissions');
+  const linkedCommissions = await commissionsCollection.find({ customer: new ObjectId(id) }).toArray();
+  if (linkedCommissions.length > 0) {
+    if (!force) throw createError({ statusCode: 400, statusMessage: 'Customer is linked to existing commissions, please delete them first!' });
+    await commissionsCollection.deleteMany({ customer: new ObjectId(id) });
+  }
   const result = await collection.deleteOne({ _id: new ObjectId(id) });
+  return result;
+}
+
+const filterManyByName = async (name: string) => {
+  const collection = await useMongoCollection<CustomerRaw>('customers');
+  const result = await collection.find({ name: { $regex: new RegExp(_.escapeRegExp(name), 'i') } }).toArray();
   return result;
 }
 
@@ -108,5 +124,6 @@ export const useCustomerModel = () => ({
   getByDiscordId,
   insertOne,
   updateOne,
-  deleteOne
+  deleteOne,
+  filterManyByName
 });

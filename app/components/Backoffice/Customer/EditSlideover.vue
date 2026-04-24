@@ -12,11 +12,16 @@ const customerFormStore = useCustomerFormStore();
         <div class="flex items-center">
           <UButton
             icon="i-heroicons-trash-solid" color="error" variant="soft" :loading="customerFormStore.destroyBusy"
+            data-testid="delete-customer-submit"
             @click="() => { customerFormStore.safeDestroy(customerFormStore.additionalState.id as string) }"
           />
         </div>
         <div class="flex w-full justify-end gap-2">
-          <UButton @click="() => { customerFormStore.update() }" :loading="customerFormStore.updateBusy">Save</UButton>
+          <UButton
+            @click="() => { customerFormStore.update() }"
+            :loading="customerFormStore.updateBusy"
+            data-testid="edit-customer-submit"
+          >Save</UButton>
         </div>
       </div>
     </template>
