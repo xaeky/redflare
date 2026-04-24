@@ -45,8 +45,6 @@ test.describe.serial('Commission management with new customer', () => {
     // Fill in commission details
     await page.getByTestId('customer-select-menu').click();
     await page.waitForTimeout(500); // Wait for options to render
-    // Type in the "Search..." input to filter options
-    console.log('Filtering customers with name:', testState.createdCustomerName);
     await page.getByRole('combobox', { name: 'Search...' }).fill(testState.createdCustomerName);
     // Ensure the debounce and filtering have completed by waiting for the expected option to appear
     await page.waitForResponse((response) =>
