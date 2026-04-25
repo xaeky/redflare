@@ -122,8 +122,6 @@ jobs:
           CI: true
           FORCE_REMOTE: true
           TEST_URL: https://localhost:3000
-          TEST_AGENT_OAUTH_USER: ${{ secrets.TEST_AGENT_OAUTH_USER }}
-          TEST_AGENT_OAUTH_PASS: ${{ secrets.TEST_AGENT_OAUTH_PASS }}
         run: bun test:e2e
 
       - name: Stop canary proxy
