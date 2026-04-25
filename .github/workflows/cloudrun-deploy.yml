@@ -1,0 +1,97 @@
+name: Cloud Run Deploy
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: Full image reference (registry/name@digest)
+        required: true
+        type: string
+      env:
+        description: Target environment — canary | staging | production
+        required: true
+        type: string
+    outputs:
+      url:
+        description: Canary tagged URL (only set when env is canary)
+        value: ${{ jobs.deploy.outputs.url }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env == 'production' && 'production' || 'staging' }}
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      url: ${{ steps.canary-url.outputs.url }}
+    steps:
+      - name: Resolve env config
+        id: config
+        run: |
+          case "${{ inputs.env }}" in
+            canary)
+              echo "playwright_test=1"                           >> $GITHUB_OUTPUT
+              echo "extra_flags=--no-traffic --tag=canary"      >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "playwright_test=0"                    >> $GITHUB_OUTPUT
+              echo "extra_flags="                         >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ vars.SERVICE_NAME }}
+          image: ${{ inputs.image }}
+          env_vars: |
+            NUXT_MP_PUBLIC=${{ vars.MP_PUBLIC }}
+            NUXT_MP_MARKETPLACE=${{ vars.MP_MARKETPLACE }}
+            NUXT_MP_ENDPOINT_BASE=${{ vars.MP_BASE }}
+            NUXT_PP_CID=${{ vars.PP_CID }}
+            NUXT_PP_ENDPOINT_BASE=${{ vars.PP_BASE }}
+            GCP_BUCKET_AVATARFILES_NAME=${{ vars.GCP_BUCKET_AVATARFILES_NAME }}
+            GCP_BUCKET_AVATARFILES_TEMP_NAME=${{ vars.GCP_BUCKET_AVATARFILES_TEMP_NAME }}
+            NUXT_OAUTH_AUTH0_CLIENT_ID=${{ vars.A0_CLIENT_ID }}
+            NUXT_OAUTH_AUTH0_DOMAIN=${{ vars.A0_TENANT }}
+            NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_ID=${{ vars.FO_DISCORD_CLIENT }}
+            NUXT_PUBLIC_CREATOR_MARKET_NAME=${{ vars.MARKET_NAME }}
+            NUXT_PUBLIC_CREATOR_CALLBACK_URI=${{ vars.MARKET_CALLBACK }}
+            NUXT_BACKOFFICE_SKIP_ROLES=${{ vars.BO_SKIP_ROLES }}
+            NUXT_PUBLIC_REDFLARE_ENV=${{ vars.ENV }}
+            PLAYWRIGHT_TEST=${{ steps.config.outputs.playwright_test }}
+          secrets: |
+            NUXT_MP_SERVICE=STAGING_MP_SERVICE:latest
+            NUXT_PP_SID=STAGING_PP_SID:latest
+            NUXT_OAUTH_AUTH0_CLIENT_SECRET=STAGING_A0_CLIENT_SECRET:latest
+            NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_SECRET=STAGING_FO_DISCORD_SECRET:latest
+            NUXT_FRONTOFFICE_SESSION_PASSWORD=STAGING_FO_SESSION_PASSWORD:latest
+            NUXT_SESSION_PASSWORD=STAGING_BO_SESSION_PASSWORD:latest
+            NUXT_BACKOFFICE_MONGO=STAGING_BO_MONGO:latest
+            NUXT_BACKOFFICE_MONGO_DB=STAGING_BO_MONGO_DB:latest
+          region: us-west1
+          flags: >
+            --service-account=${{ vars.SERVICE_ACCOUNT }}
+            --platform=managed
+            --cpu=1
+            --cpu-throttling
+            --memory=1024Mi
+            --max-instances=1
+            --allow-unauthenticated
+            ${{ steps.config.outputs.extra_flags }}
+
+      - name: Get canary URL
+        id: canary-url
+        if: steps.config.outputs.extra_flags != ''
+        run: |
+          URL=$(gcloud run services describe ${{ vars.SERVICE_NAME }} --region=us-west1 --format=json \
+            | jq -r '.status.traffic[] | select(.tag == "canary") | .url')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "Canary URL: $URL"
