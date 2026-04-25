@@ -14,11 +14,15 @@ export default defineNuxtConfig({
       { baseName: 'img', dir: 'assets/img' },
     ],
   },
-  imports: {
-    dirs: ['shared/enums'],
-  },
+  imports: { dirs: ['shared/enums'], },
   alias: {
     '#models': fileURLToPath(new URL('./server/utils/models', import.meta.url)),
+  },
+  routeRules: {
+    '/api/**': { cors: false },
+    '/api/service/**': { cors: true },
+    '/dashboard/**': { ssr: false },
+    '/commission': { redirect: '/me' },
   },
   modules: [
     '@nuxt/test-utils/module',
@@ -69,8 +73,7 @@ export default defineNuxtConfig({
       oauth: {
         discord: {
           clientId: '',
-          clientSecret: '',
-          redirectUrl: ''
+          clientSecret: ''
         }
       },
       sessionPassword: ''
