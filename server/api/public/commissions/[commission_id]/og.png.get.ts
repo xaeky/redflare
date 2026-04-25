@@ -11,15 +11,15 @@ let assets = {} as Record<string, Buffer>;
 async function loadResources() {
   // Load fonts
   const fontStorage = useStorage('assets:fonts');
-  assets.fontRegular = await fontStorage.getItemRaw<Buffer>('Geist-Regular.ttf') as Buffer;
-  assets.fontBold = await fontStorage.getItemRaw<Buffer>('Geist-Bold.ttf') as Buffer;
-  // Load SVG assets
+  assets.fontRegular = Buffer.from(await fontStorage.getItemRaw('Geist-Regular.ttf') as Uint8Array);
+  assets.fontBold = Buffer.from(await fontStorage.getItemRaw('Geist-Bold.ttf') as Uint8Array);
+  // Load SVG assets as strings
   const svgStorage = useStorage('assets:svg');
-  assets.logoSvg = await svgStorage.getItemRaw<Buffer>('xa_logotype.svg') as Buffer;
-  assets.userIconSvg = await svgStorage.getItemRaw<Buffer>('lucide-user_round.svg') as Buffer;
+  assets.logoSvg = Buffer.from(await svgStorage.getItem<string>('xa_logotype.svg') as string);
+  assets.userIconSvg = Buffer.from(await svgStorage.getItem<string>('lucide-user_round.svg') as string);
   // Load images
   const imgStorage = useStorage('assets:img');
-  assets.background = await imgStorage.getItemRaw<Buffer>('REDFLARE.GENERIC_SEO_BG.jpg') as Buffer;
+  assets.background = Buffer.from(await imgStorage.getItemRaw('REDFLARE.GENERIC_SEO_BG.jpg') as Uint8Array);
 }
 
 const STATUS_LABELS: Partial<Record<CommissionStatusType, string>> = {
