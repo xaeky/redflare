@@ -61,6 +61,9 @@ jobs:
   deploy-canary:
     uses: ./.github/workflows/cloudrun-deploy.yml
     needs: build
+    permissions:
+      contents: read
+      id-token: write
     with:
       image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
       env: canary
@@ -104,6 +107,9 @@ jobs:
   deploy-staging:
     uses: ./.github/workflows/cloudrun-deploy.yml
     needs: [build, test-e2e]
+    permissions:
+      contents: read
+      id-token: write
     with:
       image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
       env: staging
