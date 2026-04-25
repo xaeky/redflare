@@ -7,7 +7,7 @@ test.describe.serial('Commission management with new customer', () => {
   };
   
   test.beforeAll(async ({ request }) => {
-    await request.post('/api/test/cleanupTestingCustomers');
+    await request.post('/api/test/agent/cleanupTestingCustomers');
     testState.createdCustomerName = `E2E ${Date.now()}`;
   });
 
@@ -85,6 +85,6 @@ test.describe.serial('Commission management with new customer', () => {
   });
 
   test.afterAll(async ({ request }) => {
-    await request.post('/api/test/cleanupTestingCustomers');
+    await request.post('/api/test/agent/cleanupTestingCustomers');
   });
 });
