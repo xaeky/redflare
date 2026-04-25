@@ -67,8 +67,23 @@ const handleAccountBackClick = () => {
   navigateTo('/me');
 };
 
+const requestUrl = useRequestURL();
+const ogImageUrl = `${requestUrl.origin}/api/public/commissions/${commissionId}/og.png`;
+const commissionTitle = `Commission #${commissionId!.toString().slice(-6)}`;
+const commissionDescription = commission.data.characters?.length
+  ? (commission.data.characters as CommissionCharacterRaw[]).map(c => c.name).join(', ')
+  : commission.data.locked_fields?.characters_count
+    ? `${commission.data.locked_fields.characters_count} character${commission.data.locked_fields.characters_count !== 1 ? 's' : ''}`
+    : 'View commission details';
+
 useSeoMeta({
-  title: 'Commission Details'
+  title: commissionTitle,
+  ogTitle: commissionTitle,
+  description: commissionDescription,
+  ogDescription: commissionDescription,
+  ogImage: ogImageUrl,
+  twitterCard: 'summary_large_image',
+  twitterImage: ogImageUrl,
 });
 </script>
 

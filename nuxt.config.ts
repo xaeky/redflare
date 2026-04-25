@@ -8,6 +8,11 @@ export default defineNuxtConfig({
     imports: {
       dirs: ['server/utils/services', 'server/utils/models'],
     },
+    serverAssets: [
+      { baseName: 'fonts', dir: 'assets/fonts' },
+      { baseName: 'svg', dir: 'assets/svg' },
+      { baseName: 'img', dir: 'assets/img' },
+    ],
   },
   imports: {
     dirs: ['shared/enums'],
