@@ -58,7 +58,7 @@ jobs:
             REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
             SOURCE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.source'] }}
   
-  deploy-canary:
+  deploy-staging-canary:
     uses: ./.github/workflows/cloudrun-deploy.yml
     needs: build
     permissions:
@@ -66,7 +66,8 @@ jobs:
       id-token: write
     with:
       image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
-      env: canary
+      env: staging
+      strategy: canary
     secrets: inherit
 
   test-e2e:
@@ -75,9 +76,10 @@ jobs:
       name: staging
     permissions:
       contents: 'read'
+      id-token: 'write'
     needs:
       - build
-      - deploy-canary
+      - deploy-staging-canary
     steps:
       - uses: actions/checkout@v4
 
@@ -89,13 +91,41 @@ jobs:
       - name: Install Playwright Chromium
         run: bunx playwright install --with-deps chromium
 
+      - name: Auth Cloud SDK
+        if: always()
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Start canary proxy
+        run: |
+          gcloud run services proxy ${{ vars.SERVICE_NAME }}-canary \
+            --region=us-west1 --port=8080 &
+          echo $! > /tmp/gcloud-proxy.pid
+          for i in {1..10}; do
+            nc -z localhost 8080 && break || sleep 1
+          done
+          bunx local-ssl-proxy --source 3000 --target 8080 &
+          echo $! > /tmp/ssl-proxy.pid
+          for i in {1..10}; do
+            nc -z localhost 3000 && break || sleep 1
+          done
+
       - name: Run E2E tests
         env:
           CI: true
-          TEST_URL: ${{ needs.deploy-canary.outputs.url }}
+          FORCE_REMOTE: true
+          TEST_URL: https://localhost:3000
           TEST_AGENT_OAUTH_USER: ${{ secrets.TEST_AGENT_OAUTH_USER }}
           TEST_AGENT_OAUTH_PASS: ${{ secrets.TEST_AGENT_OAUTH_PASS }}
         run: bun test:e2e
+
+      - name: Stop canary proxy
+        if: always()
+        run: |
+          kill $(cat /tmp/ssl-proxy.pid) || true
+          kill $(cat /tmp/gcloud-proxy.pid) || true
 
       - name: Upload Playwright report
         if: failure()
@@ -103,6 +133,10 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
+
+      - name: Delete canary service
+        if: always()
+        run: gcloud run services delete ${{ vars.SERVICE_NAME }}-canary --region=us-west1 --quiet || true
 
   deploy-staging:
     uses: ./.github/workflows/cloudrun-deploy.yml
@@ -113,6 +147,7 @@ jobs:
     with:
       image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
       env: staging
+      strategy: direct
     secrets: inherit
 
   promote-staging:
@@ -133,6 +168,3 @@ jobs:
 
       - name: Send all traffic to this new version
         run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --to-latest --region=us-west1 --quiet
-
-      - name: Remove canary tag
-        run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --remove-tags=canary --region=us-west1 --quiet

@@ -8,12 +8,17 @@ on:
         required: true
         type: string
       env:
-        description: Target environment — canary | staging | production
+        description: Target environment — staging | production
         required: true
         type: string
+      strategy:
+        description: Deployment strategy — canary | direct
+        required: false
+        type: string
+        default: direct
     outputs:
       url:
-        description: Canary tagged URL (only set when env is canary)
+        description: Canary service URL (only set when strategy is canary)
         value: ${{ jobs.deploy.outputs.url }}
 
 jobs:
@@ -29,16 +34,15 @@ jobs:
       - name: Resolve env config
         id: config
         run: |
-          case "${{ inputs.env }}" in
-            canary)
-              echo "playwright_test=1"                           >> $GITHUB_OUTPUT
-              echo "extra_flags=--no-traffic --tag=canary"      >> $GITHUB_OUTPUT
-              ;;
-            *)
-              echo "playwright_test=0"                    >> $GITHUB_OUTPUT
-              echo "extra_flags="                         >> $GITHUB_OUTPUT
-              ;;
-          esac
+          if [[ "${{ inputs.strategy }}" == "canary" ]]; then
+            echo "service_name=${{ vars.SERVICE_NAME }}-canary"  >> $GITHUB_OUTPUT
+            echo "playwright_test=1"                             >> $GITHUB_OUTPUT
+            echo "is_canary=true"                               >> $GITHUB_OUTPUT
+          else
+            echo "service_name=${{ vars.SERVICE_NAME }}"        >> $GITHUB_OUTPUT
+            echo "playwright_test=0"                            >> $GITHUB_OUTPUT
+            echo "is_canary=false"                              >> $GITHUB_OUTPUT
+          fi
 
       - id: auth
         uses: google-github-actions/auth@v2
@@ -49,7 +53,7 @@ jobs:
       - id: deploy
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: ${{ vars.SERVICE_NAME }}
+          service: ${{ steps.config.outputs.service_name }}
           image: ${{ inputs.image }}
           env_vars: |
             NUXT_MP_PUBLIC=${{ vars.MP_PUBLIC }}
@@ -84,14 +88,11 @@ jobs:
             --cpu-throttling
             --memory=1024Mi
             --max-instances=1
-            --allow-unauthenticated
-            ${{ steps.config.outputs.extra_flags }}
+            ${{ inputs.strategy == 'canary' && '--no-allow-unauthenticated' || '--allow-unauthenticated' }}
 
-      - name: Get canary URL
+      - name: Output canary URL
         id: canary-url
-        if: steps.config.outputs.extra_flags != ''
+        if: steps.config.outputs.is_canary == 'true'
         run: |
-          URL=$(gcloud run services describe ${{ vars.SERVICE_NAME }} --region=us-west1 --format=json \
-            | jq -r '.status.traffic[] | select(.tag == "canary") | .url')
-          echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "Canary URL: $URL"
+          echo "url=${{ steps.deploy.outputs.url }}" >> $GITHUB_OUTPUT
+          echo "Canary URL: ${{ steps.deploy.outputs.url }}"
