@@ -13,6 +13,7 @@ export type CommissionPaymentCurrency = 'ARS' | 'USD' | 'USDT' | 'USDC' | 'CRYPT
 export type CommissionPaymentProcessor = 'mercadopago' | 'paypal' | 'crypto';
 // Shared
 export type CommissionBaseRaw = OptionalId<{
+  schemaVersion?: number;
   status: CommissionStatusType | number;
   flags: CommissionFlagsType | number;
   public_note: string | null;

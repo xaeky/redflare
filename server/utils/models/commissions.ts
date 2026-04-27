@@ -2,6 +2,27 @@ import { ObjectId, WithId } from 'mongodb';
 import _ from 'lodash';
 import type { FileMetadata } from '@google-cloud/storage';
 
+const CURRENT_SCHEMA_VERSION = 2;
+
+/**
+ * Normalizes an attachment ID to the current plain file-ID format (schemaVersion 2+).
+ * Handles both the legacy base64-encoded path format (e.g. base64("avatars/1234") → "1234")
+ * and the new plain file ID format ("1234").
+ * When schemaVersion is already current, the value is passed through without decoding.
+ */
+const normalizeAttachmentId = (raw: string, schemaVersion?: number): string => {
+  if ((schemaVersion ?? 0) >= CURRENT_SCHEMA_VERSION) return raw;
+  try {
+    const decoded = Buffer.from(raw, 'base64').toString('utf-8');
+    if (decoded.startsWith('avatars/')) {
+      return decoded.slice('avatars/'.length);
+    }
+  } catch {
+    // not valid base64 — already a plain ID
+  }
+  return raw;
+};
+
 type CommissionGetAllParams = {
   page?: number;
   pageSize?: number;
@@ -161,17 +182,18 @@ const getOneById = async (commissionId: string, viewAs?: ViewAs): Promise<Single
   // Fetch file details for each attachment of each character changelog, prefix "avatars/" to each attachment ID since that's the path where attachments are stored in the bucket. 
   const fileIds = _.flatMap(commission.characters ?? [], (char) =>
     _.flatMap(char.changelog ?? [], (changelog) => changelog.attachments as string[] ?? [])
-  ).map((attachmentId) => `avatars/${attachmentId}`);
+  ).map((attachmentId) => `avatars/${normalizeAttachmentId(attachmentId, commission.schemaVersion)}`);
   let filesDetails: Record<string, FileMetadata> = {};
   if (fileIds.length > 0) filesDetails = await bucketGetFilesDetails(fileIds as unknown as string[]);
   // Rename filesDetails keys, split "avatars/" prefix from each key.
   filesDetails = _.mapKeys(filesDetails, (_, key) => key.replace('avatars/', ''));
   // Minify details to each attachment ID
   const minifiedFilesDetails: Record<string, CommissionCharacterAttachmentRaw> = _.mapValues(filesDetails, (file) => {
+    const originalName = file.metadata?.originalname as string || file.metadata?.originalName as string || '';
     return ({
       id: file.name,
-      filename: file.metadata?.originalname,
-      filetype: getContentTypeByExtension(file.metadata?.originalname as string || ''),
+      filename: originalName,
+      filetype: getContentTypeByExtension(originalName),
       size: parseInt(file.size as string, 10),
       unconfirmed: false
     } as CommissionCharacterAttachmentRaw)
@@ -193,9 +215,15 @@ const updateOne = async (commissionId: string, requestData: Partial<CommissionUp
       const sanitizedCharacter = c;
       // Ensure base is an ObjectId
       sanitizedCharacter.base = new ObjectId(c.base as string);
+      // Normalize attachment IDs to current schema format
+      sanitizedCharacter.changelog = (c.changelog ?? []).map((log) => ({
+        ...log,
+        attachments: (log.attachments ?? []).map((id) => normalizeAttachmentId(id)),
+      }));
       return sanitizedCharacter;
     }) } : {}),
     updated_at: new Date().toISOString(),
+    schemaVersion: CURRENT_SCHEMA_VERSION,
   };
   // Remove payments from newData since Billing controller handles it
   if (newData.payments) delete newData.payments;
@@ -218,6 +246,7 @@ const insertOne = async (requestData: CommissionOptions) => {
       sanitizedCharacter.base = new ObjectId(c.base as string);
       return sanitizedCharacter;
     }),
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }
@@ -306,7 +335,7 @@ const confirmAllAttachmentsFromOne = async (commissionId: string) => {
     _.flatMap(char.changelog ?? [], (changelog) => changelog.attachments as string[] ?? [])
   );
   allAttachments.forEach((attachmentId) => {
-    const destinationPath = `avatars/${attachmentId}`;
+    const destinationPath = `avatars/${normalizeAttachmentId(attachmentId, commission.schemaVersion)}`;
     // Verify if the attachment is still unconfirmed (exists in temp bucket), if so, move it to the default bucket. If it doesn't exist in temp bucket, it means it's already confirmed.
     bucketFilesExists([destinationPath], 'temp').then((existence) => {
       if (existence[destinationPath]) {
@@ -323,6 +352,40 @@ const confirmAllAttachmentsFromOne = async (commissionId: string) => {
   });
 };
 
+const migrateCommissions = async (): Promise<{ migrated: number }> => {
+  const collection = await useMongoCollection<CommissionBaseRaw>('commissions');
+  const cursor = collection.find({ schemaVersion: { $not: { $gte: CURRENT_SCHEMA_VERSION } } });
+
+  const bulkOps: any[] = [];
+  let migrated = 0;
+
+  const flush = async () => {
+    if (bulkOps.length === 0) return;
+    const result = await collection.bulkWrite(bulkOps.splice(0));
+    migrated += result.modifiedCount;
+  };
+
+  for await (const doc of cursor) {
+    const updatedCharacters = (doc.characters ?? []).map((char) => ({
+      ...char,
+      changelog: (char.changelog ?? []).map((log) => ({
+        ...log,
+        attachments: (log.attachments as string[] ?? []).map((id) => normalizeAttachmentId(id, doc.schemaVersion)),
+      })),
+    }));
+    bulkOps.push({
+      updateOne: {
+        filter: { _id: doc._id },
+        update: { $set: { characters: updatedCharacters, schemaVersion: CURRENT_SCHEMA_VERSION } },
+      },
+    });
+    if (bulkOps.length >= 100) await flush();
+  }
+
+  await flush();
+  return { migrated };
+};
+
 export const useCommissionModel = () => ({
   getAll,
   getOneById,
@@ -334,5 +397,6 @@ export const useCommissionModel = () => ({
   addTransactionToOne,
   findCustomerByOne,
   checkOwnershipFromOne,
-  confirmAllAttachmentsFromOne
+  confirmAllAttachmentsFromOne,
+  migrateCommissions
 });
