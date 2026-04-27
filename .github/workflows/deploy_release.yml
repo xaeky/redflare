@@ -56,64 +56,116 @@ jobs:
             REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
             SOURCE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.source'] }}
   
-  cloud-run-deploy:
+  deploy-production-canary:
+    uses: ./.github/workflows/cloudrun-deploy.yml
+    needs: build
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
+      env: production
+      strategy: canary
+    secrets: inherit
+
+  test-e2e:
     runs-on: ubuntu-latest
-    environment: 
+    environment:
       name: production
-      url: https://avatars-console.xaeky.cloud
     permissions:
       contents: 'read'
       id-token: 'write'
     needs:
       - build
+      - deploy-production-canary
     steps:
       - uses: actions/checkout@v4
 
-      - id: 'auth'
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Auth Cloud SDK
+        if: always()
         uses: google-github-actions/auth@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-      
-      - id: 'deploy'
-        uses: google-github-actions/deploy-cloudrun@v2
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
         with:
-          service: ${{ vars.SERVICE_NAME }}
-          image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
-          env_vars: |
-            NUXT_MP_PUBLIC=${{ vars.MP_PUBLIC }}
-            NUXT_MP_SERVICE=${{ secrets.MP_SERVICE }}
-            NUXT_MP_MARKETPLACE=${{ vars.MP_MARKETPLACE }}
-            NUXT_MP_ENDPOINT_BASE=${{ vars.MP_BASE }}
-            NUXT_PP_CID=${{ vars.PP_CID }}
-            NUXT_PP_SID=${{ secrets.PP_SID }}
-            NUXT_PP_ENDPOINT_BASE=${{ vars.PP_BASE }}
-            NUXT_BUCKET_NAME=${{ vars.BUCKET_NAME }}
-            NUXT_BUCKET_AUTH=${{ secrets.BUCKET_AUTH }}
-            NUXT_OAUTH_AUTH0_CLIENT_ID=${{ vars.A0_CLIENT_ID }}
-            NUXT_OAUTH_AUTH0_CLIENT_SECRET=${{ secrets.A0_CLIENT_SECRET }}
-            NUXT_OAUTH_AUTH0_DOMAIN=${{ vars.A0_TENANT }}
-            NUXT_OAUTH_AUTH0_REDIRECT_URL=${{ vars.A0_CALLBACK }}
-            NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_ID=${{ vars.FO_DISCORD_CLIENT }}
-            NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_SECRET=${{ secrets.FO_DISCORD_SECRET }}
-            NUXT_FRONTOFFICE_OAUTH_DISCORD_REDIRECT_URL=${{ vars.FO_DISCORD_REDIRECT }}
-            NUXT_FRONTOFFICE_SESSION_PASSWORD=${{ secrets.FO_SESSION_PASSWORD }}
-            NUXT_PUBLIC_CREATOR_MARKET_NAME=${{ vars.MARKET_NAME }}
-            NUXT_PUBLIC_CREATOR_CALLBACK_URI=${{ vars.MARKET_CALLBACK }}
-            NUXT_SESSION_PASSWORD=${{ secrets.SESSION_PASSWORD }}
-            NUXT_BACKOFFICE_SKIP_ROLES=${{ vars.BO_SKIP_ROLES }}
-            NUXT_BACKOFFICE_MONGO=${{ secrets.BO_MONGO }}
-            NUXT_BACKOFFICE_MONGO_DB=${{ vars.BO_MONGO_DB }}
-            NUXT_PUBLIC_REDFLARE_ENV=${{ vars.ENV }}
-          region: us-west1
-          flags: >
-            --service-account=${{ vars.SERVICE_ACCOUNT }}
-            --platform=managed
-            --cpu=1
-            --cpu-throttling
-            --memory=1024Mi
-            --max-instances=1
-            --allow-unauthenticated
-      
+          install_components: 'cloud-run-proxy'
+
+      - name: Start canary proxy
+        run: |
+          gcloud run services proxy ${{ vars.SERVICE_NAME }}-canary \
+            --region=us-west1 --port=8080 &
+          echo $! > /tmp/gcloud-proxy.pid
+          for i in {1..10}; do
+            nc -z localhost 8080 && break || sleep 1
+          done
+          bunx local-ssl-proxy --source 3000 --target 8080 &
+          echo $! > /tmp/ssl-proxy.pid
+          for i in {1..10}; do
+            nc -z localhost 3000 && break || sleep 1
+          done
+
+      - name: Run E2E tests
+        env:
+          CI: true
+          FORCE_REMOTE: true
+          TEST_URL: https://localhost:3000
+        run: bun test:e2e
+
+      - name: Stop canary proxy
+        if: always()
+        run: |
+          kill $(cat /tmp/ssl-proxy.pid) || true
+          kill $(cat /tmp/gcloud-proxy.pid) || true
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+      - name: Delete canary service
+        if: always()
+        run: gcloud run services delete ${{ vars.SERVICE_NAME }}-canary --region=us-west1 --quiet || true
+
+  deploy-production:
+    uses: ./.github/workflows/cloudrun-deploy.yml
+    needs: [build, test-e2e]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      image: us-west1-docker.pkg.dev/redflare-prod/avatars-console/redflare@${{ needs.build.outputs.digest }}
+      env: production
+      strategy: direct
+    secrets: inherit
+
+  promote-production:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://avatars-console.xaeky.cloud
+    permissions:
+      contents: read
+      id-token: write
+    needs: deploy-production
+    steps:
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
       - name: Send all traffic to this new version
         run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --to-latest --region=us-west1 --quiet
