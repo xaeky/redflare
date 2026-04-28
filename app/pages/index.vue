@@ -52,9 +52,14 @@ const isDesktop = breakpoints.greater('lg');
         <p>Please log in to your respective account to continue.</p>
       </div>
       <div class="flex flex-col gap-4 justify-center items-center">
-        <div class="flex flex-col lg:flex-row items-center gap-4 lg:gap-8">
+        <div
+          class="flex flex-col items-center gap-4 lg:gap-8"
+          :class="{
+            'lg:flex-row': !isPublicLoggedIn,
+          }"
+        >
           <div class="rf-login-card">
-            <div class="card-icon">
+            <div v-if="!isPublicLoggedIn" class="card-icon">
               <UIcon name="i-heroicons-sparkles-solid" class="size-8" />
             </div>
             <div v-if="!isPublicLoggedIn" class="frontier-content card-content">
@@ -62,18 +67,26 @@ const isDesktop = breakpoints.greater('lg');
               <UButton @click="handleLoginDoor('public')" label="Log in with Discord" icon="i-ic-baseline-discord" />
             </div>
             <div v-else class="welcome-content card-content">
-              <PublicSessionCard />
-              <UButton @click="handleWelcomeDoor('public')" label="Go to Account" trailing-icon="i-heroicons-arrow-right-20-solid" />
+              <PublicSessionCard size="sm" />
+              <UButton block @click="handleWelcomeDoor('public')" label="Go to Account" trailing-icon="i-heroicons-arrow-right-20-solid" />
             </div>
           </div>
-          <USeparator v-if="isDesktop" orientation="vertical" label="or" class="h-24" />
+          <USeparator
+            v-if="isDesktop && !isPublicLoggedIn" orientation="vertical" label="or" class="h-24" 
+          />
+          <USeparator
+            v-if="isDesktop && isPublicLoggedIn" label="or"
+          />
           <div class="rf-login-card">
-            <div class="card-icon">
+            <div v-if="!isAgentLoggedIn" class="card-icon">
               <UIcon name="i-heroicons-paint-brush-solid" class="size-8" />
             </div>
-            <div class="card-content">
+            <div v-if="!isAgentLoggedIn" class="card-content">
               <h2>I'm an artist</h2>
               <UButton @click="handleLoginDoor('agent')" label="Log in with Auth0" icon="i-heroicons-key-20-solid" />
+            </div>
+            <div v-else class="w-full">
+              <UButton block @click="handleWelcomeDoor('agent')" label="Go to Artist Dashboard" trailing-icon="i-heroicons-arrow-right-20-solid" />
             </div>
           </div>
         </div>
@@ -94,7 +107,7 @@ const isDesktop = breakpoints.greater('lg');
 @reference '~/assets/global.css';
 
 .rf-login-card {
-  @apply flex items-center gap-6 bg-muted/25 rounded-xl p-6;
+  @apply flex items-center gap-6 bg-muted/25 w-full rounded-xl p-6;
   .frontier-content { @apply flex flex-col gap-4 items-start; }
   .welcome-content {
     @apply text-center flex flex-col items-center gap-4;
