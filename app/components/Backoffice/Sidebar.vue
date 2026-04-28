@@ -1,11 +1,9 @@
 <script setup lang="ts">
-interface SidebarLink {
-  label: string;
-  icon: string;
-  to: string;
-}
+import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
 
-const links:SidebarLink[] = [
+const { clear, session } = useUserSession();
+
+const links:NavigationMenuItem[] = [
   {
     label: 'Home',
     icon: 'i-heroicons-home-20-solid',
@@ -27,29 +25,43 @@ const links:SidebarLink[] = [
     to: '/dashboard/customers'
   }
 ];
+
+const userDropdownItems: DropdownMenuItem[] = [
+  {
+    label: 'Settings',
+    icon: 'i-heroicons-cog-16-solid',
+    onSelect: () => navigateTo('/dashboard/me')
+  },
+  {
+    label: 'Logout',
+    icon: 'i-heroicons-arrow-right-end-on-rectangle-16-solid',
+    async onSelect() {
+      await clear();
+      navigateTo('/');
+    }
+  }
+]
 </script>
 
 <template>
-  <aside id="redflare_backoffice_sidebar" class="flex flex-col gap-4 border-r border-r-neutral-800 p-4">
-    <div v-for="link in links" :key="link.to">
-      <UTooltip :content="{ side: 'right' }" arrow :text="link.label" :delay-duration="0">
-        <ULink
-          :to="link.to"
-          class="w-12 h-12 flex items-center justify-center rounded-xl bg-neutral-800"
-        >
-          <UIcon :name="link.icon" size="20" />
-        </ULink>
-      </UTooltip>
-    </div>
-    <DevOnly>
-      <UTooltip :content="{ side: 'right' }" arrow text="Development" :delay-duration="0">
-        <ULink
-          to="/dashboard/dev"
-          class="w-12 h-12 flex items-center justify-center rounded-xl bg-neutral-800"
-        >
-          <UIcon name="i-heroicons-code-bracket-20-solid" size="20" />
-        </ULink>
-      </UTooltip>
-    </DevOnly>
-  </aside>
+  <USidebar :ui="{ inner: 'bg-elevated/25' }">
+    <template #header>
+      <HeaderLogo />
+    </template>
+    <template #default>
+      <UNavigationMenu
+        :items="links"
+        orientation="vertical"
+        :ui="{ list: 'space-y-1' }"
+      />
+    </template>
+    <template #footer>
+      <UDropdownMenu
+        :items="userDropdownItems"
+        v-if="session && session.user"
+      >
+        <UButton square class="w-full" variant="ghost" color="neutral" :label="session.user.nickname" :avatar="{ src: session.user.picture }" />
+      </UDropdownMenu>
+    </template>
+  </USidebar>
 </template>

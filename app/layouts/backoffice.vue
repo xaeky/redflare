@@ -13,28 +13,18 @@ useHead({
 <template>
   <UApp>
     <div class="rf_restricted">
-      <header class="rf_backoffice_head">
-        <UContainer>
-          <div class="flex items-stretch justify-between">
-            <HeaderLogo />
-            <HeaderSession />
-          </div>
-        </UContainer>
-      </header>
-      <UContainer class="flex flex-grow">
-        <div class="rf_backoffice_contentwrapper">
-          <BackofficeSidebar />
-          <div id="rf_backoffice_content" class="px-12 py-6 w-full">
-            <div id="rf_backoffice_content_header" class="flex items-center justify-between mb-6">
-              <div>
-                <h1 v-text="title" />
-                <span v-if="description" v-text="description" class="text-muted" />
-              </div>
+      <div class="rf_backoffice_contentwrapper">
+        <BackofficeSidebar />
+        <div class="rf_backoffice_content">
+          <div id="rf_backoffice_content_header" class="flex items-center justify-between mb-6">
+            <div>
+              <h1 v-text="title" />
+              <span v-if="description" v-text="description" class="text-muted" />
             </div>
-            <slot />
           </div>
+          <slot />
         </div>
-      </UContainer>
+      </div>
     </div>
   </UApp>
 </template>
@@ -51,7 +41,11 @@ useHead({
 }
 
 .rf_backoffice_contentwrapper {
-  @apply flex flex-grow;
+  @apply flex flex-1 ;
+}
+
+.rf_backoffice_content {
+  @apply px-12 py-6 w-full overflow-y-auto;
 }
 
 .rf_backoffice_content_header_actions {
