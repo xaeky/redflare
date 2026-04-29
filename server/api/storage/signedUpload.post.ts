@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
     const url = await bucketGetSignedUploadUrl({ destinationPath, fileName, expiresInSeconds: 3600, contentType: fileContentType });
     return { success: true, url, id: fileId.toString() };
   } catch (error) {
+    logger.error('Error getting signed upload URL:', error);
     throw createError({ statusCode: 500, message: 'Failed to get signed upload URL' });
   }
 });
