@@ -45,15 +45,15 @@ const headerExtraActionsItems: DropdownMenuItem[][] = [
     <div class="flex items-center justify-between">
       <h1>Billing</h1>
       <div>
-        <UButtonGroup>
+        <UFieldGroup>
           <UButton
             @click="() => openAddTransactionModal()" :loading="transactionsLoading"
-            label="Add transaction log" icon="i-heroicons-plus-16-solid"
+            label="Add transaction log" icon="i-heroicons-plus-16-solid" color="neutral" variant="subtle"
           />
           <UDropdownMenu :items="headerExtraActionsItems">
-            <UButton icon="i-heroicons-chevron-down-16-solid" />
+            <UButton icon="i-heroicons-chevron-down-16-solid" color="neutral" variant="subtle" />
           </UDropdownMenu>
-        </UButtonGroup>
+        </UFieldGroup>
       </div>
     </div>
     <div class="space-y-2">

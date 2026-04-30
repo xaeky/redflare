@@ -1,5 +1,5 @@
 export type PaymentProcessorType = 'mercadopago' | 'airtm' | 'paypal' | string;
-export type PaymentCurrencyType = 'ARS' | 'USD' | string;
+export type PaymentCurrencyType = 'ARS' | 'USD' | 'USDT' | 'USDC' | string;
 
 export interface PaymentTransaction {
   approved_at: string;

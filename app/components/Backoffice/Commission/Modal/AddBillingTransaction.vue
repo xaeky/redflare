@@ -24,8 +24,8 @@ const billingTransactionState = reactive<z.infer<typeof billingTransactionSchema
   internal_note: ''
 });
 const billingForm = {
-  paymentCurrencyOptions: getBillingCurrencies(),
-  paymentProcessorOptions: getBillingProcessors()
+  paymentCurrencyOptions: getBillingCurrenciesOptions(),
+  paymentProcessorOptions: getBillingProcessorsOptions()
 }
 const billingTransactionFormBusy = ref(false);
 const billingTransactionFormPostHandle = async () => {

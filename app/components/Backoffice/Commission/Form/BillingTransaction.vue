@@ -53,6 +53,8 @@ const transactionApprovedAt = computed(() => {
 });
 const transactionLocales: Record<string, string> = {
   'USD': 'en-US',
+  'USDT': 'en-US',
+  'USDC': 'en-US',
   'ARS': 'es-AR'
 }
 const transactionFormattedProcessor = computed(() => {
@@ -62,13 +64,21 @@ const transactionFormattedProcessor = computed(() => {
   };
   return processors[props.transaction.payment_processor] || props.transaction.payment_processor;
 })
-const transactionLocale = computed(() => transactionLocales[props.transaction.payment_currency] || 'en-US');
+const transactionLocale = computed(() => getBillingCurrencyLocales(props.transaction.payment_currency) || 'en-US');
 const transactionAmounts = {
   billed: computed(() => {
-    return new Intl.NumberFormat(transactionLocale.value, { style: 'currency', currency: props.transaction.payment_currency }).format(props.transaction.total_paid_amount);
+    return new Intl.NumberFormat(
+      transactionLocale.value,
+      { style: 'currency', currency: getBillingCurrencySymbol(props.transaction.payment_currency) }
+    )
+    .format(props.transaction.total_paid_amount);
   }),
   received: computed(() => {
-    return new Intl.NumberFormat(transactionLocale.value, { style: 'currency', currency: props.transaction.payment_currency }).format(props.transaction.net_received_amount);
+    return new Intl.NumberFormat(
+      transactionLocale.value,
+      { style: 'currency', currency: getBillingCurrencySymbol(props.transaction.payment_currency) }
+    )
+    .format(props.transaction.net_received_amount);
   })
 }
 const transactionDropdownItems = ref<DropdownMenuItem[][]>([
