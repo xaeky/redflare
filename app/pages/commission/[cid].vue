@@ -57,8 +57,12 @@ function routeCommissionStatus(status: CommissionStatusType): CommissionStatusTy
 const commissionRoutedValue = routeCommissionStatus(commission.data.status as CommissionStatusType);
 const commissionRoutedValueString = computed(() => commissionRoutedValue.toString());
 
-function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[]) {
-  characterChangelogOverlay.open({ changelog, commission: commission.data._id?.toString() || '', attachments: commission.attachments || {} });
+function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[], characterIndex: number) {
+  characterChangelogOverlay.open({
+    changelog, commission: commission.data._id?.toString() || '',
+    attachments: commission.attachments || {},
+    avatarBase: commission.data.characters[characterIndex]?.base as AvatarBase
+  });
 }
 
 const { isLoggedIn, login } = await usePublicUserSession();
@@ -144,7 +148,7 @@ useSeoMeta({
                   <div v-if="char.changelog && char.changelog.length" class="flex items-center gap-2">
                     <UButton
                       label="View releases" icon="i-lucide-list" variant="soft"
-                      @click="handleCharacterChangelogOpen(char.changelog)"
+                      @click="handleCharacterChangelogOpen(char.changelog, charIndex)"
                     />
                   </div>
                 </div>

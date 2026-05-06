@@ -5,6 +5,7 @@ const props = defineProps<{
   commission: string;
   changelog: CommissionCharacterChangelog[];
   attachments: Record<string, CommissionCharacterAttachmentRaw>;
+  avatarBase?: AvatarBase;
 }>();
 
 const toast = useToast();
@@ -38,6 +39,23 @@ const formatTime = (t: string) => useTimeAgo(new Date(t)).value;
   <UModal title="Character releases">
     <template #body>
       <div class="rf_shared_ro_character_changelog">
+        <UAlert color="neutral" variant="subtle" icon="lucide:package-check" title="Make sure you got everything!">
+          <template #description>
+            <div class="space-y-4">
+              <p>
+                Make sure to <u>download the {{ avatarBase?.name }} base files from {{ avatarBase?.creator_name }}'s storefront</u>, then download the package provided here for the latest updates.
+              </p>
+              <div class="flex flex-wrap gap-2 items-start">
+                <ULink external target="_blank" to="https://avatars.xaeky.cloud/faq#_4-how-do-i-upload-my-private-avatar">
+                  <UButton size="sm" icon="i-lucide-external-link" variant="subtle" label="View uploading guide" />
+                </ULink>
+                <ULink external target="_blank" :to="(avatarBase?.storefront_url as string)">
+                  <UButton size="sm" icon="i-lucide-external-link" color="neutral" variant="subtle" label="View base storefront" />
+                </ULink>
+              </div>
+            </div>
+          </template>
+        </UAlert>
         <div v-for="(entry, index) in changelog" :key="index" class="changelog_entry">
           <div class="changelog_title">
             <span v-text="entry.version" />
