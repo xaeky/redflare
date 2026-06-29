@@ -21,6 +21,7 @@ export default defineNuxtConfig({
   routeRules: {
     '/api/**': { cors: false },
     '/api/service/**': { cors: true },
+    '/api/auth/**': { cors: true },
     '/dashboard/**': { ssr: false },
     '/commission': { redirect: '/me' },
   },
