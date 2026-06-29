@@ -79,7 +79,6 @@ jobs:
             NUXT_FRONTOFFICE_SESSION_PASSWORD=${{ inputs.env == 'production' && 'PROD_FO_SESSION_PASSWORD:latest' || 'STAGING_FO_SESSION_PASSWORD:latest' }}
             NUXT_SESSION_PASSWORD=${{ inputs.env == 'production' && 'PROD_BO_SESSION_PASSWORD:latest' || 'STAGING_BO_SESSION_PASSWORD:latest' }}
             NUXT_BACKOFFICE_MONGO=${{ inputs.env == 'production' && 'PROD_BO_MONGO:latest' || 'STAGING_BO_MONGO:latest' }}
-            NUXT_BACKOFFICE_MONGO_DB=${{ inputs.env == 'production' && 'PROD_BO_MONGO_DB:latest' || 'STAGING_BO_MONGO_DB:latest' }}
           region: us-west1
           flags: >
             --service-account=${{ vars.SERVICE_ACCOUNT }}
