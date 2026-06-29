@@ -71,6 +71,7 @@ jobs:
             NUXT_BACKOFFICE_SKIP_ROLES=${{ vars.BO_SKIP_ROLES }}
             NUXT_PUBLIC_REDFLARE_ENV=${{ vars.ENV }}
             PLAYWRIGHT_TEST=${{ steps.config.outputs.playwright_test }}
+          env_vars_update_strategy: overwrite
           secrets: |
             NUXT_MP_SERVICE=${{ inputs.env == 'production' && 'PROD_MP_SERVICE:latest' || 'STAGING_MP_SERVICE:latest' }}
             NUXT_PP_SID=${{ inputs.env == 'production' && 'PROD_PP_SID:latest' || 'STAGING_PP_SID:latest' }}
@@ -79,6 +80,7 @@ jobs:
             NUXT_FRONTOFFICE_SESSION_PASSWORD=${{ inputs.env == 'production' && 'PROD_FO_SESSION_PASSWORD:latest' || 'STAGING_FO_SESSION_PASSWORD:latest' }}
             NUXT_SESSION_PASSWORD=${{ inputs.env == 'production' && 'PROD_BO_SESSION_PASSWORD:latest' || 'STAGING_BO_SESSION_PASSWORD:latest' }}
             NUXT_BACKOFFICE_MONGO=${{ inputs.env == 'production' && 'PROD_BO_MONGO:latest' || 'STAGING_BO_MONGO:latest' }}
+          secrets_update_strategy: overwrite
           region: us-west1
           flags: >
             --service-account=${{ vars.SERVICE_ACCOUNT }}
