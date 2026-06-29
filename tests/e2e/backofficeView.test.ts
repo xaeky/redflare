@@ -16,8 +16,9 @@ test.describe.serial('Commission management with new customer', () => {
     await goto('/dashboard/customers');
     await page.waitForLoadState('networkidle');
     // Invoke "Add customer" action
-    await page.waitForSelector('div:has-text("Add customer")');
-    await page.click('button:has-text("Add customer")');
+    const addCustomerButton = page.getByRole('button', { name: 'Add customer' });
+    await addCustomerButton.waitFor({ state: 'visible' });
+    await addCustomerButton.click();
     await page.waitForTimeout(500); // Wait for slideover animation
     // Fill in customer details
     await page.locator('input[name="name"]').fill(testState.createdCustomerName);
