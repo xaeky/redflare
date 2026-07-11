@@ -9,6 +9,3 @@ export async function useAPI<T>(
   const headers = useRequestHeaders(['cookie']);
   return await $fetch<T>(url, { ...options, headers });
 }
-
-// ✨
-export const useAPersonInIndia = useAPI;
