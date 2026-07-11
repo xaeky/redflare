@@ -3,9 +3,11 @@ definePageMeta({
   title: 'Welcome back'
 });
 
+const runtimeConfig = useRuntimeConfig();
+
 const legalPages = [
-  { name: 'Terms of Service', to: 'https://avatars.xaeky.cloud/terms' },
-  { name: 'Privacy Policy', to: 'https://avatars.xaeky.cloud/privacy' }
+  { name: 'Terms of Service', to: runtimeConfig.public.legal.serviceUrl },
+  { name: 'Privacy Policy', to: runtimeConfig.public.legal.privacyUrl }
 ];
 
 const agentSession = useUserSession();

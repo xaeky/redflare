@@ -1,5 +1,6 @@
 export default defineNuxtRouteMiddleware(() => {
   const { loggedIn } = useUserSession();
-  if (!loggedIn.value) return navigateTo('https://avatars.xaeky.cloud', { external: true });
+  const runtimeConfig = useRuntimeConfig();
+  if (!loggedIn.value) return navigateTo(runtimeConfig.public.homepageUrl, { external: true });
   else return navigateTo('/dashboard');
 })

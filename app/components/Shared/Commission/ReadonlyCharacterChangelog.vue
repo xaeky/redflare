@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { FetchError } from 'ofetch';
 
+const runtimeConfig = useRuntimeConfig();
+
 const props = defineProps<{
   commission: string;
   changelog: CommissionCharacterChangelog[];
@@ -46,7 +48,7 @@ const formatTime = (t: string) => useTimeAgo(new Date(t)).value;
                 Make sure to <u>download the {{ avatarBase?.name }} base files from {{ avatarBase?.creator_name }}'s storefront</u>, then download the package provided here for the latest updates.
               </p>
               <div class="flex flex-wrap gap-2 items-start">
-                <ULink external target="_blank" to="https://avatars.xaeky.cloud/faq#_4-how-do-i-upload-my-private-avatar">
+                <ULink external target="_blank" :to="runtimeConfig.public.help.privateUploadUrl">
                   <UButton size="sm" icon="i-lucide-external-link" variant="subtle" label="View uploading guide" />
                 </ULink>
                 <ULink external target="_blank" :to="(avatarBase?.storefront_url as string)">

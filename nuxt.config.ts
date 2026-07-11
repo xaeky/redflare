@@ -63,6 +63,14 @@ export default defineNuxtConfig({
       },
       env: process.env.NODE_ENV || '',
       redflare_env: '',
+      legal: {
+        serviceUrl: '',
+        privacyUrl: ''
+      },
+      homepageUrl: '',
+      help: {
+        privateUploadUrl: ''
+      }
     },
     backoffice: {
       skipRoles: false,
