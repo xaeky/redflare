@@ -1,6 +1,6 @@
 import { ObjectId, WithId } from 'mongodb';
 import _ from 'lodash';
-import type { FileMetadata } from '@google-cloud/storage';
+import type { StorageMeta } from 'unstorage';
 
 const CURRENT_SCHEMA_VERSION = 2;
 
@@ -183,24 +183,14 @@ const getOneById = async (commissionId: string, viewAs?: ViewAs): Promise<Single
   const fileIds = _.flatMap(commission.characters ?? [], (char) =>
     _.flatMap(char.changelog ?? [], (changelog) => changelog.attachments as string[] ?? [])
   ).map((attachmentId) => `avatars/${normalizeAttachmentId(attachmentId, commission.schemaVersion)}`);
-  let filesDetails: Record<string, FileMetadata> = {};
-  if (fileIds.length > 0) filesDetails = await bucketGetFilesDetails(fileIds as unknown as string[]);
+  let filesDetails: Record<string, CommissionCharacterAttachmentRaw> = {};
+  if (fileIds.length > 0) filesDetails = await bucketFilesMetadata(fileIds, 'default', true);
   // Rename filesDetails keys, split "avatars/" prefix from each key.
   filesDetails = _.mapKeys(filesDetails, (_, key) => key.replace('avatars/', ''));
-  // Minify details to each attachment ID
-  const minifiedFilesDetails: Record<string, CommissionCharacterAttachmentRaw> = _.mapValues(filesDetails, (file) => {
-    const originalName = file.metadata?.originalname as string || file.metadata?.originalName as string || '';
-    return ({
-      id: file.name,
-      filename: originalName,
-      filetype: getContentTypeByExtension(originalName),
-      size: parseInt(file.size as string, 10),
-      unconfirmed: false
-    } as CommissionCharacterAttachmentRaw)
-  });
+  const canViewAttachments = viewAs === 'customer' || viewAs === 'agent';
   let returnData = {
     data: commission,
-    attachments: viewAs === 'customer' || viewAs === 'agent' ? minifiedFilesDetails : undefined,
+    attachments: canViewAttachments ? filesDetails : undefined,
     customer: customer
   }
   return returnData;
@@ -336,19 +326,7 @@ const confirmAllAttachmentsFromOne = async (commissionId: string) => {
   );
   allAttachments.forEach((attachmentId) => {
     const destinationPath = `avatars/${normalizeAttachmentId(attachmentId, commission.schemaVersion)}`;
-    // Verify if the attachment is still unconfirmed (exists in temp bucket), if so, move it to the default bucket. If it doesn't exist in temp bucket, it means it's already confirmed.
-    bucketFilesExists([destinationPath], 'temp').then((existence) => {
-      if (existence[destinationPath]) {
-        logger.info('Confirming attachment by moving it to permanent storage', { destinationPath });
-        return bucketMoveFileToPermanent(destinationPath);
-      } else {
-        logger.debug('Attachment already confirmed, skipping', { destinationPath });
-        return null;
-      }
-    }).catch((error) => {
-      logger.error('Failed to confirm attachment', { destinationPath, error });
-      throw createError({ statusCode: 500, message: `Failed to confirm attachment ${attachmentId}` });
-    });
+    bucketMoveFileToPermanent(destinationPath);
   });
 };
 

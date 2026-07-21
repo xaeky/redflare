@@ -51,7 +51,7 @@ const handleFileUpload = async (file: File) => {
     method: 'PUT', body: file,
     headers: {
       'Content-Type': file.type,
-      'x-goog-meta-originalname': file.name
+      'x-amz-meta-original-name': file.name
     }
   }).catch(() => {
     throw new Error('Failed to upload file to storage');
@@ -146,11 +146,11 @@ watch(tempFile, async (newFile) => {
           color="error"
           variant="outline"
           size="sm"
-          @click="changelogItemState.items.splice(itemIndex, 1)"
+          @click="() => { changelogItemState.items.splice(itemIndex, 1) }"
         />
       </div>
       <div class="flex justify-start">
-        <UButton color="neutral" variant="soft" @click="changelogItemState.items.push('')" label="Add change" />
+        <UButton color="neutral" variant="soft" @click="() => { changelogItemState.items.push('') }" label="Add change" />
       </div>
     </div>
     <div class="space-y-2">

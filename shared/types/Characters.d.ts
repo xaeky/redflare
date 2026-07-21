@@ -21,7 +21,7 @@ export interface CommissionCharacterAttachmentRaw {
   filetype: string;
   size: number; // in bytes
   // This value is true if the attachment doesn't come from the permanent storage bucket yet, and is still in the temp bucket.
-  unconfirmed: boolean;
+  unconfirmed?: boolean;
 }
 export interface CommissionCharacterChangelogRaw {
   date: string;

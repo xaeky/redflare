@@ -15,23 +15,42 @@ Many note-taking applications charges to the final user for general usage, those
   - UI isn't customizable in-app.
 
 ## 📚 Deployment and stack required
-Redflare uses many services to work, it will depend on a **MongoDB** database (MongoDB Atlas cloud solution works fine), a **Auth0 tenant** for artist authentication, a **Discord OAuth App** for customer authentication, and a **Google Cloud Platform Bucket** for file storage. Additional "native" plugins you will find are **PayPal** for global payments and **Mercado Pago** for Argentina payments. You'll have to make local SSL certificates for local development, `mkcert` command can help you with that. I recommend **Bun** for package management for this project.
-- Clone and `cd` into the project root folder.
-- Make sure to copy the `.env.example` file, paste and rename it to `.env`. You'll have to fill every field to make the app work properly.
-- **For testing**, same step but for `.env.test.example`.
-- **For Windows users**, I strongly recommend to use **WSL** for the local environment.
-1. Install the dependencies with `bun i`.
-2. Create your SSL certificates inside the root directory with `mkcert`.
+Redflare uses many services to work:
+
+- **MongoDB** database (MongoDB Atlas cloud solution works fine).
+- **Auth0 tenant** for artist authentication.
+- **Discord OAuth App** for customer authentication
+- **Any S3-compatible storage** to store files like `.unitypackage`, `.spp`, etc.
+
+0. Make sure you already have the following installed in your system:
+    - [bun](https://bun.sh/)
+    - [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/install/) for local development.
+    - If you are using Windows, I strongly recommend to use **WSL** for the local environment.
+1. Clone and `cd` into the project root folder.
+2. Make sure to copy the `.env.example` file, paste and rename it to `.env`. You'll have to fill every field to make the app work properly. **For E2E testing**, same step but for `.env.test.example`.
 3. Setup the following services, don't forget to fill `.env` with your API keys!
     - Set up the database for the app, a MongoDB Atlas cloud instance should work.
     - Set up the Auth0 tenant for the artist authentication.
     - Create a Discord developer app for the customer authentication.
-    - Create a Google Cloud Platform project. You'll have to setup a billing for it and export the IAM credentials in a JSON, then encode that JSON to Base64.
-    - For global payments, set up a **PayPal** developer app.
-    - For Argentina payments, set up a **MercadoPago** developer app.
-4. Deploy the local development with `bun devs`.
-    - In case you want to run the local server without SSL, just run `bun dev` but isn't recommended since you're interacting with external services that enforces SSL connections.
-5. Since you're using GCP for development, you can use Cloud Run to deploy the app!
-6. In case you want to do E2E testing, make sure to install Playwright in your environment. You can run the tests with `bun test:e2e`. For snapshot preview, use the `--ui` flag.
+    - Set up an S3-compatible storage for the file storage. I recommend using **Cloudflare R2** for this.
+4. Install the dependencies with `bun i`.
+5. Deploy the local development with `bun dev`.
+
+```bash
+git clone https://github.com/xaeky/redflare.git
+cd redflare
+cp .env.example .env
+vim .env # Fill the fields with your API keys.
+bun i
+bun dev
+```
+
+## 🧪 Testing
+To run tests we use Playwright (it may ask you to install it or install a headless browser), you need to have a `.env.test` file with the proper configuration. You can use `.env.test.example` as reference.
+
+Then, run the tests with:
+```bash
+bun test # --ui for GUI window.
+```
 # 📜 License
-GPL-3.0 © 2025 Xaeky - https://ko-fi.com/xaeky
+GPL-3.0 © 2026 [Xaeky](https://ko-fi.com/xaeky)

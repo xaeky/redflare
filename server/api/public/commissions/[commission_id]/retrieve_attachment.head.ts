@@ -18,8 +18,7 @@ export default defineEventHandler(async (event) => {
   const query = await getQuery<{ file_id: string }>(event);
   if (!query.file_id || !query.file_id.length) throw createError({ statusCode: 400, statusMessage: 'No file_id provided' });
   const destinationPath = `avatars/${query.file_id}`;
-  const [exists] = await useStorageBucket().file(destinationPath).exists();
-  if (!exists) throw createError({ statusCode: 404, statusMessage: 'File not found' });
+  if (!(await bucketFileExists(destinationPath))) throw createError({ statusCode: 404, statusMessage: 'File not found' });
   await publicGrantTempAuthorization(event, `retrieve_commission_attachment:${query.file_id}`);
   return true
 });

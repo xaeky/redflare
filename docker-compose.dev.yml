@@ -1,0 +1,40 @@
+name: redflare-dev-services
+
+services:
+  mongo:
+    image: mongo:latest
+    hostname: mongodb
+    container_name: mongo
+    ports:
+      - "27020:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=local
+      - MONGO_INITDB_ROOT_PASSWORD=local
+      - MONGO_INITDB_DATABASE=redflare
+    volumes:
+      - ./.data/db:/data/db
+
+  rustfs_perms:
+    image: alpine
+    user: root
+    volumes:
+      - ./.data/storage:/fix_path
+    command: chown -R 10001:10001 /fix_path
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    depends_on:
+      rustfs_perms:
+        condition: service_completed_successfully
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - RUSTFS_VOLUMES=/data
+      - RUSTFS_ADDRESS=0.0.0.0:9000
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_ACCESS_KEY=local
+      - RUSTFS_SECRET_KEY=local
+    volumes:
+      - ./.data/storage:/data

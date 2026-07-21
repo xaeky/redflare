@@ -1,9 +1,19 @@
-import { type FileMetadata, Storage } from '@google-cloud/storage';
+import { type StorageMeta, createStorage } from "unstorage";
+import s3Driver from "unstorage/drivers/s3";
+import { AwsClient } from "aws4fetch";
+
+const getEndpoint = () => {
+  const endpoint = process.env.S3_ENDPOINT;
+  if (!endpoint || !endpoint.length) {
+    throw new Error('No S3 endpoint provided');
+  }
+  return /^https?:\/\//i.test(endpoint) ? endpoint : `https://${endpoint}`;
+}
 
 const getBucketName = (bucketType: 'default' | 'temp' = 'default') => {
   const buckets = {
-    default: process.env.GCP_BUCKET_AVATARFILES_NAME,
-    temp: process.env.GCP_BUCKET_AVATARFILES_TEMP_NAME
+    default: process.env.S3_BUCKET_AVATARFILES,
+    temp: process.env.S3_BUCKET_AVATARFILES_TEMP
   }
   const nameProvided = buckets[bucketType];
   if (!nameProvided || !nameProvided.length) {
@@ -12,12 +22,34 @@ const getBucketName = (bucketType: 'default' | 'temp' = 'default') => {
   return nameProvided;
 }
 
+const buildContentDisposition = (fileName: string) => {
+  const asciiFallback = fileName.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, "'");
+  return `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encodeURIComponent(fileName)}`;
+}
+
 export const useStorageBucket = (bucketType: 'default' | 'temp' = 'default') => {
   const bucketName = getBucketName(bucketType);
-  const keyFilename = process.env.GCP_PROJECT_SERVICE_KEY_PATH;
-  const storage = new Storage({ keyFilename });
-  return storage.bucket(bucketName);
+  const storage = createStorage({
+    driver: s3Driver({
+      accessKeyId: process.env.S3_ACCESS as string,
+      secretAccessKey: process.env.S3_SECRET as string,
+      endpoint: getEndpoint(),
+      bucket: bucketName,
+      region: 'auto',
+    }),
+  });
+  return storage;
 }
+
+export const useStorageClient = () => {
+  const client = new AwsClient({
+    service: 's3',
+    region: 'auto',
+    accessKeyId: process.env.S3_ACCESS as string,
+    secretAccessKey: process.env.S3_SECRET as string
+  });
+  return client;
+};
 
 type BucketUploadOptions = {
   destinationPath: string;
@@ -34,114 +66,129 @@ type BucketSignedUploadUrlOptions = {
 };
 
 export const bucketGetSignedUploadUrl = async ({ destinationPath, fileName, expiresInSeconds = 3600, contentType = 'application/octet-stream' }: BucketSignedUploadUrlOptions) => {
-  const bucket = useStorageBucket('temp');
-  const file = bucket.file(destinationPath);
-  const [url] = await file.getSignedUrl({
-    action: 'write',
-    expires: Date.now() + expiresInSeconds * 1000,
-    contentType: contentType,
-    extensionHeaders: {
-      'x-goog-meta-originalname': fileName || 'unknown'
-    }
-  }).catch((error) => {
-    throw new Error(`Failed to get signed URL for file ${destinationPath}: ${error.message}`);
-  });
-  logger.info('Generated signed upload URL', { destinationPath, expiresInSeconds, contentType, fileName });
-  return url;
+  const client = useStorageClient();
+  const endpoint = getEndpoint();
+
+  const url = new URL(`${endpoint}/${getBucketName('temp')}/${destinationPath}`);
+  url.searchParams.append('X-Amz-Content-Sha256', 'UNSIGNED-PAYLOAD');
+  url.searchParams.append('X-Amz-Expires', expiresInSeconds.toString());
+
+  const headers = new Headers();
+  headers.set('Content-Type', contentType);
+  headers.set('x-amz-meta-original-name', fileName || 'unknown');
+
+  const signed = await client.sign(url.toString(), { method: 'PUT', headers, aws: { signQuery: true } });
+  return signed.url;
 }
 
-/**
- * Note: This method only creates a signed URL for the permanent bucket. Use bucketMoveFileToPermanent
- * to move the file from temp to permanent bucket after upload and then generate signed URL for the permanent bucket.
- */
 export const bucketGetSignedDownloadUrl = async (destinationPath: string, expiresInSeconds = 3600) => {
-  const bucket = useStorageBucket('default');
-  const file = bucket.file(destinationPath);
-  // Check if file exists before generating signed URL to avoid generating URLs for non-existent files
-  const [exists] = await file.exists();
+  const client = useStorageClient();
+  const endpoint = getEndpoint();
+
+  const exists = await useStorageBucket('default').hasItem(destinationPath);
   if (!exists) {
     logger.warn('File not found in bucket when attempting to generate signed download URL', { destinationPath });
-    throw new Error('File not found');
+    throw createError({ statusCode: 404, statusMessage: 'File not found' });
   }
-  // Get metadata to determine original filename for content disposition
-  const [metadata] = await file.getMetadata().catch((error) => {
-    throw new Error(`Failed to get metadata for file ${destinationPath}: ${error.message}`);
-  });
-  const originalFilename = metadata?.metadata?.originalname || 'attachment';
-  const contentDisposition = `attachment; filename="${originalFilename}"`;
-  const [url] = await file.getSignedUrl({
-    action: 'read',
-    expires: Date.now() + expiresInSeconds * 1000,
-    responseDisposition: contentDisposition
-  }).catch((error) => {
-    throw new Error(`Failed to get signed download URL for file ${destinationPath}: ${error.message}`);
-  });
-  logger.info('Generated signed download URL', { destinationPath, expiresInSeconds });
-  return url;
+
+  const meta = await bucketFileMetadata(destinationPath, 'default');
+
+  const url = new URL(`${endpoint}/${getBucketName('default')}/${destinationPath}`);
+  url.searchParams.append('X-Amz-Expires', expiresInSeconds.toString());
+  url.searchParams.append('response-content-disposition', buildContentDisposition(meta['original-name'] as string || 'unknown'));
+
+  const signed = await client.sign(url.toString(), { method: 'GET', aws: { signQuery: true } });
+  return signed.url;
 }
 
 export const bucketMoveFileToPermanent = async (filePath: string) => {
+  const client = useStorageClient();
+  const endpoint = getEndpoint();
   const tempBucket = useStorageBucket('temp');
   const permanentBucket = useStorageBucket('default');
   const destinationPath = filePath;
-  const tempFile = tempBucket.file(destinationPath);
-  const permanentFile = permanentBucket.file(destinationPath);
-  await tempFile.move(permanentFile).catch((error) => {
-    throw new Error(`Failed to move file from temp to permanent bucket: ${error.message}`);
+  if ((await permanentBucket.hasItem(destinationPath))) {
+    logger.warn('File already exists in permanent bucket, skipping move', { destinationPath });
+    return { id: filePath };
+  }
+  if (!(await tempBucket.hasItem(destinationPath))) throw createError({ statusCode: 404, statusMessage: 'File not found in temp bucket' });
+  const tempMeta = await tempBucket.getMeta(destinationPath);
+  const copyUrl = new URL(`${endpoint}/${getBucketName('default')}/${destinationPath}`);
+  const headers = new Headers();
+  headers.set('Content-Type', 'application/octet-stream');
+  headers.set('x-amz-meta-original-name', tempMeta['original-name'] as string || 'unknown');
+  headers.set('x-amz-copy-source', `/${getBucketName('temp')}/${destinationPath}`);
+  headers.set('x-amz-metadata-directive', 'REPLACE');
+  await client.fetch(copyUrl.toString(), { method: 'PUT', headers });
+  await tempBucket.removeItem(destinationPath, { removeMeta: true }).catch((error) => {
+    logger.warn('Failed to remove file from temp bucket after moving to permanent bucket', { filePath, error });
   });
-  return { id: filePath };
-}
 
-/**
- * @deprecated Use bucketGetSignedUploadUrl instead and upload file directly to the bucket from the client.
- */
-export const bucketUploadFile = async ({ destinationPath, fileBuffer, metadata }: BucketUploadOptions) => {
-  const bucket = useStorageBucket();
-  const file = bucket.file(destinationPath);
-  await file.save(fileBuffer).catch((error) => {
-    throw new Error(`Failed to upload file to bucket: ${error.message}`);
-  });
-  await file.setMetadata({ metadata }).catch((error) => {
-    throw new Error(`Failed to set metadata for file ${destinationPath}: ${error.message}`);
-  });
-  const fileId = Buffer.from(destinationPath).toString('base64');
-  
-  return { id: fileId, storageId: file.id };
+  return { id: filePath };
 }
 
 export const bucketDeleteFile = async (destinationPath: string, bucketType: 'default' | 'temp' = 'default') => {
   const bucket = useStorageBucket(bucketType);
-  const file = bucket.file(destinationPath);
-  await file.delete().catch((error) => {
-    throw new Error(`Failed to delete file from bucket: ${error.message}`);
+  bucket.removeItem(destinationPath, { removeMeta: true }).catch((error) => {
+    throw createError({ statusCode: 500, statusMessage: `Failed to delete file from bucket: ${error.message}` });
   });
   return true;
 }
 
-export const bucketFilesExists = async (destinationPaths: string[], bucketType: 'default' | 'temp' = 'default'): Promise<Record<string, boolean>> => {
+export const bucketFileExists = async (destinationPath: string, bucketType: 'default' | 'temp' = 'default'): Promise<boolean> => {
   const bucket = useStorageBucket(bucketType);
-  const existenceResults: Record<string, boolean> = {};
-  for (const destinationPath of destinationPaths) {
-    const file = bucket.file(destinationPath);
-    const [exists] = await file.exists().catch((error) => {
-      throw new Error(`Failed to check existence of file ${destinationPath} in bucket: ${error.message}`);
-    });
-    existenceResults[destinationPath] = exists;
-  }
-  return existenceResults;
+  const exists = await bucket.hasItem(destinationPath);
+  return exists;
 }
 
-export const bucketGetFilesDetails = async (fileIds: string[], bucketType: 'default' | 'temp' = 'default'): Promise<Record<string, FileMetadata>> => {
-  logger.debug('Fetching file details from bucket', { fileIds, bucketType });
+export const bucketFilesExists = async (destinationPaths: string[], bucketType: 'default' | 'temp' = 'default'): Promise<Record<string, boolean>> => {
   const bucket = useStorageBucket(bucketType);
-  const files: Record<string, FileMetadata> = {};
-  // TODO: Cache files metadata to reduce API calls
-  for (const fileId of fileIds) {
-    const file = bucket.file(fileId);
-    const [metadata] = await file.getMetadata().catch((error) => {
-      logger.warn('Failed to get metadata for file', { fileId, error });
-    });
-    files[fileId] = metadata;
+  const existenceMap: Record<string, boolean> = {};
+  for (const path of destinationPaths) {
+    existenceMap[path] = await bucket.hasItem(path);
   }
-  return files;
+  return existenceMap;
+}
+
+const getFileSize = async (fileId: string, bucketType: 'default' | 'temp'): Promise<number> => {
+  const client = useStorageClient();
+  const endpoint = getEndpoint();
+  const headUrl = new URL(`${endpoint}/${getBucketName(bucketType)}/${fileId}`);
+  const res = await client.fetch(headUrl.toString(), { method: 'HEAD' });
+  return Number(res.headers.get('content-length')) || 0;
+}
+
+const toAttachmentMeta = (fileId: string, meta: StorageMeta, size: number): CommissionCharacterAttachmentRaw => ({
+  id: fileId,
+  filename: meta['original-name'] as string || 'unknown',
+  filetype: getContentTypeByExtension(meta['original-name'] as string || 'unknown'),
+  size,
+});
+
+export async function bucketFileMetadata(fileId: string, bucketType?: 'default' | 'temp', sanitized?: false): Promise<StorageMeta>;
+export async function bucketFileMetadata(fileId: string, bucketType: 'default' | 'temp', sanitized: true): Promise<CommissionCharacterAttachmentRaw>;
+export async function bucketFileMetadata(fileId: string, bucketType: 'default' | 'temp' = 'default', sanitized: boolean = false): Promise<StorageMeta | CommissionCharacterAttachmentRaw> {
+  const bucket = useStorageBucket(bucketType);
+  const meta = await bucket.getMeta(fileId) as StorageMeta;
+  if (!sanitized) return meta;
+
+  const size = await getFileSize(fileId, bucketType);
+  return toAttachmentMeta(fileId, meta, size);
+}
+
+export async function bucketFilesMetadata(fileIds: string[], bucketType?: 'default' | 'temp', sanitized?: false): Promise<Record<string, StorageMeta>>;
+export async function bucketFilesMetadata(fileIds: string[], bucketType: 'default' | 'temp', sanitized: true): Promise<Record<string, CommissionCharacterAttachmentRaw>>;
+export async function bucketFilesMetadata(fileIds: string[], bucketType: 'default' | 'temp' = 'default', sanitized: boolean = false): Promise<Record<string, StorageMeta | CommissionCharacterAttachmentRaw>> {
+  const bucket = useStorageBucket(bucketType);
+  const metadataMap: Record<string, StorageMeta | CommissionCharacterAttachmentRaw> = {};
+  for (const fileId of fileIds) {
+    const meta = await bucket.getMeta(fileId) as StorageMeta;
+    if (!sanitized) {
+      metadataMap[fileId] = meta;
+      continue;
+    }
+    const size = await getFileSize(fileId, bucketType);
+    metadataMap[fileId] = toAttachmentMeta(fileId, meta, size);
+  }
+  return metadataMap;
 }
