@@ -1,4 +1,4 @@
-import type { OptionalId, WithId } from 'mongodb';
+import type { OptionalId, WithId, WithoutId } from 'mongodb';
 
 export enum CommissionFlagsType {
   None           = 0,
@@ -60,7 +60,7 @@ export type AvatarBase = WithId<{
   storefront_url: string | null;
   blacklisted: boolean;
 }>;
-export type AvatarBaseInsertOptions = Omit<AvatarBase, 'created_at' | 'updated_at'>;
+export type AvatarBaseInsertOptions = Omit<WithoutId<AvatarBase>, 'created_at' | 'updated_at'>;
 export type AvatarBaseUpdateOptions = Partial<AvatarBaseInsertOptions>;
 export type DeserializedAvatarBase = Deserialized<WithId<AvatarBase>>;
 
