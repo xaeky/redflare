@@ -7,5 +7,6 @@ export default defineEventHandler(async (event) => {
   if (body.error) throw createError({ statusCode: 400, data: body.error });
   // Update commission in database
   const result = await useAvatarBasesModel().updateOne(baseId, body.data);
+  await invalidateHandlerCache('avatar_bases');
   return result;
 });

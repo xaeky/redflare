@@ -7,3 +7,8 @@ export default createStorage({
     ttl: 10 * 60 * 1000 // 10 minutes
   })
 });
+
+export const invalidateHandlerCache = async (key: string) => {
+  await useStorage('cache').removeItem(`nitro:handlers:_:${key}.json`);
+  logger.withTag('cache').debug(`Invalidated handler cache for key: ${key}`);
+}
