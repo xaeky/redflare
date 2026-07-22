@@ -1,4 +1,4 @@
-import { MongoClient, Db, ServerApiVersion, Document } from 'mongodb';
+import { MongoClient, Db, Document } from 'mongodb';
 import type { H3Event } from 'h3';
 
 let client:  MongoClient | null = null;
