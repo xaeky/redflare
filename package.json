@@ -10,6 +10,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "migrate": "bun run scripts/migrate.ts",
     "test:e2e": "playwright test",
     "test:report": "playwright show-report",
     "util:db": "bun run scripts/helpers/database.ts"

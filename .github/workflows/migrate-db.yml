@@ -1,0 +1,47 @@
+name: Migrate Database
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: Target environment — staging | production
+        required: true
+        type: string
+    outputs:
+      applied_count:
+        description: Number of migrations applied
+        value: ${{ jobs.migrate.outputs.applied_count }}
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env == 'production' && 'production' || 'staging' }}
+    outputs:
+      applied_count: ${{ steps.run.outputs.applied_count }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Notify migration start
+        uses: ./.github/workflows/notify/action.yml
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          message: |
+            🛠️ Database migration started for ${{ inputs.env }} environment.
+
+      - name: Run migrations
+        id: run
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+        run: bun run migrate

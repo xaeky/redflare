@@ -58,6 +58,16 @@ jobs:
             REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
             SOURCE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.source'] }}
   
+  migrate:
+    uses: ./.github/workflows/migrate-db.yml
+    needs: build
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      env: staging
+    secrets: inherit
+  
   deploy-staging-canary:
     uses: ./.github/workflows/cloudrun-deploy.yml
     needs: build
@@ -86,7 +96,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Install Playwright Chromium
         run: bunx playwright install --with-deps chromium
@@ -118,6 +128,7 @@ jobs:
           done
 
       - name: Run E2E tests
+        timeout-minutes: 5
         env:
           CI: true
           FORCE_REMOTE: true
@@ -130,6 +141,14 @@ jobs:
           kill $(cat /tmp/ssl-proxy.pid) || true
           kill $(cat /tmp/gcloud-proxy.pid) || true
 
+      - name: Notify if E2E tests fail
+        if: failure()
+        uses: ./.github/workflows/notify/action.yml
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          message: |
+            🚨 E2E tests failed for staging environment.
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -141,6 +160,27 @@ jobs:
         if: always()
         run: gcloud run services delete ${{ vars.SERVICE_NAME }}-canary --region=us-west1 --quiet || true
 
+  rollback-migrations:
+    runs-on: ubuntu-latest
+    environment: staging
+    needs: [migrate, test-e2e]
+    if: failure() && needs.test-e2e.result == 'failure'
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+        run: bun run scripts/rollback.ts ${{ needs.migrate.outputs.applied_count }}
+      - name: Notify if rollback fails
+        uses: ./.github/workflows/notify/action.yml
+        if: failure()
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          message: |
+            🚨 Rollback failed. Please check the logs and manually rollback the database if necessary.
+  
   deploy-staging:
     uses: ./.github/workflows/cloudrun-deploy.yml
     needs: [build, test-e2e]
@@ -170,4 +210,13 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Send all traffic to this new version
+        id: promote
         run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --to-latest --region=us-west1 --quiet
+
+      - name: Notify promotion
+        uses: ./.github/workflows/notify/action.yml
+        if: success()
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          message: |
+            ✅ Deployment promoted to staging environment.
