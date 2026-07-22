@@ -5,12 +5,9 @@ import { join } from 'path';
 
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) throw new Error('MONGO_URI is not set');
-const MONGO_HOST = MONGO_URI.split(/@(.*)\//)[1];
 const logger = consola.create({
   defaults: { tag: 'redflare:migrate' }
 });
-
-logger.info(`Connecting to MongoDB at ${MONGO_HOST}...`);
 
 const client = new MongoClient(MONGO_URI);
 await client.connect();

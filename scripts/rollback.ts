@@ -4,15 +4,12 @@ import { join } from 'path';
 
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) throw new Error('MONGO_URI is not set');
-const MONGO_HOST = MONGO_URI.split(/@(.*)\//)[1];
 const logger = consola.create({
   defaults: { tag: 'redflare:rollback' }
 });
 
 const count = parseInt(process.argv[2] ?? '0');
 if (count === 0) { logger.info('Nothing to roll back.'); process.exit(0); }
-
-logger.info(`Connecting to MongoDB at ${MONGO_HOST}...`);
 
 const client = new MongoClient(MONGO_URI);
 await client.connect();
