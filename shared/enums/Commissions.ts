@@ -11,3 +11,10 @@ export enum CommissionStatusType {
   Maintenance      = 1 << 8,
   Cancelled        = 1 << 9,
 };
+
+export enum AvatarBaseFlagsType {
+  None        = 0,
+  Private     = 1 << 0,
+  MeshKitbash = 1 << 1,
+  MeshEdit    = 1 << 2,
+}

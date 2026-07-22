@@ -58,7 +58,7 @@ export type AvatarBase = WithId<{
   name: string;
   creator_name: string | null;
   storefront_url: string | null;
-  blacklisted: boolean;
+  flags: AvatarBaseFlagsType;
 }>;
 export type AvatarBaseInsertOptions = Omit<WithoutId<AvatarBase>, 'created_at' | 'updated_at'>;
 export type AvatarBaseUpdateOptions = Partial<AvatarBaseInsertOptions>;
