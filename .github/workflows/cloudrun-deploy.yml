@@ -31,13 +31,6 @@ jobs:
     outputs:
       url: ${{ steps.canary-url.outputs.url }}
     steps:
-      - name: Notify deployment start
-        uses: ./.github/workflows/notify/action.yml
-        with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: |
-            🚀 Deployment started for ${{ inputs.env }} environment. ( ${{ inputs.image }} ~ ${{ inputs.strategy }} )
-
       - name: Resolve env config
         id: config
         run: |

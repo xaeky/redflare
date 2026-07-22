@@ -33,13 +33,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Notify migration start
-        uses: ./.github/workflows/notify/action.yml
-        with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: |
-            🛠️ Database migration started for ${{ inputs.env }} environment.
-
       - name: Run migrations
         id: run
         env:

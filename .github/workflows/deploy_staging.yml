@@ -141,14 +141,6 @@ jobs:
           kill $(cat /tmp/ssl-proxy.pid) || true
           kill $(cat /tmp/gcloud-proxy.pid) || true
 
-      - name: Notify if E2E tests fail
-        if: failure()
-        uses: ./.github/workflows/notify/action.yml
-        with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: |
-            🚨 E2E tests failed for staging environment.
-
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -173,13 +165,6 @@ jobs:
       - env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
         run: bun run scripts/rollback.ts ${{ needs.migrate.outputs.applied_count }}
-      - name: Notify if rollback fails
-        uses: ./.github/workflows/notify/action.yml
-        if: failure()
-        with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: |
-            🚨 Rollback failed. Please check the logs and manually rollback the database if necessary.
   
   deploy-staging:
     uses: ./.github/workflows/cloudrun-deploy.yml
@@ -212,11 +197,3 @@ jobs:
       - name: Send all traffic to this new version
         id: promote
         run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --to-latest --region=us-west1 --quiet
-
-      - name: Notify promotion
-        uses: ./.github/workflows/notify/action.yml
-        if: success()
-        with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: |
-            ✅ Deployment promoted to staging environment.
