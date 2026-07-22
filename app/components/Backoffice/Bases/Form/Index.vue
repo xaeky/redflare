@@ -1,5 +1,25 @@
 <script setup lang="ts">
+import { enumToSelectItems } from '@@/shared/enums/Index';
+import { AvatarBaseFlagsType } from '@@/shared/enums/Commissions';
+
 const avatarBaseFormStore = useAvatarBaseFormStore();
+
+function flagsModel(flag: AvatarBaseFlagsType) {
+  return computed({
+    get: () => !!(avatarBaseFormStore.formState.flags & flag),
+    set: (checked: boolean) => {
+      if (checked) {
+        avatarBaseFormStore.formState.flags |= flag;
+      } else {
+        avatarBaseFormStore.formState.flags &= ~flag;
+      }
+    }
+  });
+}
+
+const isPrivate = flagsModel(AvatarBaseFlagsType.Private);
+const isMeshKitbash = flagsModel(AvatarBaseFlagsType.MeshKitbash);
+const isMeshEdit = flagsModel(AvatarBaseFlagsType.MeshEdit);
 </script>
 
 <template>
@@ -13,11 +33,15 @@ const avatarBaseFormStore = useAvatarBaseFormStore();
     <UFormField name="storefront_url" label="Storefront URL">
       <UInput v-model="avatarBaseFormStore.formState.storefront_url" class="w-full" />
     </UFormField>
-    <UFormField name="blacklisted">
-      <USwitch v-model="avatarBaseFormStore.formState.blacklisted" label="Blacklisted" />
-      <UAlert color="neutral" variant="soft" class="mt-2" v-if="avatarBaseFormStore.formState.blacklisted" icon="i-heroicons-information-circle-16-solid">
+    <UFormField name="flags" label="Flags">
+      <div class="flex flex-col gap-2">
+        <UCheckbox v-model="isPrivate" label="Private" />
+        <UCheckbox v-model="isMeshKitbash" label="Kitbash" />
+        <UCheckbox v-model="isMeshEdit" label="Mesh Edit" />
+      </div>
+      <UAlert color="neutral" variant="soft" class="mt-2" v-if="isPrivate" icon="i-heroicons-information-circle-16-solid">
         <template #description>
-          Marking an avatar base as blacklisted will exclude it from being displayed in the Public API.
+          Marking an avatar base as private will exclude it from being displayed in the Public API.
         </template>
       </UAlert>
     </UFormField>

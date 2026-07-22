@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { CommissionStatusType } from '../enums/Commissions';
+import { CommissionStatusType, AvatarBaseFlagsType } from '../enums/Commissions';
 
 export const commissionChangelogSchema = z.object({
   date: z.string(),
@@ -53,5 +53,5 @@ export const avatarBaseOptionsSchema = z.object({
   name: z.string().min(1),
   creator_name: z.string().min(1),
   storefront_url: z.string().url(),
-  blacklisted: z.boolean().default(false)
+  flags: z.number().default(AvatarBaseFlagsType.None)
 })

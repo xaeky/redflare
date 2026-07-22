@@ -12,7 +12,7 @@ const defaultState = (): Schema => ({
   name: '',
   creator_name: '',
   storefront_url: '',
-  blacklisted: false
+  flags: 0
 });
 const defaultAdditionalState = (): AdditionalState => ({
   id: null

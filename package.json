@@ -10,11 +10,14 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "migrate": "bun run scripts/migrate.ts",
     "test:e2e": "playwright test",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "util:db": "bun run scripts/helpers/database.ts"
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.2.0",
+    "@clack/prompts": "^1.7.0",
     "@google-cloud/secret-manager": "^6.1.1",
     "@google-cloud/storage": "^7.17.3",
     "@mercadopago/sdk-js": "^0.0.3",
@@ -50,6 +53,7 @@
     "@iconify-json/lucide": "^1.2.60",
     "@nuxt/test-utils": "^3.21.0",
     "@playwright/test": "^1.57.0",
+    "@types/bun": "^1.3.14",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/lodash": "^4.17.16",
     "cross-env": "^7.0.3",

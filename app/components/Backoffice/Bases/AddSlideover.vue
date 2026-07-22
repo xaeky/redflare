@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const avatarBaseFormStore = useAvatarBaseFormStore();
-
 onMounted(avatarBaseFormStore.reset);
 </script>
 
