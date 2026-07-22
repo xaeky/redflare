@@ -87,7 +87,7 @@ export const bucketGetSignedDownloadUrl = async (destinationPath: string, expire
 
   const exists = await useStorageBucket('default').hasItem(destinationPath);
   if (!exists) {
-    logger.warn('File not found in bucket when attempting to generate signed download URL', { destinationPath });
+    logger.withTag('storage').warn('File not found in bucket when attempting to generate signed download URL', { destinationPath });
     throw createError({ statusCode: 404, statusMessage: 'File not found' });
   }
 
@@ -108,7 +108,7 @@ export const bucketMoveFileToPermanent = async (filePath: string) => {
   const permanentBucket = useStorageBucket('default');
   const destinationPath = filePath;
   if ((await permanentBucket.hasItem(destinationPath))) {
-    logger.warn('File already exists in permanent bucket, skipping move', { destinationPath });
+    logger.withTag('storage').warn('File already exists in permanent bucket, skipping move', { destinationPath });
     return { id: filePath };
   }
   if (!(await tempBucket.hasItem(destinationPath))) throw createError({ statusCode: 404, statusMessage: 'File not found in temp bucket' });
@@ -121,7 +121,7 @@ export const bucketMoveFileToPermanent = async (filePath: string) => {
   headers.set('x-amz-metadata-directive', 'REPLACE');
   await client.fetch(copyUrl.toString(), { method: 'PUT', headers });
   await tempBucket.removeItem(destinationPath, { removeMeta: true }).catch((error) => {
-    logger.warn('Failed to remove file from temp bucket after moving to permanent bucket', { filePath, error });
+    logger.withTag('storage').warn('Failed to remove file from temp bucket after moving to permanent bucket', { filePath, error });
   });
 
   return { id: filePath };
