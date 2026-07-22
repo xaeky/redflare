@@ -38,18 +38,16 @@ test.describe.serial('Commission management with new customer', () => {
     await page.waitForLoadState('networkidle');
     // Invoke "New commission" action
     await page.click('button:has-text("New commission")');
+    // Wait for page to render the form and load customers
+    await page.waitForTimeout(500);
     await page.waitForSelector('div:has-text("Add commission")');
-    // Wait for page to load customers
-    await page.waitForResponse((response) =>
-      /\/api\/customers(\?.*)?$/.test(response.url()) && response.status() === 200
-    );
     // Fill in commission details
     await page.getByTestId('customer-select-menu').click();
     await page.waitForTimeout(500); // Wait for options to render
     await page.getByRole('combobox', { name: 'Search…' }).fill(testState.createdCustomerName);
     // Ensure the debounce and filtering have completed by waiting for the expected option to appear
     await page.waitForResponse((response) =>
-      new RegExp(`/api/customers\\?name=E2E`).test(response.url()) && response.status() === 200
+      /\/api\/customers\?name=E2E/.test(response.url()) && response.status() === 200
     );
     await page.waitForTimeout(500); // Wait for selection to register and close the menu
     // Click on the filtered customer option
