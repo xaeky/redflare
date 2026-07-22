@@ -45,12 +45,12 @@ bun i
 bun dev
 ```
 
-## 🧪 Testing
-To run tests we use Playwright (it may ask you to install it or install a headless browser), you need to have a `.env.test` file with the proper configuration. You can use `.env.test.example` as reference.
+## 🧪 Testing (E2E)
+To run E2E tests we use Playwright (it may ask you to install it or install a headless browser), you need to have a `.env.test` file with the proper configuration. You can use `.env.test.example` as reference.
 
 Then, run the tests with:
 ```bash
-bun test # --ui for GUI window.
+bun test:e2e # --ui for GUI window.
 ```
 # 📜 License
 GPL-3.0 © 2026 [Xaeky](https://ko-fi.com/xaeky)
