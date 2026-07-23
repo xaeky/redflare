@@ -14,6 +14,7 @@ defineProps<{
         v-for="(action, actionIndex) in actions"
         :key="actionIndex" :icon="action.icon" :color="action.color"
         :variant="action.variant" :label="action.label"
+        :data-testid="action.testid"
         @click="action.action"
       />
     </div>

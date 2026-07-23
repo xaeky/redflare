@@ -13,11 +13,10 @@ test.describe.serial('Commission management with new customer', () => {
 
   test('Agent is able to create customers', async ({ page, goto }) => {
     await claimSession(page, 'agent');
-    await goto('/dashboard/customers');
-    await page.waitForLoadState('networkidle');
+    await goto('/dashboard/customers', { waitUntil: 'networkidle' });
     // Invoke "Add customer" action
-    const addCustomerButton = page.getByRole('button', { name: 'Add customer' });
-    await addCustomerButton.waitFor({ state: 'visible' });
+    const addCustomerButton = page.getByTestId('add-customer-button');
+    await addCustomerButton.waitFor({ state: 'visible', timeout: 1000 * 10 });
     await addCustomerButton.click();
     await page.waitForTimeout(500); // Wait for slideover animation
     // Fill in customer details
@@ -34,8 +33,7 @@ test.describe.serial('Commission management with new customer', () => {
 
   test('Agent is able to create commissions with the generated customer', async ({ page, goto }) => {
     await claimSession(page, 'agent');
-    await goto('/dashboard/commissions');
-    await page.waitForLoadState('networkidle');
+    await goto('/dashboard/commissions', { waitUntil: 'networkidle' });
     // Invoke "New commission" action
     await page.click('button:has-text("New commission")');
     // Wait for page to render the form and load customers
@@ -66,8 +64,7 @@ test.describe.serial('Commission management with new customer', () => {
 
   test('Agent should not be able to delete customers that are linked to commissions', async ({ page, goto }) => {
     await claimSession(page, 'agent');
-    await goto('/dashboard/customers');
-    await page.waitForLoadState('networkidle');
+    await goto('/dashboard/customers', { waitUntil: 'networkidle' });
     const trRow = page.locator(`tr:has-text("${testState.createdCustomerName}")`);
     await trRow.locator('button').click();
     // Wait for slideover to open

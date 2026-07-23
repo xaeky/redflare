@@ -37,7 +37,8 @@ const actions:PageAction[] = [
   {
     label: 'Add customer',
     icon: 'i-heroicons-plus-16-solid',
-    action: () => { overlay.create(BackofficeCustomerAddSlideover, { destroyOnClose: true }).open(); }
+    action: () => { overlay.create(BackofficeCustomerAddSlideover, { destroyOnClose: true }).open(); },
+    testid: 'add-customer-button'
   }
 ];
 
