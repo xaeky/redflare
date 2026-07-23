@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithoutId } from 'mongodb';
 import { AvatarBaseFlagsType } from '~~/shared/enums/Commissions';
 
 const collectionName = 'avatar_bases';
@@ -11,12 +11,12 @@ const getAll = async (excludeFlags:AvatarBaseFlagsType = 0) => {
 
 const insertOne = async (data: AvatarBaseInsertOptions) => {
   const collection = await useMongoCollection<AvatarBase>(collectionName);
-  const newData: AvatarBase = {
+  const newData: WithoutId<AvatarBase> = {
     ...data,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   };
-  return await collection.insertOne(newData);
+  return await collection.insertOne(newData as AvatarBase);
 };
 
 const updateOne = async (id: string, data: AvatarBaseUpdateOptions) => {
