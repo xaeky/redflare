@@ -1,10 +1,11 @@
 import { ObjectId } from 'mongodb';
+import { AvatarBaseFlagsType } from '~~/shared/enums/Commissions';
 
 const collectionName = 'avatar_bases';
 
-const getAll = async (excludeBlacklisted = false) => {
+const getAll = async (excludeFlags:AvatarBaseFlagsType = 0) => {
   const collection = await useMongoCollection<AvatarBase>(collectionName);
-  const query = excludeBlacklisted ? { blacklisted: { $ne: true } } : {};
+  const query = excludeFlags ? { flags: { $bitsAllClear: excludeFlags } } : {};
   return collection.find(query).toArray();
 };
 
@@ -31,8 +32,15 @@ const deleteOne = async (id: string) => {
   return result;
 }
 
+const getAllCached = defineCachedFunction(async (excludeFlags:AvatarBaseFlagsType = 0) => await getAll(excludeFlags), {
+  name: 'avatar_bases_getAll',
+  maxAge: 60 * 30, // 30 minutes
+  getKey: (excludeFlags:AvatarBaseFlagsType) => `default:${excludeFlags}`
+});
+
 export const useAvatarBasesModel = () => ({
   getAll,
+  getAllCached,
   insertOne,
   updateOne,
   deleteOne

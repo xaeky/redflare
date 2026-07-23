@@ -1,8 +1,6 @@
-export default defineCachedEventHandler(async () => {
-  const result = await useAvatarBasesModel().getAll();
+import { AvatarBaseFlagsType } from "~~/shared/enums/Commissions";
+
+export default defineEventHandler(async () => {
+  const result = await useAvatarBasesModel().getAllCached(AvatarBaseFlagsType.None);
   return result;
-}, {
-  swr: false,
-  maxAge: 60 * 60, // 1 hour
-  getKey: () => 'avatar_bases'
 });

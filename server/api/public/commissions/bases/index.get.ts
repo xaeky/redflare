@@ -1,8 +1,8 @@
 import _ from 'lodash';
+import { AvatarBaseFlagsType } from '~~/shared/enums/Commissions';
 
-export default defineEventHandler(async (event) => {
-  const result = await useAvatarBasesModel().getAll(true);
-  // Delete the `id` field from each base
+export default defineEventHandler(async () => {
+  const result = await useAvatarBasesModel().getAllCached(AvatarBaseFlagsType.Private);
   _.forEach(result, (base) => {
     delete (base as Partial<typeof base>)._id;
   });

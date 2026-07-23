@@ -4,6 +4,6 @@ export default defineEventHandler(async (event) => {
   if (body.error) throw createError({ status: 400, statusText: 'Invalid body', data: body.error });
   // Insert commission base to database
   const result = await useAvatarBasesModel().insertOne(body.data);
-  await invalidateHandlerCache('avatar_bases');
+  await invalidateFunctionCache('avatar_bases_getAll', '*');
   return result;
 });
