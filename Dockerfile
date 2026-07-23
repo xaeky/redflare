@@ -1,7 +1,7 @@
 # https://nuxtjs.org/deployments/google-cloud-run/
 # https://nuxt.com/docs/getting-started/deployment#nodejs-server
 # Build app
-FROM node:22.17 AS builder
+FROM oven/bun:latest AS builder
 
 WORKDIR /usr/src/app
 
@@ -11,7 +11,6 @@ COPY . ./
 
 # Install dependencies
 RUN apt-get update && apt-get install -y unzip curl
-RUN npm i -g bun
 RUN bun i
 
 ARG VERSION
@@ -24,7 +23,7 @@ ENV REVISION=${REVISION}
 RUN bun run build
 
 # Run entrypoint
-FROM node:22.17
+FROM oven/bun:latest
 
 WORKDIR /usr/src/app
 

@@ -2,4 +2,4 @@
 set -e
 
 # Start the app
-node .output/server/index.mjs
+bun run .output/server/index.mjs

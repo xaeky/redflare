@@ -1,4 +1,12 @@
 .dockerignore
+.credentials
+.data
+.github
+.output
+.vscode
 .gitignore
+.nuxt
 Dockerfile
 *.md
+.env.*
+.env

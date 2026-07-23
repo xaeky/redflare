@@ -2,9 +2,10 @@ import { fileURLToPath } from "node:url";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-06-27',
+  compatibilityDate: '2026-06-13',
   devtools: { enabled: false },
   nitro: {
+    preset: 'bun',
     imports: {
       dirs: ['server/utils/services', 'server/utils/models'],
     },
@@ -46,8 +47,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     mp: {
-      public: '', // PublicToken
-      service: '', // AccessToken
+      public: '',
+      service: '',
       marketplace: '',
       endpointBase: ''
     },
