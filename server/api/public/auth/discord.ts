@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   }
   const query = getQuery<DiscordOAuthResponseQuery>(event);
 
-  if (query.error) throw createError({ statusCode: 400, statusMessage: `Discord OAuth Error: ${query.error}` });
+  if (query.error) throw createError({ status: 400, statusText: `Discord OAuth Error: ${query.error}` });
   let scope = ['identify'].join(' ');
   if (!query.code) {
     return sendRedirect(event,
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
     });
     tokens = result;
   } catch (error) {
-    throw createError({ statusCode: 500, statusMessage: `Discord OAuth Error: ${(error as Error).message}` });
+    throw createError({ status: 500, statusText: `Discord OAuth Error: ${(error as Error).message}` });
   }
 
   const discordAccessToken = 'Bearer ' + tokens.access_token;

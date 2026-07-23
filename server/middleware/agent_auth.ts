@@ -16,6 +16,6 @@ export default defineEventHandler(async (event) => {
   const isAuthenticated = isService || !!_.get(authenticatedData, 'user') || !!_.get(authenticatedData, 'secure.access_token');
   if (!isAuthenticated) {
     logger.warn('Unauthorized access attempt to', event.path);
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
+    throw createError({ status: 401, statusText: 'Unauthorized' });
   };
 })

@@ -52,7 +52,7 @@ const STATUS_COLORS: Partial<Record<CommissionStatusType, string>> = {
 
 export default defineEventHandler(async (event) => {
   const { data: rawCommission } = await validateCommission(event, true, true);
-  if (!rawCommission) throw createError({ statusCode: 404, message: 'Commission not found' });
+  if (!rawCommission) throw createError({ status: 404, statusText: 'Commission not found' });
   const commission = rawCommission as unknown as PublicSerializedCommission;
 
   await loadResources();

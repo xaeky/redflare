@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   // TODO: Implement a middleware to handle public authentication
   const publicSession = await getPublicUserSession(event);
-  if (!publicSession || !publicSession?.user) throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
+  if (!publicSession || !publicSession?.user) throw createError({ status: 401, statusText: 'Unauthorized' });
   const publicUserDiscordId = publicSession.user.id;
   const customersModel = useCustomerModel();
   const commissionsModel = useCommissionModel();

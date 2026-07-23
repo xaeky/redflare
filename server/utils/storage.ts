@@ -88,7 +88,7 @@ export const bucketGetSignedDownloadUrl = async (destinationPath: string, expire
   const exists = await useStorageBucket('default').hasItem(destinationPath);
   if (!exists) {
     logger.withTag('storage').warn('File not found in bucket when attempting to generate signed download URL', { destinationPath });
-    throw createError({ statusCode: 404, statusMessage: 'File not found' });
+    throw createError({ status: 404, statusText: 'File not found' });
   }
 
   const meta = await bucketFileMetadata(destinationPath, 'default');
@@ -111,7 +111,7 @@ export const bucketMoveFileToPermanent = async (filePath: string) => {
     logger.withTag('storage').warn('File already exists in permanent bucket, skipping move', { destinationPath });
     return { id: filePath };
   }
-  if (!(await tempBucket.hasItem(destinationPath))) throw createError({ statusCode: 404, statusMessage: 'File not found in temp bucket' });
+  if (!(await tempBucket.hasItem(destinationPath))) throw createError({ status: 404, statusText: 'File not found in temp bucket' });
   const tempMeta = await tempBucket.getMeta(destinationPath);
   const copyUrl = new URL(`${endpoint}/${getBucketName('default')}/${destinationPath}`);
   const headers = new Headers();
@@ -130,7 +130,7 @@ export const bucketMoveFileToPermanent = async (filePath: string) => {
 export const bucketDeleteFile = async (destinationPath: string, bucketType: 'default' | 'temp' = 'default') => {
   const bucket = useStorageBucket(bucketType);
   bucket.removeItem(destinationPath, { removeMeta: true }).catch((error) => {
-    throw createError({ statusCode: 500, statusMessage: `Failed to delete file from bucket: ${error.message}` });
+    throw createError({ status: 500, statusText: `Failed to delete file from bucket: ${error.message}` });
   });
   return true;
 }

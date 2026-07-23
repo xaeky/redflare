@@ -248,7 +248,7 @@ const deleteOne = async (commissionId: string) => {
   const collection = await useMongoCollection('commissions');
   const result = await collection.deleteOne({ _id: new ObjectId(commissionId) });
   if (result.deletedCount === 0) {
-    throw createError({ statusCode: 404, message: 'Commission not found' });
+    throw createError({ status: 404, statusText: 'Commission not found' });
   }
   return { success: true };
 }
@@ -262,7 +262,7 @@ const existsOne = async (commissionId: string) => {
 const removeTransactionFromOne = async (commissionId: string, paymentId: string) => {
   const collection = await useMongoCollection('commissions');
   const commission = await collection.findOne({ _id: new ObjectId(commissionId) });
-  if (!commission) throw createError({ statusCode: 404, message: 'Commission not found' });
+  if (!commission) throw createError({ status: 404, statusText: 'Commission not found' });
   const updatedPayments = (commission.payments || []).filter((pId: string) => pId !== paymentId);
   const result = await collection.updateOne(
     { _id: new ObjectId(commissionId) },
@@ -275,12 +275,12 @@ const addTransactionToOne = async (commissionId: string, paymentId: string) => {
   const collection = await useMongoCollection('commissions');
   const transactionCollection = await useMongoCollection('billing_transactions');
   const transaction = await transactionCollection.findOne({ _id: new ObjectId(paymentId) });
-  if (!transaction) throw createError({ statusCode: 404, message: 'Payment transaction not found' });
+  if (!transaction) throw createError({ status: 404, statusText: 'Payment transaction not found' });
   const commission = await collection.findOne({ _id: new ObjectId(commissionId) });
-  if (!commission) throw createError({ statusCode: 404, message: 'Commission not found' });
+  if (!commission) throw createError({ status: 404, statusText: 'Commission not found' });
   // Making sure is not already added
   if (commission.payments && commission.payments.includes(paymentId)) {
-    throw createError({ statusCode: 400, message: 'Payment transaction already linked to this commission' });
+    throw createError({ status: 400, statusText: 'Payment transaction already linked to this commission' });
   }
   const updatedPayments = Array.from(new Set([...(commission.payments || []), paymentId]));
   const result = await collection.updateOne(
@@ -319,7 +319,7 @@ const checkOwnershipFromOne = async (commissionId: string, evalCustomerId: strin
 const confirmAllAttachmentsFromOne = async (commissionId: string) => {
   const collection = await useMongoCollection<CommissionBaseRaw>('commissions');
   const commission = await collection.findOne({ _id: new ObjectId(commissionId) });
-  if (!commission) throw createError({ statusCode: 404, message: 'Commission not found' });
+  if (!commission) throw createError({ status: 404, statusText: 'Commission not found' });
   // Attachments in changelogs are stored only as strings (Object ID)
   const allAttachments = _.flatMap(commission.characters ?? [], (char) =>
     _.flatMap(char.changelog ?? [], (changelog) => changelog.attachments as string[] ?? [])

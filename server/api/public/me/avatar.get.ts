@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
   const publicSession = await getPublicUserSession(event);
   const { user } = publicSession;
-  if (!user) throw createError({ statusCode: 401, statusMessage: 'Not authenticated' });
+  if (!user) throw createError({ status: 401, statusText: 'Not authenticated' });
   let avatarUrl: string;
   // Return generic avatar if user has no avatar set
   if (!user.avatar) avatarUrl = 'https://cdn.discordapp.com/embed/avatars/0.png';

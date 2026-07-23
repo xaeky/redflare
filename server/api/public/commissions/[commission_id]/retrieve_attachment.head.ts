@@ -14,11 +14,11 @@ export default defineEventHandler(async (event) => {
     isOwner = await commissionModel.checkOwnershipFromOne(commission_id, currentCustomerUserId);
   }
   
-  if (!isOwner) throw createError({ statusCode: 403, statusMessage: 'Unauthorized to access attachment' });
+  if (!isOwner) throw createError({ status: 403, statusText: 'Unauthorized to access attachment' });
   const query = await getQuery<{ file_id: string }>(event);
-  if (!query.file_id || !query.file_id.length) throw createError({ statusCode: 400, statusMessage: 'No file_id provided' });
+  if (!query.file_id || !query.file_id.length) throw createError({ status: 400, statusText: 'No file_id provided' });
   const destinationPath = `avatars/${query.file_id}`;
-  if (!(await bucketFileExists(destinationPath))) throw createError({ statusCode: 404, statusMessage: 'File not found' });
+  if (!(await bucketFileExists(destinationPath))) throw createError({ status: 404, statusText: 'File not found' });
   await publicGrantTempAuthorization(event, `retrieve_commission_attachment:${query.file_id}`);
   return true
 });

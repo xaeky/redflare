@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, z.object({
     transactionId: z.string(),
   }).safeParse);
-  if (!body.success) throw createError({ statusCode: 400, message: 'Invalid body' });
+  if (!body.success) throw createError({ status: 400, statusText: 'Invalid body' });
   const { id: commissionId } = await validateCommission(event);
   const commissionModel = useCommissionModel();
 

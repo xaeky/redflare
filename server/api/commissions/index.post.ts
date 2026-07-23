@@ -3,7 +3,7 @@ export default defineEventHandler(async (event) => {
   await hasPermission(event, 'write:commissions');
   // Get validated body from request
   const trustedBody = await readValidatedBody(event, commissionOptionsSchema.safeParse);
-  if (trustedBody.error) throw createError({ statusCode: 400, message: 'Invalid request body', data: trustedBody.error });
+  if (trustedBody.error) throw createError({ status: 400, statusText: 'Invalid request body', data: trustedBody.error });
   const body = trustedBody.data;
   
   const result = await useCommissionModel().insertOne({

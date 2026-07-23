@@ -59,21 +59,21 @@ const getAll = async ({ page, pageSize = 20, filters, sort }: CustomerGetAllPara
 const getById = async (id: string) => {
   const collection = await useMongoCollection<CustomerRaw>('customers');
   const result = await collection.findOne({ _id: new ObjectId(id) });
-  if (!result) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
+  if (!result) throw createError({ status: 404, statusText: 'Customer not found' });
   return result;
 }
 
 const getByTelegramId = async (telegramId: string) => {
   const collection = await useMongoCollection<CustomerRaw>('customers');
   const result = await collection.findOne({ telegram_id: telegramId });
-  if (!result) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
+  if (!result) throw createError({ status: 404, statusText: 'Customer not found' });
   return result;
 }
 
 const getByDiscordId = async (discordId: string) => {
   const collection = await useMongoCollection<CustomerRaw>('customers');
   const result = await collection.findOne({ discord_id: discordId });
-  if (!result) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
+  if (!result) throw createError({ status: 404, statusText: 'Customer not found' });
   return result;
 }
 
@@ -99,12 +99,12 @@ const deleteOne = async (id: string, force = false) => {
   const collection = await useMongoCollection('customers');
   // Make sure customer exists before deleting
   const existing = await collection.findOne({ _id: new ObjectId(id) });
-  if (!existing) throw createError({ statusCode: 404, statusMessage: 'Customer not found' });
+  if (!existing) throw createError({ status: 404, statusText: 'Customer not found' });
   // Make sure customer is not linked to any commissions before deleting
   const commissionsCollection = await useMongoCollection('commissions');
   const linkedCommissions = await commissionsCollection.find({ customer: new ObjectId(id) }).toArray();
   if (linkedCommissions.length > 0) {
-    if (!force) throw createError({ statusCode: 400, statusMessage: 'Customer is linked to existing commissions, please delete them first!' });
+    if (!force) throw createError({ status: 400, statusText: 'Customer is linked to existing commissions, please delete them first!' });
     await commissionsCollection.deleteMany({ customer: new ObjectId(id) });
   }
   const result = await collection.deleteOne({ _id: new ObjectId(id) });
@@ -126,7 +126,7 @@ const findOneWithCommission = async () => {
     { $sample: { size: 1 } },
     { $project: { commissions: 0 } }
   ]).toArray();
-  if (!result[0]) throw createError({ statusCode: 404, statusMessage: 'No eligible test customer found' });
+  if (!result[0]) throw createError({ status: 404, statusText: 'No eligible test customer found' });
   return result[0] as CustomerRaw;
 }
 

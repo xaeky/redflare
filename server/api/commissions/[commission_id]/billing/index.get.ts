@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
   const billingModel = useBillingModel();
 
   const result = await billingModel.getByCommission(commissionId);
-  if (!result) throw createError({ statusCode: 500, message: 'Failed to fetch transactions' });
+  if (!result) throw createError({ status: 500, statusText: 'Failed to fetch transactions' });
 
   return result;
 });

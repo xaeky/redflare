@@ -3,8 +3,8 @@ export default defineEventHandler(async (event) => {
   await hasPermission(event, 'delete:customers', true);
   // Get customer ID
   const id = getRouterParam(event, 'id');
-  if (!id) throw createError({ statusCode: 400 });
+  if (!id) throw createError({ status: 400, statusText: 'Customer ID is required' });
   // Delete it
-  const result = useCustomerModel().deleteOne(id);
+  const result = await useCustomerModel().deleteOne(id);
   return result;
 });

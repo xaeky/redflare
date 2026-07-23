@@ -13,7 +13,7 @@ export async function needAuth(event: EventUserSession) {
   const userSession = await getUserSession(event);
   // On test environment, skip auth checks
   if (isTestEnv) return userSession;
-  if (!_.get(userSession, 'user') || !_.get(userSession, 'secure.access_token')) throw createError({ statusCode: 401, message: 'Unauthorized' });
+  if (!_.get(userSession, 'user') || !_.get(userSession, 'secure.access_token')) throw createError({ status: 401, statusText: 'Unauthorized' });
   // So user exists on session, now we're going to validate it, use cache to avoid multiple calls
   const cacheKey = `auth0-session-${userSession.user?.sub}`;
   let cachedSession = await cache.get<boolean>(cacheKey);
@@ -32,7 +32,7 @@ export async function needAuth(event: EventUserSession) {
     } catch (e) {
       const err = e as Error;
       logger.error('Auth0Error:', e);
-      throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: `Auth0Error: ${err.message}` || 'Failed to fetch user details.' });
+      throw createError({ status: 403, statusText: `Auth0Error: ${err.message}` || 'Failed to fetch user details.' });
     }
   }
   // User exists, now we try to update the token if it's expired
@@ -40,7 +40,7 @@ export async function needAuth(event: EventUserSession) {
   if (!isSessionExpired) return userSession;
   if (isSessionExpired && !refresh_token) {
     clearUserSession(event as H3Event);
-    throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: 'Your refresh token is missing or expired.' });
+    throw createError({ status: 403, statusText: 'Your refresh token is missing or expired.' });
   }
   try {
     logger.debug('Session expired, attempting to refresh for user:', decodedIdAuth.sub);
@@ -59,7 +59,7 @@ export async function needAuth(event: EventUserSession) {
   } catch (e) {
     logger.error('Failed to refresh session:', e);
     clearUserSession(event as H3Event);
-    throw createError({ statusCode: 403, message: 'Forbidden', statusMessage: 'Your session has expired.' });
+    throw createError({ status: 403, statusText: 'Your session has expired.' });
   }
 }
 
@@ -68,7 +68,7 @@ export async function getPermissions(event: EventUserSession, useTrustedSession:
   // if such variable is not true, use session provided by server that might be outdated.
   // Useful to speed up certain processes.
   const session = useTrustedSession ? await needAuth(event) : await getUserSession(event);
-  if (!session.user) throw createError({ statusCode: 500, statusMessage: 'Could not read user from the session key.' });
+  if (!session.user) throw createError({ status: 500, statusText: 'Could not read user from the session key.' });
   // Get app config
   const runtime = useRuntimeConfig(event as H3Event);
   const { domain, clientId, clientSecret } = runtime.oauth.auth0;
@@ -79,7 +79,7 @@ export async function getPermissions(event: EventUserSession, useTrustedSession:
     const mappedPermissions = curretPermissions.data.map(p => p.permission_name);
     return mappedPermissions as Permission[];
   } catch (e) {
-    throw createError({ statusCode: 500, statusMessage: 'Failed to fetch permissions' });
+    throw createError({ status: 500, statusText: 'Failed to fetch permissions' });
   }
 }
 
@@ -89,7 +89,7 @@ export async function hasPermission(event: EventUserSession, permissionName: Per
   if (runtime.backoffice.skipRoles) return true;
   const permissions = await getPermissions(event, false);
   const itHasPermission = permissions.includes(permissionName);
-  if (throwError && !itHasPermission) throw createError({ statusCode: 403, statusMessage: 'Missing permissions to perform this action' });
+  if (throwError && !itHasPermission) throw createError({ status: 403, statusText: 'Missing permissions to perform this action' });
   return permissions.includes(permissionName);
 }
 
@@ -113,7 +113,7 @@ export async function updateCurrentUserPassword(event: EventUserSession, oldPass
   } catch (e) {
     const err = e as Error;
     logger.error('Auth0Error:', e);
-    throw createError({ statusCode: 403, statusMessage: `Auth0Error: ${err.message}` || 'Credentials are invalid or internal Auth0 error.' });
+    throw createError({ status: 403, statusText: `Auth0Error: ${err.message}` || 'Credentials are invalid or internal Auth0 error.' });
   }
   // If we reach this point, the old password is correct, so we can update to the new password
   try {
@@ -123,7 +123,7 @@ export async function updateCurrentUserPassword(event: EventUserSession, oldPass
   } catch (e) {
     const err = e as Error;
     logger.error('Auth0Error:', e);
-    throw createError({ statusCode: 500, statusMessage: `Auth0Error: ${err.message}` || 'Failed to update user password.' });
+    throw createError({ status: 500, statusText: `Auth0Error: ${err.message}` || 'Failed to update user password.' });
   }
 };
 
@@ -142,7 +142,7 @@ export async function updateCurrentUserProfile(event: EventUserSession, profileU
   } catch (e) {
     const err = e as Error;
     logger.error('Auth0Error:', e);
-    throw createError({ statusCode: 500, statusMessage: `Auth0Error: ${err.message}` || 'Failed to update user profile.' });
+    throw createError({ status: 500, statusText: `Auth0Error: ${err.message}` || 'Failed to update user profile.' });
   }
 }
 

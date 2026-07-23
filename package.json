@@ -36,7 +36,7 @@
     "lru-cache": "^11.2.4",
     "mercadopago": "^2.3.0",
     "mongodb": "^6.18.0",
-    "nuxt": "^4.2.2",
+    "nuxt": "^4.5.0",
     "nuxt-auth-utils": "0.5.20",
     "pinia": "^3.0.3",
     "satori": "^0.26.0",

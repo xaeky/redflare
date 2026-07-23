@@ -24,15 +24,15 @@ export const createPaymentPreference = async (options: CreatePaymentLinkOptions,
           processor: 'mercadopago'
         });
       } catch (error) {
-        throw createError({ statusCode: 500, message: 'Unable to create MercadoPago preference', data: error });
+        throw createError({ status: 500, statusText: 'Unable to create MercadoPago preference', data: error });
       }
     },
     'USD': async () => {
       // TODO: PayPal integration
-      throw createError({ statusCode: 501, message: 'PayPal integration not implemented yet' });
+      throw createError({ status: 501, statusText: 'PayPal integration not implemented yet' });
     }
   };
   await paymentFunctionMap[currency]();
-  if (!paymentObject) throw createError({ statusCode: 500, message: 'Payment object not created' });
+  if (!paymentObject) throw createError({ status: 500, statusText: 'Payment object not created' });
   return paymentObject as PaymentAttachment;
 };
