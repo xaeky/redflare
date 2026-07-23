@@ -12,24 +12,26 @@ test.describe.serial('Commission management with new customer', () => {
   });
 
   test('Agent is able to create customers', async ({ page, goto }) => {
+    test.setTimeout(1000 * 10);
     await claimSession(page, 'agent');
     await goto('/dashboard/customers', { waitUntil: 'networkidle' });
     // Invoke "Add customer" action
-    await page.getByTestId('add-customer-button').click();
+    await page.getByTestId('add-customer-button').click({ timeout: 1000 * 5 });
     await page.waitForTimeout(500); // Wait for slideover animation
     // Fill in customer details
     await page.locator('input[name="name"]').fill(testState.createdCustomerName);
     await page.locator('input[name="note"]').fill('E2E Test Customer');
     await page.waitForTimeout(500);
-    await page.getByTestId('add-customer-submit').click();
-    const response = await page.waitForResponse((response) =>
+    const postResult = page.waitForResponse((response) =>
       response.url().includes('/api/customers') &&
       response.request().method() === 'POST'
     );
-    expect(response.status()).toBe(200);
+    await page.getByTestId('add-customer-submit').click();
+    expect((await postResult).status()).toBe(200);
   });
 
   test('Agent is able to create commissions with the generated customer', async ({ page, goto }) => {
+    test.setTimeout(1000 * 10);
     await claimSession(page, 'agent');
     await goto('/dashboard/commissions', { waitUntil: 'networkidle' });
     // Invoke "New commission" action
@@ -52,15 +54,16 @@ test.describe.serial('Commission management with new customer', () => {
     await page.locator('input[name="secure_note"]').fill('Internal E2E Test Note');
     await page.waitForTimeout(500);
     // Save commission
-    await page.getByRole('button', { name: 'Save' }).click();
-    const response = await page.waitForResponse((response) =>
+    const postResult = page.waitForResponse((response) =>
       response.url().includes('/api/commissions') &&
       response.request().method() === 'POST'
     );
-    expect(response.status()).toBe(200);
+    await page.getByRole('button', { name: 'Save' }).click();
+    expect((await postResult).status()).toBe(200);
   });
 
   test('Agent should not be able to delete customers that are linked to commissions', async ({ page, goto }) => {
+    test.setTimeout(1000 * 10);
     await claimSession(page, 'agent');
     await goto('/dashboard/customers', { waitUntil: 'networkidle' });
     await page.locator(`tr:has-text("${testState.createdCustomerName}")`).locator('button').click();
@@ -69,12 +72,12 @@ test.describe.serial('Commission management with new customer', () => {
     await page.getByTestId('delete-customer-submit').click();
     // Wait for confirmation dialog and confirm deletion
     await page.waitForSelector('h2:has-text("Delete Customer")');
-    (await page.waitForSelector('button:has-text("Delete")')).click();
-    const response = await page.waitForResponse((response) =>
+    const deleteResult = page.waitForResponse((response) =>
       response.url().includes('/api/customers/') &&
       response.request().method() === 'DELETE'
     );
-    expect(response.status()).toBe(400);
+    (await page.waitForSelector('button:has-text("Delete")')).click();
+    expect((await deleteResult).status()).toBe(400);
   });
 
   test.afterAll(async ({ request }) => {

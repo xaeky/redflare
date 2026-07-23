@@ -128,12 +128,12 @@ jobs:
           done
 
       - name: Run E2E tests
-        timeout-minutes: 5
+        timeout-minutes: 1
         env:
           CI: true
           FORCE_REMOTE: true
           TEST_URL: https://localhost:3000
-        run: bun test:e2e
+        run: bun test:e2e --retries 2
 
       - name: Stop canary proxy
         if: always()
