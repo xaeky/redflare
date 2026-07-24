@@ -17,3 +17,21 @@ export async function getAllConfig() {
 export async function getConfigByCategory(category: RedflareConfigCategory) {
   return useConfigModel().getByCategory(category);
 };
+
+export const getCachedConfig = defineCachedFunction(async () => {
+  return getAllConfig();
+}, {
+  name: 'config_getAll',
+  getKey: () => 'default',
+  maxAge: 60 * 30, // Cache for 30 minutes
+});
+
+export const getCachedConfigByCategory = defineCachedFunction(async (category: RedflareConfigCategory) => {
+  return getConfigByCategory(category);
+}, {
+  name: 'config_getByCategory',
+  getKey: (category) => `config-${category}`,
+  maxAge: 60 * 30, // Cache for 30 minutes
+});
+
+export const invalidateCachedConfigByCategory = (category: RedflareConfigCategory) => invalidateFunctionCache('config_getByCategory', category);
