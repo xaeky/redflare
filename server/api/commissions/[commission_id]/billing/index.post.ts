@@ -16,5 +16,9 @@ export default defineEventHandler(async (event) => {
   const updateResult = await commissionModel.addTransactionToOne(commissionId, result.insertedId.toString());
   if (!updateResult) throw createError({ status: 500, statusText: 'Failed to link transaction to commission' });
   // Return the newly created payment
+  event.context.audit = {
+    transaction_id: result.insertedId.toString(),
+    body: body.data
+  };
   return result;
 });

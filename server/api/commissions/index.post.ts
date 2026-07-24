@@ -13,5 +13,8 @@ export default defineEventHandler(async (event) => {
       note: c.note === undefined ? null : c.note,
     })),
   });
+  event.context.audit = {
+    commission_id: result.insertedId.toString(),
+  };
   return result;
 });

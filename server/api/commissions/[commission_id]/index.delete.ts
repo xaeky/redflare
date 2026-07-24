@@ -3,5 +3,8 @@ export default defineEventHandler(async (event) => {
   await hasPermission(event, 'delete:commissions');
   const { id: commissionId } = await validateCommission(event);
   const result = await useCommissionModel().deleteOne(commissionId);
+  event.context.audit = {
+    commission_id: commissionId,
+  };
   return result;
 });

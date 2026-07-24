@@ -1,6 +1,7 @@
 export default defineEventHandler(async (event) => {
   // Verify if current session user has permissions to write customers.
   await hasPermission(event, 'write:customers', true);
+  const session = await getUserSession(event);
   // Get customer ID
   const id = getRouterParam(event, 'id');
   if (!id) throw createError({ status: 400, statusText: 'Customer ID is required' });
@@ -10,5 +11,8 @@ export default defineEventHandler(async (event) => {
   const body = trustedBody.data as CustomerUpdateOptions;
   // Update customer
   const result = await useCustomerModel().updateOne(id, body);
+  event.context.audit = {
+    customer_id: id,
+  };
   return result;
 });

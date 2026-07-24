@@ -24,5 +24,8 @@ export default defineEventHandler(async (event) => {
     logger.error('Failed to confirm attachments for commission', { commissionId, error });
     throw createError({ status: 500, statusText: 'Failed to confirm attachments' });
   }
+  event.context.audit = {
+    commission_id: commissionId,
+  };
   return result;
 });

@@ -38,6 +38,7 @@
     "mongodb": "^6.18.0",
     "nuxt": "^4.4.8",
     "nuxt-auth-utils": "0.5.20",
+    "nuxt-shiki": "0.3.2",
     "pinia": "^3.0.3",
     "satori": "^0.26.0",
     "sharp": "^0.34.5",
