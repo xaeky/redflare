@@ -10,7 +10,7 @@ export default defineNitroPlugin(async (nitroApp) => {
     const trackPerRoute = [
       // Attachments
       {
-        pathRegex: '^/api/public/commissions/[^/]+/retrieve_attachment$',
+        pathRegex: /^\/api\/public\/commissions\/(.*)\/retrieve_attachment/,
         method: 'GET',
         category: AuditCategory.DownloadAttachment,
         action: AuditAction.Access
@@ -24,8 +24,7 @@ export default defineNitroPlugin(async (nitroApp) => {
 
     if (!requestMatch) return;
 
-    logger.withTag('auditPublicOperation').info(`Auditing public operation: ${requestMatch.category} - ${requestMatch.action}`);
-
+    logger.withTag('auditPublicOperation').info(`Auditing public operation for: ${method} ${route}`);
     await auditPublicOperation(event, {
       category: requestMatch.category,
       action: requestMatch.action,

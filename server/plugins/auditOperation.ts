@@ -8,57 +8,57 @@ export default defineNitroPlugin(async (nitroApp) => {
     const trackPerRoute = [
       // Avatar bases
       {
-        pathRegex: '^/api/commissions/bases$',
+        pathRegex: /^\/api\/commissions\/bases$/,
         method: 'POST',
         category: AuditCategory.AvatarBase,
         action: AuditAction.Create
       },
       {
-        pathRegex: '^/api/commissions/bases/[^/]+$',
+        pathRegex: /^\/api\/commissions\/bases\/[^/]+$/,
         method: 'PUT',
         category: AuditCategory.AvatarBase,
         action: AuditAction.Update
       },
       {
-        pathRegex: '^/api/commissions/bases/[^/]+$',
+        pathRegex: /^\/api\/commissions\/bases\/[^/]+$/,
         method: 'DELETE',
         category: AuditCategory.AvatarBase,
         action: AuditAction.Delete
       },
       // Commissions
       {
-        pathRegex: '^/api/commissions$',
+        pathRegex: /^\/api\/commissions$/,
         method: 'POST',
         category: AuditCategory.Commission,
         action: AuditAction.Create
       },
       {
-        pathRegex: '^/api/commissions/[^/]+$',
+        pathRegex: /^\/api\/commissions\/[^/]+$/,
         method: 'PUT',
         category: AuditCategory.Commission,
         action: AuditAction.Update
       },
       {
-        pathRegex: '^/api/commissions/[^/]+$',
+        pathRegex: /^\/api\/commissions\/[^/]+$/,
         method: 'DELETE',
         category: AuditCategory.Commission,
         action: AuditAction.Delete
       },
       // Customer
       {
-        pathRegex: '^/api/customers$',
+        pathRegex: /^\/api\/customers$/,
         method: 'POST',
         category: AuditCategory.Customer,
         action: AuditAction.Create
       },
       {
-        pathRegex: '^/api/customers/[^/]+$',
+        pathRegex: /^\/api\/customers\/[^/]+$/,
         method: 'PUT',
         category: AuditCategory.Customer,
         action: AuditAction.Update
       },
       {
-        pathRegex: '^/api/customers/[^/]+$',
+        pathRegex: /^\/api\/customers\/[^/]+$/,
         method: 'DELETE',
         category: AuditCategory.Customer,
         action: AuditAction.Delete
@@ -66,8 +66,7 @@ export default defineNitroPlugin(async (nitroApp) => {
     ]
     // Handle audit logging when conditions are met (route and method)
     const requestMatch = trackPerRoute.find((routeConfig) => {
-      const regex = new RegExp(routeConfig.pathRegex);
-      return regex.test(route) && routeConfig.method === method;
+      return routeConfig.pathRegex.test(route) && routeConfig.method === method;
     });
 
     if (!requestMatch) return; // No matching route for auditing
