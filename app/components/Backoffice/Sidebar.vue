@@ -28,6 +28,11 @@ const links:NavigationMenuItem[] = [
     label: 'Audits',
     icon: 'i-heroicons-document-text-20-solid',
     to: '/dashboard/audits'
+  },
+  {
+    label: 'App Settings',
+    icon: 'i-heroicons-cog-16-solid',
+    to: '/dashboard/app-settings'
   }
 ];
 
