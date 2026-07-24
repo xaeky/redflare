@@ -6,19 +6,25 @@ export const redflareConfigGeneralSchema = z.object({
 
 export const redflareConfigKnowledgeBaseSchema = z.object({
   helpLinks: z.object({
-    howToUploadAvatarUrl: z.string().url().optional().default(''),
+    howToUploadAvatarUrl: z.union([z.literal(''), z.string().url()]).optional().nullable().default(''),
+  }).default({
+    howToUploadAvatarUrl: ''
   })
 });
 
 export const redflareConfigLegalSchema = z.object({
-  privacyPolicyUrl: z.string().url().optional().default(''),
-  termsOfServiceUrl: z.string().url().optional().default(''),
+  privacyPolicyUrl: z.union([z.literal(''), z.string().url()]).optional().nullable().default(''),
+  termsOfServiceUrl: z.union([z.literal(''), z.string().url()]).optional().nullable().default(''),
 });
 
 export const redflareConfigEmailSchema = z.object({
   contact: z.object({
-    support: z.string().email().optional().default(''),
-    copyright: z.string().email().optional().default(''),
-    legal: z.string().email().optional().default(''),
+    support: z.union([z.literal(''), z.string().email()]).optional().nullable().default(''),
+    copyright: z.union([z.literal(''), z.string().email()]).optional().nullable().default(''),
+    legal: z.union([z.literal(''), z.string().email()]).optional().nullable().default(''),
+  }).default({
+    support: '',
+    copyright: '',
+    legal: ''
   })
 });
