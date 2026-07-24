@@ -1,5 +1,3 @@
-import { AuditAction, AuditCategory } from '~~/shared/enums/Audit';
-
 export default defineEventHandler(async (event) => {
   // Verify if current session user has permissions to write commissions.
   await hasPermission(event, 'write:commissions');
@@ -15,12 +13,8 @@ export default defineEventHandler(async (event) => {
       note: c.note === undefined ? null : c.note,
     })),
   });
-  await auditOperation(event, {
-    category: AuditCategory.Commission,
-    action: AuditAction.Create,
-    details: {
-      commission_id: result.insertedId.toString()
-    },
-  });
+  event.context.audit = {
+    commission_id: result.insertedId.toString(),
+  };
   return result;
 });

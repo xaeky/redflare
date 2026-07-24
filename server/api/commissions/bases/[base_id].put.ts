@@ -1,5 +1,3 @@
-import { AuditAction, AuditCategory } from "~~/shared/enums/Audit";
-
 export default defineEventHandler(async (event) => {
   const baseId = getRouterParam(event, 'base_id');
   if (!baseId) throw createError({ status: 400, statusText: 'Base ID is required' });
@@ -9,12 +7,8 @@ export default defineEventHandler(async (event) => {
   // Update avatar base in database
   const result = await useAvatarBasesModel().updateOne(baseId, body.data);
   await invalidateFunctionCache('avatar_bases_getAll', '*');
-  await auditOperation(event, {
-    category: AuditCategory.AvatarBase,
-    action: AuditAction.Update,
-    details: {
-      avatar_base_id: baseId
-    },
-  });
+  event.context.audit = {
+    avatar_base_id: baseId,
+  };
   return result;
 });

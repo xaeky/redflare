@@ -1,5 +1,3 @@
-import { AuditAction, AuditCategory } from '~~/shared/enums/Audit';
-
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);
   // Read & validate request body
@@ -8,12 +6,8 @@ export default defineEventHandler(async (event) => {
   // Insert avatar base to database
   const result = await useAvatarBasesModel().insertOne(body.data);
   await invalidateFunctionCache('avatar_bases_getAll', '*');
-  await auditOperation(event, {
-    category: AuditCategory.AvatarBase,
-    action: AuditAction.Create,
-    details: {
-      avatar_base_id: result.insertedId.toString()
-    },
-  });
+  event.context.audit = {
+    avatar_base_id: result.insertedId.toString(),
+  };
   return result;
 });

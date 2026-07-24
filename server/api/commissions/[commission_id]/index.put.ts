@@ -1,5 +1,3 @@
-import { AuditAction, AuditCategory } from '~~/shared/enums/Audit';
-
 export default defineEventHandler(async (event) => {
   // Verify if current session user has permissions to write commissions.
   await hasPermission(event, 'write:commissions');
@@ -26,12 +24,8 @@ export default defineEventHandler(async (event) => {
     logger.error('Failed to confirm attachments for commission', { commissionId, error });
     throw createError({ status: 500, statusText: 'Failed to confirm attachments' });
   }
-  await auditOperation(event, {
-    category: AuditCategory.Commission,
-    action: AuditAction.Update,
-    details: {
-      commission_id: commissionId
-    },
-  });
+  event.context.audit = {
+    commission_id: commissionId,
+  };
   return result;
 });

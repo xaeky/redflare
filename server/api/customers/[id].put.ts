@@ -1,5 +1,3 @@
-import { AuditAction, AuditCategory } from '~~/shared/enums/Audit';
-
 export default defineEventHandler(async (event) => {
   // Verify if current session user has permissions to write customers.
   await hasPermission(event, 'write:customers', true);
@@ -13,12 +11,8 @@ export default defineEventHandler(async (event) => {
   const body = trustedBody.data as CustomerUpdateOptions;
   // Update customer
   const result = await useCustomerModel().updateOne(id, body);
-  await auditOperation(event, {
-    category: AuditCategory.Customer,
-    action: AuditAction.Update,
-    details: {
-      customer_id: id
-    },
-  });
+  event.context.audit = {
+    customer_id: id,
+  };
   return result;
 });
