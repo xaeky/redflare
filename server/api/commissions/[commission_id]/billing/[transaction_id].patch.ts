@@ -7,6 +7,9 @@ export default defineEventHandler(async (event) => {
   const billingModel = useBillingModel();
   const updateResult = await billingModel.updateOne(transactionId, safeBody.data);
   if (!updateResult) throw createError({ status: 500, statusText: 'Failed to update transaction' });
-
+  event.context.audit = {
+    transaction_id: transactionId,
+    body: safeBody.data
+  };
   return { success: true };
 });

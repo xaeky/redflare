@@ -9,5 +9,6 @@ export enum AuditCategory {
   Customer = 1 << 0,
   Commission = 1 << 1,
   AvatarBase = 1 << 2,
-  DownloadAttachment = 1 << 3
+  DownloadAttachment = 1 << 3,
+  BillingTransaction = 1 << 4,
 }

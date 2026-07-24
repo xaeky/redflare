@@ -15,5 +15,9 @@ export default defineEventHandler(async (event) => {
     const result = await billingModel.deleteOne(transactionId);
     if (!result) throw createError({ status: 500, statusText: 'Failed to delete transaction' });
   }
+  event.context.audit = {
+    transaction_id: transactionId,
+    deleted_completely: !hasParents
+  };
   return { success: true, deletedCompletely: !hasParents };
 });

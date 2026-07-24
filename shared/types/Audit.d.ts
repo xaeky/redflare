@@ -43,9 +43,20 @@ export interface AuditDownloadAttachment extends AuditBase {
   }
 }
 
+export interface AuditBilling extends AuditBase {
+  action: AuditAction.Create | AuditAction.Update | AuditAction.Delete;
+  category: AuditCategory.BillingTransaction;
+  details: {
+    transaction_id: string;
+    deleted_completely?: boolean;
+    body?: Record<string, any>;
+  }
+}
+
 export type Audit = AuditCustomer
   | AuditCommission
   | AuditAvatarBase
-  | AuditDownloadAttachment;
+  | AuditDownloadAttachment
+  | AuditBilling;
 
 export type AuditInsertOptions = Omit<Audit, 'created_at'>;

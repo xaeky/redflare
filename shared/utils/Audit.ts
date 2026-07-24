@@ -6,7 +6,8 @@ export function humanizeAuditCategory(category: AuditCategory): string {
     [AuditCategory.Commission]: 'Commission',
     [AuditCategory.Customer]: 'Customer',
     [AuditCategory.AvatarBase]: 'Avatar Base',
-    [AuditCategory.DownloadAttachment]: 'Download Attachment'
+    [AuditCategory.DownloadAttachment]: 'Download Attachment',
+    [AuditCategory.BillingTransaction]: 'Billing Transaction'
   };
   return categoryMap[category] || 'Unknown';
 }
@@ -24,7 +25,8 @@ export function iconizeAuditCategory(category: AuditCategory): string {
     [AuditCategory.Commission]: 'i-heroicons-document-text-20-solid',
     [AuditCategory.Customer]: 'i-heroicons-user-circle-solid',
     [AuditCategory.AvatarBase]: 'i-heroicons-photo-16-solid',
-    [AuditCategory.DownloadAttachment]: 'i-heroicons-arrow-down-on-square-solid'
+    [AuditCategory.DownloadAttachment]: 'i-heroicons-arrow-down-on-square-solid',
+    [AuditCategory.BillingTransaction]: 'i-heroicons-credit-card-solid'
   };
   return categoryMap[category] || 'i-heroicons-question-mark-circle-solid';
 }
