@@ -3,6 +3,7 @@ import { H3Event } from 'h3';
 
 export default defineNitroPlugin(async (nitroApp) => {
   nitroApp.hooks.hook('afterResponse', async (event: H3Event) => {
+    if (bypassAuthForDev(event)) return; // Skip auditing for dev bypass requests
     const route = event.path;
     const method = event.method;
     const trackPerRoute = [

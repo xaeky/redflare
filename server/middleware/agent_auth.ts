@@ -2,8 +2,7 @@ import _ from 'lodash';
 
 export default defineEventHandler(async (event) => {
   const runtime = useRuntimeConfig(event);
-  const isAPICall = event.path.startsWith('/api/');
-  if (!isAPICall) return;
+  if (!isAPICall(event) || bypassAuthForDev(event)) return;
   // All endpoints are treated as restricted except for public ones
   const publicEndpoints = ['/api/auth', '/api/_auth', '/api/_nuxt_icon', '/api/public'];
   if (isTestEnv) publicEndpoints.push('/api/test');
