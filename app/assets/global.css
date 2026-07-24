@@ -3,7 +3,8 @@
 
 @theme static {
   --font-sans: 'Geist', sans-serif;
-  --color-beige-200: #efbc8e;
+  --font-mono: 'Inconsolata', monospace;
 }
 
-pre { @apply font-mono bg-neutral-800 border border-neutral-700 overflow-x-auto p-4; }
+pre:not(.shiki) { @apply font-mono bg-neutral-800 border border-neutral-700 overflow-x-auto p-4 rounded-md; }
+pre.shiki { @apply font-mono p-4 rounded-md; }
