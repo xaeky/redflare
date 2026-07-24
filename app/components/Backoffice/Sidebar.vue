@@ -23,6 +23,11 @@ const links:NavigationMenuItem[] = [
     label: 'Customers',
     icon: 'i-heroicons-at-symbol-solid',
     to: '/dashboard/customers'
+  },
+  {
+    label: 'Audits',
+    icon: 'i-heroicons-document-text-20-solid',
+    to: '/dashboard/audits'
   }
 ];
 

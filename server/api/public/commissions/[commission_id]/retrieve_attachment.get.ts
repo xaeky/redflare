@@ -1,3 +1,4 @@
+import { AuditAction, AuditCategory } from '~~/shared/enums/Audit';
 import _ from "lodash";
 
 export default defineEventHandler(async (event) => {
@@ -12,6 +13,13 @@ export default defineEventHandler(async (event) => {
   const url = await bucketGetSignedDownloadUrl(destinationPath).catch((error) => {
     logger.error('Error generating signed download URL', { destinationPath, error: error.message });
     throw createError({ status: 500, statusText: 'Failed to generate download URL' });
+  });
+  await auditPublicOperation(event, {
+    action: AuditAction.Access,
+    category: AuditCategory.DownloadAttachment,
+    details: {
+      file_id: fileId
+    }
   });
   await publicRevokeTempAuthorization(event, expectedAuth);
   sendRedirect(event, url);

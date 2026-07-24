@@ -1,5 +1,6 @@
 type CommissionQueryParams = { page?: number; sorting?: { by: string; order: number } };
 type CommissionsResponse = { data: WithCustomer<DeserializedCommission>[]; total: number };
+
 export const commissionsQuery = defineQueryOptions(
   ({ page = 1, sorting = { by: 'created_at', order: -1 } }: CommissionQueryParams) => ({
     key: ['commissions', { page, sorting }],

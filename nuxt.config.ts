@@ -36,7 +36,8 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     '@pinia/nuxt',
     '@pinia/colada-nuxt',
-    '@nuxt/image'
+    '@nuxt/image',
+    'nuxt-shiki',
   ],
   css: ['~/assets/global.css'],
   vite: {
@@ -44,6 +45,9 @@ export default defineNuxtConfig({
     server: {
       allowedHosts: ['local.xavis.redflare']
     }
+  },
+  shiki: {
+    defaultTheme: 'vitesse-dark'
   },
   runtimeConfig: {
     mp: {

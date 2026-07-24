@@ -30,6 +30,7 @@ type CommissionGetAllParams = {
   sort?: { by: string; order: 1 | -1 };
   public?: boolean;
 };
+
 const getAll = async ({ page, pageSize = 50, filters, sort, public: publicRequest }: CommissionGetAllParams) => {
   const collection = await useMongoCollection('commissions');
   page ||= 1;

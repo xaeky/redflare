@@ -2,6 +2,7 @@ import _ from 'lodash';
 
 type CustomerQueryParams = { name?: string; page?: number, sorting?: { by: string; order: number } };
 type CustomersResponse = { data: DeserializedCustomer[]; total: number };
+
 export const customersQuery = defineQueryOptions(
   ({ name, page = 1, sorting = { by: 'created_at', order: -1 } }: CustomerQueryParams) => ({
     key: ['customers', { name, page, sorting }],
