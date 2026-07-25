@@ -30,7 +30,7 @@ export const getCachedConfigByCategory = defineCachedFunction(async (category: R
   return getConfigByCategory(category);
 }, {
   name: 'config_getByCategory',
-  getKey: (category) => `config-${category}`,
+  getKey: (category) => category,
   maxAge: 60 * 30, // Cache for 30 minutes
 });
 

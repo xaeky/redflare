@@ -1,22 +1,21 @@
 <script setup lang="ts">
+import { RedflareConfigCategory } from '~~/shared/enums/Config';
+
 definePageMeta({
   title: 'Welcome back'
 });
 
 // Get agreement URLs from Redflare config
-const { data } = useAsyncData(async () => {
-  const config = await useAPI<RedflareConfigLegal>('/api/config/legal')
-  return config;
-});
+const { data: appAgreements } = await useRedflarePublicConfig<RedflareConfigLegal>(RedflareConfigCategory.Legal);
 
 // Check if app has legal pages configured
 const appHasConfiguredAgreements = computed(() => {
-  return data.value?.termsOfServiceUrl.length && data.value?.privacyPolicyUrl.length;
+  return appAgreements.value?.termsOfServiceUrl?.length && appAgreements.value?.privacyPolicyUrl?.length;
 });
 
 const legalAgreements = [
-  { name: 'Terms of Service', to: data.value?.termsOfServiceUrl },
-  { name: 'Privacy Policy', to: data.value?.privacyPolicyUrl }
+  { name: 'Terms of Service', to: appAgreements.value?.termsOfServiceUrl },
+  { name: 'Privacy Policy', to: appAgreements.value?.privacyPolicyUrl }
 ];
 
 const agentSession = useUserSession();

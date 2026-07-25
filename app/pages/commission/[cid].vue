@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { OptionalId } from 'mongodb';
 import { CommissionStatusType } from '~~/shared/enums/Commissions';
+import { RedflareConfigCategory } from '~~/shared/enums/Config';
 import { SharedCommissionReadonlyCharacterChangelog } from '#components';
 import type { TimelineItem } from '@nuxt/ui';
 
 const thisRoute = useRoute();
 const commissionId = thisRoute.params.cid;
 const commission = await useAPI<PublicSerializedCommission>(`/api/public/commissions/${commissionId}`);
+const { data: knowledgeBaseConfig } = await useRedflarePublicConfig<RedflareConfigKnowledgeBase>(RedflareConfigCategory.KnowledgeBase);
 type AllowedTimelineValues = CommissionStatusType.InSetup | CommissionStatusType.NextUp | CommissionStatusType.InDevelopment | CommissionStatusType.Showtime;
 const commissionTimelineAllowedValues:AllowedTimelineValues[] = [CommissionStatusType.InSetup, CommissionStatusType.NextUp, CommissionStatusType.InDevelopment, CommissionStatusType.Showtime]
 const commissionTimeline = ref<TimelineItem[]>([
@@ -61,12 +63,13 @@ function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[],
   characterChangelogOverlay.open({
     changelog, commission: commission.data._id?.toString() || '',
     attachments: commission.attachments || {},
-    avatarBase: commission.data.characters[characterIndex]?.base as AvatarBase
+    avatarBase: commission.data.characters[characterIndex]?.base as AvatarBase,
+    uploadGuideUrl: knowledgeBaseConfig.value?.helpLinks.howToUploadAvatarUrl
   });
 }
 
-const { isLoggedIn, login } = await usePublicUserSession();
-const { user:agentUser } = await useUserSession();
+const { isLoggedIn, login } = usePublicUserSession();
+const { user:agentUser } = useUserSession();
 const handleAccountBackClick = () => {
   navigateTo('/me');
 };
