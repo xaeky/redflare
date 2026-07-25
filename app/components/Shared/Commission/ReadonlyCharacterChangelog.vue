@@ -6,8 +6,11 @@ const props = defineProps<{
   changelog: CommissionCharacterChangelog[];
   attachments: Record<string, CommissionCharacterAttachmentRaw>;
   avatarBase?: AvatarBase;
-  uploadGuideUrl?: string;
 }>();
+
+const { config } = useRedflarePublicConfig();
+const kbConfig = config.value?.kb as RedflareConfigKnowledgeBase;
+const uploadGuideUrl = kbConfig?.helpLinks.howToUploadAvatarUrl;
 
 const toast = useToast();
 
