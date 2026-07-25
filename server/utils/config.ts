@@ -34,4 +34,7 @@ export const getCachedConfigByCategory = defineCachedFunction(async (category: R
   maxAge: 60 * 30, // Cache for 30 minutes
 });
 
-export const invalidateCachedConfigByCategory = (category: RedflareConfigCategory) => invalidateFunctionCache('config_getByCategory', category);
+export const invalidateCachedConfigByCategory = async (category: RedflareConfigCategory) => {
+  await invalidateFunctionCache('config_getAll', 'default');
+  await invalidateFunctionCache('config_getByCategory', category);
+};
