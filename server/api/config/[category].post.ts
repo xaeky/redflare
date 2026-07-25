@@ -14,5 +14,9 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<RedflareConfigUpsertOptions>(event);
   await configModel.setByCategory(category, body as RedflareConfig);
   await invalidateCachedConfigByCategory(category);
+  event.context.audit = {
+    config_category: category,
+    body,
+  }
   return;
 });

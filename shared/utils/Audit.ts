@@ -7,7 +7,8 @@ export function humanizeAuditCategory(category: AuditCategory): string {
     [AuditCategory.Customer]: 'Customer',
     [AuditCategory.AvatarBase]: 'Avatar Base',
     [AuditCategory.DownloadAttachment]: 'Download Attachment',
-    [AuditCategory.BillingTransaction]: 'Billing Transaction'
+    [AuditCategory.BillingTransaction]: 'Billing Transaction',
+    [AuditCategory.GlobalConfig]: 'System Config'
   };
   return categoryMap[category] || 'Unknown';
 }
@@ -26,7 +27,8 @@ export function iconizeAuditCategory(category: AuditCategory): string {
     [AuditCategory.Customer]: 'i-heroicons-user-circle-solid',
     [AuditCategory.AvatarBase]: 'i-heroicons-photo-16-solid',
     [AuditCategory.DownloadAttachment]: 'i-heroicons-arrow-down-on-square-solid',
-    [AuditCategory.BillingTransaction]: 'i-heroicons-credit-card-solid'
+    [AuditCategory.BillingTransaction]: 'i-heroicons-credit-card-solid',
+    [AuditCategory.GlobalConfig]: 'i-heroicons-cog-16-solid'
   };
   return categoryMap[category] || 'i-heroicons-question-mark-circle-solid';
 }
