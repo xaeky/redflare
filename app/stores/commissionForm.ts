@@ -13,6 +13,7 @@ function toUpdateData(remoteData: CommissionBaseRaw): CommissionUpdate {
       name: c.name,
       base: c.base._id.toString(), // Ensure base is an ID
       note: c.note,
+      tasks: c.tasks || [],
       changelog: c.changelog,
     })) as CommissionCharacterOptions[],
     payments: rawClone.payments.map(p => p.toString()),

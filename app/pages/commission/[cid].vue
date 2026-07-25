@@ -128,7 +128,7 @@ useSeoMeta({
             <h2>Characters</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8 select-none">
               <div
-                v-for="(char, charIndex) in commission.data.characters" :key="char.id"
+                v-for="(char, charIndex) in commission.data.characters" :key="charIndex"
                 class="bg-linear-125 from-neutral-800/50 to-primary-500/20 border border-neutral-700/25 p-4 md:p-6 rounded-xl hover:shadow-xl hover:shadow-neutral-950/50 duration-300"
               >
                 <div class="flex flex-col gap-2">
@@ -145,6 +145,13 @@ useSeoMeta({
                   </div>
                   <span class="font-bold text-primary" v-text="(char.base as AvatarBase).name"/>
                   <span v-if="char.note && char.note.length" class="text-xs" v-text="char.note" />
+                  <ul v-if="char.tasks && char.tasks.length">
+                    <li v-for="(task, taskIndex) in char.tasks" :key="taskIndex" class="flex items-center gap-2">
+                      <UIcon name="i-lucide-circle-small" class="text-warning animate-pulse" v-if="!task.completed" />
+                      <UIcon name="i-lucide-circle-check" class="text-success" v-else />
+                      <span v-text="task.description" />
+                    </li>
+                  </ul>
                   <div v-if="char.changelog && char.changelog.length" class="flex items-center gap-2">
                     <UButton
                       label="View releases" icon="i-lucide-list" variant="soft"

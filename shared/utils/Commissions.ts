@@ -25,6 +25,11 @@ export const commissionOptionsSchema = z.object({
   payments: z.array(z.string().min(1)).default([])
 });
 
+export const commissionCharacterTaskSchema = z.object({
+  description: z.string().min(1, 'Task description is required'),
+  completed: z.boolean().default(false)
+});
+
 export const commissionUpdateSchema = z.object({
   status: z.number().optional(),
   public_note: z.string().nullable().optional(),
@@ -36,6 +41,7 @@ export const commissionUpdateSchema = z.object({
       name: z.string().min(1, 'Character name is required'),
       note: z.string().nullable().optional(),
       changelog: z.array(commissionChangelogSchema).default([]),
+      tasks: z.array(commissionCharacterTaskSchema).default([]),
       base: z.string().min(1, 'Base character is required')
     })
   ).optional().default([]),

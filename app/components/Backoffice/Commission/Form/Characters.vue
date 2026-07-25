@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import _ from 'lodash';
-import * as z from 'zod';
 import { avatarBasesQuery } from '~/queries/commissions';
 import { BackofficeCommissionModalEditCharacterChangelog } from '#components';
 
@@ -31,9 +30,18 @@ function addCharacterObject() {
     name: '',
     base: '',
     note: '',
+    tasks: [],
     changelog: []
   };
   commissionFormStore.formState.characters.push(characterObject);
+}
+
+function handleAddTask(characterIndex: number) {
+  if (!commissionFormStore.formState.characters[characterIndex]) return;
+  if (!commissionFormStore.formState.characters[characterIndex].tasks) {
+    commissionFormStore.formState.characters[characterIndex].tasks = [];
+  }
+  commissionFormStore.formState.characters[characterIndex].tasks.push({ description: '', completed: false });
 }
 
 function handleCharacterChangelogEdit(characterIndex: number) {
@@ -66,8 +74,31 @@ defineExpose({
             />
           </UFormField>
           <UFormField label="Note" name="note">
-            <UTextarea v-model="character.note" placeholder="Optional character note" class="w-full" />
+            <UTextarea v-model="(character.note as string)" placeholder="Optional character note" class="w-full" />
           </UFormField>
+          <div>
+            <UFormField label="Tasks" name="tasks">
+              <div class="space-y-2">
+                <div v-for="(task, taskIndex) in character.tasks" :key="taskIndex" class="flex items-center gap-2">
+                  <UCheckbox v-model="task.completed" />
+                  <UInput v-model="task.description" placeholder="Task description" class="w-full" />
+                  <UButton
+                    icon="i-heroicons-trash-16-solid"
+                    color="error"
+                    variant="subtle"
+                    @click="character.tasks.splice(taskIndex, 1)"
+                  />
+                </div>
+                <UButton
+                  icon="i-heroicons-plus-16-solid"
+                  color="primary"
+                  variant="soft"
+                  @click="handleAddTask(index)"
+                  label="Add task"
+                />
+              </div>
+            </UFormField>
+          </div>
         </UForm>
         <div class="flex items-center justify-between">
           <UButton
