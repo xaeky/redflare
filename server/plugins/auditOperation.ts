@@ -3,6 +3,7 @@ import { H3Event } from 'h3';
 
 export default defineNitroPlugin(async (nitroApp) => {
   nitroApp.hooks.hook('afterResponse', async (event: H3Event) => {
+    if (bypassAuthForDev(event)) return; // Skip auditing for dev bypass requests
     const route = event.path;
     const method = event.method;
     const trackPerRoute = [
@@ -81,6 +82,13 @@ export default defineNitroPlugin(async (nitroApp) => {
         method: 'DELETE',
         category: AuditCategory.BillingTransaction,
         action: AuditAction.Delete
+      },
+      // Global config
+      {
+        pathRegex: /^\/api\/config\/[^/]+$/,
+        method: 'POST',
+        category: AuditCategory.GlobalConfig,
+        action: AuditAction.Update
       }
     ];
     // Handle audit logging when conditions are met (route and method)

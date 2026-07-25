@@ -11,4 +11,5 @@ export enum AuditCategory {
   AvatarBase = 1 << 2,
   DownloadAttachment = 1 << 3,
   BillingTransaction = 1 << 4,
+  GlobalConfig = 1 << 5,
 }

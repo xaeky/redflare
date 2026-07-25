@@ -53,10 +53,20 @@ export interface AuditBilling extends AuditBase {
   }
 }
 
+export interface AuditGlobalConfig extends AuditBase {
+  action: AuditAction.Update;
+  category: AuditCategory.GlobalConfig;
+  details: {
+    config_category: string;
+    body?: Record<string, any>;
+  }
+}
+
 export type Audit = AuditCustomer
   | AuditCommission
   | AuditAvatarBase
   | AuditDownloadAttachment
-  | AuditBilling;
+  | AuditBilling
+  | AuditGlobalConfig;
 
 export type AuditInsertOptions = Omit<Audit, 'created_at'>;

@@ -65,8 +65,8 @@ function handleCharacterChangelogOpen(changelog: CommissionCharacterChangelog[],
   });
 }
 
-const { isLoggedIn, login } = await usePublicUserSession();
-const { user:agentUser } = await useUserSession();
+const { isLoggedIn, login } = usePublicUserSession();
+const { user:agentUser } = useUserSession();
 const handleAccountBackClick = () => {
   navigateTo('/me');
 };

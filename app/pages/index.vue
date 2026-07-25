@@ -3,11 +3,19 @@ definePageMeta({
   title: 'Welcome back'
 });
 
-const runtimeConfig = useRuntimeConfig();
+// Get agreement URLs from Redflare config
+const { config } = useRedflarePublicConfig();
+const legalConfig = config.value?.legal as RedflareConfigLegal;
 
-const legalPages = [
-  { name: 'Terms of Service', to: runtimeConfig.public.legal.serviceUrl },
-  { name: 'Privacy Policy', to: runtimeConfig.public.legal.privacyUrl }
+// Check if app has legal pages configured
+const appHasConfiguredAgreements = computed(() => {
+  if (!legalConfig) return false;
+  return !!(legalConfig.termsOfServiceUrl?.length && legalConfig.privacyPolicyUrl?.length);
+});
+
+const legalAgreements = [
+  { name: 'Terms of Service', to: legalConfig?.termsOfServiceUrl },
+  { name: 'Privacy Policy', to: legalConfig?.privacyPolicyUrl }
 ];
 
 const agentSession = useUserSession();
@@ -92,12 +100,12 @@ const isDesktop = breakpoints.greater('lg');
             </div>
           </div>
         </div>
-        <USeparator />
-        <div>
+        <USeparator v-if="appHasConfiguredAgreements" />
+        <div v-if="appHasConfiguredAgreements">
           By signing in, you agree to our
-          <span v-for="(page, index) in legalPages" :key="index">
-            <NuxtLink external :href="page.to" target="_blank" class="text-primary-400 hover:underline">{{ page.name }}</NuxtLink>
-            <span v-if="index < legalPages.length - 1"> and </span>
+          <span v-for="(page, index) in legalAgreements" :key="index">
+            <ULink external :to="page.to" target="_blank" class="text-primary-400 hover:underline">{{ page.name }}</ULink>
+            <span v-if="index < legalAgreements.length - 1"> and </span>
           </span>.
         </div>
       </div>
