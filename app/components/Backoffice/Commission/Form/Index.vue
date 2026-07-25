@@ -59,6 +59,7 @@ const commissionStatusOptions:SelectItem[] = [
   { type: 'label', label: 'Pending' },
   { label: 'In Project Setup', value: CommissionStatusType.InSetup, icon: 'i-lucide-circle-dashed' },
   { label: 'Backlog', value: CommissionStatusType.Backlog, icon: 'i-lucide-circle-question-mark' },
+  { label: 'Pending Payment', value: CommissionStatusType.PendingPayment, icon: 'i-lucide-circle-dollar-sign' },
   { label: 'Missing', value: CommissionStatusType.Missing, icon: 'i-lucide-circle-alert' },
   { label: 'Next Up', value: CommissionStatusType.NextUp, icon: 'i-lucide-circle-ellipsis' },
   { type: 'separator' },
