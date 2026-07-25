@@ -10,6 +10,7 @@ export enum CommissionStatusType {
   Showtime         = 1 << 7,
   Maintenance      = 1 << 8,
   Cancelled        = 1 << 9,
+  PendingPayment   = 1 << 10,
 };
 
 export enum AvatarBaseFlagsType {
