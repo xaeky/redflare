@@ -1,5 +1,6 @@
 import type { OptionalId, WithId, WithoutId } from 'mongodb';
 
+// TODO: Unused!
 export enum CommissionFlagsType {
   None           = 0,
   HideCustomer   = 1 << 0,
