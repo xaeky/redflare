@@ -31,7 +31,7 @@ export default defineAppConfig({
       slots: {
         base: 'border-separate border-spacing-y-1',
         tr: 'group [&>td]:border-none',
-        td: 'group-data-[selectable=true]:group-hover:bg-elevated/50 py-2 px-3 first:rounded-l-lg last:rounded-r-lg',
+        td: 'group-data-[selectable=true]:group-hover:bg-elevated/50 py-2 px-3 first:rounded-l-lg last:rounded-r-lg duration-50 transition-colors',
         th: 'py-2 px-3',
         tbody: '[&>tr]:data-[selectable=true]:hover:bg-transparent [&>tr]:data-[selectable=true]:hover>td:bg-elevated/25 [&>tr]:data-[selectable=true]:hover:cursor-pointer',
       }
