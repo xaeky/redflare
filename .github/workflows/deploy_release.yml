@@ -56,6 +56,16 @@ jobs:
             REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
             SOURCE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.source'] }}
   
+  migrate:
+    uses: ./.github/workflows/migrate-db.yml
+    needs: build
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      env: production
+    secrets: inherit
+  
   deploy-production-canary:
     uses: ./.github/workflows/cloudrun-deploy.yml
     needs: build
@@ -139,6 +149,20 @@ jobs:
         if: always()
         run: gcloud run services delete ${{ vars.SERVICE_NAME }}-canary --region=us-west1 --quiet || true
 
+  rollback-migrations:
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [migrate, test-e2e]
+    if: failure() && needs.test-e2e.result == 'failure'
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+        run: bun run scripts/rollback.ts ${{ needs.migrate.outputs.applied_count }}
+  
   deploy-production:
     uses: ./.github/workflows/cloudrun-deploy.yml
     needs: [build, test-e2e]
