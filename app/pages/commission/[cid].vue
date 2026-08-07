@@ -46,6 +46,9 @@ const commissionRoutedValues:Record<AllowedTimelineValues, CommissionStatusType[
 const overlay = useOverlay();
 const characterChangelogOverlay = overlay.create(SharedCommissionReadonlyCharacterChangelog);
 
+// Viewport calculations
+const isMobile = useMediaQuery('(max-width: 768px)');
+
 function routeCommissionStatus(status: CommissionStatusType): CommissionStatusType {
   for (const [key, values] of Object.entries(commissionRoutedValues)) {
     if (values.includes(status)) {
@@ -100,8 +103,13 @@ useSeoMeta({
         />
         <PublicSessionCard size="sm" />
       </div>
-      <div v-else class="flex justify-end">
-        <UButton label="Log in with Discord" icon="i-ic-baseline-discord" @click="() => { login() }" />
+    </div>
+    <div v-if="!isLoggedIn && !agentUser" class="fixed bottom-0 inset-x-0 px-4">
+      <div class="flex flex-col md:flex-row gap-4 items-center justify-between container mx-auto p-6 bg-muted rounded-xl">
+        <p>You are viewing this commission as a guest. To view more details, please log in with your Discord account.</p>
+        <div>
+          <UButton label="Log in with Discord" icon="i-ic-baseline-discord" @click="() => { login() }" />
+        </div>
       </div>
     </div>
     <div v-if="agentUser && agentUser.settings.forceAgentView" class="md:p-8">
@@ -117,19 +125,22 @@ useSeoMeta({
     <div class="flex flex-col lg:flex-row items-stretch space-y-4 md:space-y-0">
       <div class="md:p-8 flex-1 space-y-8">
         <div class="flex gap-2 flex-col md:flex-row items-start md:items-center md:justify-between">
-          <h1>Commission</h1>
+          <div>
+            <h1>Commission</h1>
+            <div class="font-mono text-muted">{{ commission.data._id }}</div>
+          </div>
           <SharedCommissionStatusBadge :status="commission.data.status" />
         </div>
         <div id="commission_sections" class="space-y-4">
           <section v-if="commissionTimelineAllowedValues.includes(commissionRoutedValue as AllowedTimelineValues)">
-            <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" orientation="horizontal" />
+            <UTimeline :items="commissionTimeline" v-model="commissionRoutedValueString" :orientation="isMobile ? 'vertical' : 'horizontal'" />
           </section>
           <section v-if="commission.data.characters && commission.data.characters.length" class="space-y-4">
             <h2>Characters</h2>
             <div class="grid md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-8 select-none">
               <div
                 v-for="(char, charIndex) in commission.data.characters" :key="charIndex"
-                class="bg-linear-125 from-neutral-800/50 to-primary-500/20 border border-neutral-700/25 p-4 md:p-6 rounded-xl hover:shadow-xl hover:shadow-neutral-950/50 duration-300"
+                class="bg-linear-to-t from-neutral-800/50 shadow-lg ring ring-neutral-800 p-4 md:p-6 rounded-xl hover:shadow-xl hover:shadow-neutral-950/50 duration-300"
               >
                 <div class="flex flex-col gap-2">
                   <div class="flex items-center justify-between">
@@ -147,14 +158,14 @@ useSeoMeta({
                   <span v-if="char.note && char.note.length" class="text-xs" v-text="char.note" />
                   <ul v-if="char.tasks && char.tasks.length">
                     <li v-for="(task, taskIndex) in char.tasks" :key="taskIndex" class="flex items-center gap-2">
-                      <UIcon name="i-lucide-circle-small" class="text-warning animate-pulse" v-if="!task.completed" />
+                      <UIcon name="i-lucide-loader" class="text-neutral-300 animate-spin" v-if="!task.completed" />
                       <UIcon name="i-lucide-circle-check" class="text-success" v-else />
                       <span v-text="task.description" />
                     </li>
                   </ul>
                   <div v-if="char.changelog && char.changelog.length" class="flex items-center gap-2">
                     <UButton
-                      label="View releases" icon="i-lucide-list" variant="soft"
+                      label="View releases" icon="i-lucide-list" color="neutral" variant="soft" size="lg"
                       @click="handleCharacterChangelogOpen(char.changelog, charIndex)"
                     />
                   </div>
