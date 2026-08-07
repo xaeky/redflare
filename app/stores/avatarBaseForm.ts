@@ -24,16 +24,25 @@ export const useAvatarBaseFormStore = defineStore('avatarBaseForm', () => {
   const busy = ref(false);
   const formState = reactive<Schema>(defaultState());
   const additionalState = reactive<AdditionalState>(defaultAdditionalState());
+  const initialState = ref<Schema>(defaultState());
   const queryCache = useQueryCache();
+
+  function snapshot() {
+    initialState.value = _.cloneDeep(formState);
+  }
+
+  const isModified = computed(() => !_.isEqual(formState, initialState.value));
 
   function reset() {
     _.assign(formState, defaultState());
     _.assign(additionalState, defaultAdditionalState());
+    snapshot();
   }
 
   function clear() {
     _.assign(formState, defaultState());
     _.assign(additionalState, defaultAdditionalState());
+    snapshot();
     queryCache.invalidateQueries(avatarBasesQuery);
     useOverlay().closeAll();
   }
@@ -71,5 +80,5 @@ export const useAvatarBaseFormStore = defineStore('avatarBaseForm', () => {
     }).open();
   }
 
-  return { reset, update, updateBusy, destroy, safeDestroy, destroyBusy, insert, insertBusy, schema, formState, additionalState, errors, busy }
+  return { reset, snapshot, isModified, update, updateBusy, destroy, safeDestroy, destroyBusy, insert, insertBusy, schema, formState, additionalState, errors, busy }
 });

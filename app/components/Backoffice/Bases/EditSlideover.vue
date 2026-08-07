@@ -1,25 +1,34 @@
 <script setup lang="ts">
 import type { ComponentExposed } from 'vue-component-type-helpers';
-import type { BackofficeBasesForm } from '#components'; 
+import type { BackofficeBasesForm } from '#components';
+import { USlideover } from '#components';
 const avatarBaseFormStore = useAvatarBaseFormStore();
-
+const overlay = useOverlay();
 const baseForm = ref<ComponentExposed<typeof BackofficeBasesForm>>();
 
 async function handleSave() {
-  try {
-    await baseForm.value?.formRef?.validate({});
-    avatarBaseFormStore.update();
-  } catch (error) {
-    useToast().add({
-      color: 'error',
-      description: 'Please check the form for errors and try again.'
-    });
-  }
+  await baseForm.value?.formRef?.validate({});
+  avatarBaseFormStore.update();
+}
+
+function handleUpdateOpen() {
+  if (!avatarBaseFormStore.isModified) return;
+  useConfirmationModal({
+    title: 'Unsaved changes',
+    message: 'You have unsaved changes. Are you sure you want to close this form?',
+    confirmLabel: 'Discard changes',
+    onConfirm: () => {
+      avatarBaseFormStore.reset();
+      overlay.closeAll();
+    }
+  });
 }
 </script>
 
 <template>
-  <USlideover title="Edit avatar base">
+  <USlideover
+    title="Edit avatar base" 
+    @close:prevent="handleUpdateOpen" :dismissible="!avatarBaseFormStore.isModified">
     <template #body>
       <BackofficeBasesForm ref="baseForm" />
     </template>
@@ -32,7 +41,10 @@ async function handleSave() {
           />
         </div>
         <div class="flex w-full justify-end gap-2">
-          <UButton @click="handleSave" :loading="avatarBaseFormStore.updateBusy">Save</UButton>
+          <UButton
+            @click="handleSave" label="Save" color="neutral" icon="i-lucide-save"
+            :loading="avatarBaseFormStore.updateBusy" :disabled="!avatarBaseFormStore.isModified"
+          />
         </div>
       </div>
     </template>

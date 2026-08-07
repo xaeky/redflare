@@ -12,6 +12,7 @@ const overlay = useOverlay();
 function handleEditButton() {
   _.assign(avatarBaseFormStore.formState, _.pick(props.base, Object.keys(avatarBaseFormStore.schema.shape)));
   avatarBaseFormStore.additionalState.id = props.base._id as string;
+  avatarBaseFormStore.snapshot();
   overlay.create(BackofficeBasesEditSlideover, { destroyOnClose: true }).open();
 }
 </script>
