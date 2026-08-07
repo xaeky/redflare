@@ -63,13 +63,6 @@ const getById = async (id: string) => {
   return result;
 }
 
-const getByTelegramId = async (telegramId: string) => {
-  const collection = await useMongoCollection<CustomerRaw>('customers');
-  const result = await collection.findOne({ telegram_id: telegramId });
-  if (!result) throw createError({ status: 404, statusText: 'Customer not found' });
-  return result;
-}
-
 const getByDiscordId = async (discordId: string) => {
   const collection = await useMongoCollection<CustomerRaw>('customers');
   const result = await collection.findOne({ discord_id: discordId });
@@ -133,7 +126,6 @@ const findOneWithCommission = async () => {
 export const useCustomerModel = () => ({
   getAll,
   getById,
-  getByTelegramId,
   getByDiscordId,
   insertOne,
   updateOne,

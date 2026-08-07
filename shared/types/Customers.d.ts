@@ -5,7 +5,6 @@ export type CustomerRaw = WithId<{
   name: string;
   vrc_id: string | null;
   note: string | null;
-  telegram_id: string | null;
   discord_id: string | null;
   created_at: string;
   updated_at: string;
@@ -15,7 +14,6 @@ export type Customer = CustomerRaw;
 
 export type CustomerInsertOptions = Omit<Customer, 'created_at' | 'updated_at'> & {
   vrc_id?: string | null;
-  telegram_id?: string | null;
   discord_id?: string | null;
   note?: string | null;
 };
@@ -24,7 +22,6 @@ export type CustomerUpdateOptions = Partial<CustomerInsertOptions>;
 
 export type CustomerFilterOptions = {
   name?: string;
-  telegram_id?: string;
   discord_id?: string;
   vrc_id?: string;
   note?: string;

@@ -96,7 +96,7 @@ const getOneById = async (commissionId: string, viewAs?: ViewAs): Promise<Single
   if (viewAs === 'anon') {
     // exclude following fields for public requests
     excludedFields = [
-      'customer.note', 'customer._id', 'customer.updated_at', 'customer.created_at', 'customer.telegram_id', 'customer.discord_id',
+      'customer.note', 'customer._id', 'customer.updated_at', 'customer.created_at', 'customer.discord_id',
       'payments', 'characters', 'public_note', 'secure_note'];
   } else if (viewAs === 'customer') {
     // exclude following fields for customer requests

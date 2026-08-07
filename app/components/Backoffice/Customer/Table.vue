@@ -41,7 +41,6 @@ const columns: TableColumn<DeserializedCustomer>[] = [
     cell: ({row}) => {
       const hasVRC = !!row.original.vrc_id;
       const hasDiscord = !!row.original.discord_id;
-      const hasTelegram = !!row.original.telegram_id;
       return h('div',
         {
           class: 'flex items-center gap-2'
@@ -58,9 +57,6 @@ const columns: TableColumn<DeserializedCustomer>[] = [
           }) : null,
           hasDiscord ? h(UButton, {
             icon: 'i-bi-discord', size: 'sm', variant: 'soft'
-          }) : null,
-          hasTelegram ? h(UButton, {
-            icon: 'i-bi-telegram', size: 'sm', variant: 'soft'
           }) : null
         ]
       )

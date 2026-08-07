@@ -10,9 +10,6 @@ const customerFormStore = useCustomerFormStore();
     <UFormField name="vrc_id" label="VRChat User ID">
       <UInput label="VRChat User ID" v-model="customerFormStore.formState.vrc_id" class="w-full" />
     </UFormField>
-    <UFormField name="telegram_id" label="Telegram ID">
-      <UInput label="Telegram ID" v-model="customerFormStore.formState.telegram_id" class="w-full" />
-    </UFormField>
     <UFormField name="discord_id" label="Discord ID">
       <UInput label="Discord ID" v-model="customerFormStore.formState.discord_id" class="w-full" />
     </UFormField>

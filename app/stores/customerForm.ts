@@ -11,7 +11,6 @@ const defaultState = (): Schema => ({
   name: '',
   vrc_id: '',
   note: '',
-  telegram_id: '',
   discord_id: ''
 });
 const defaultAdditionalState = (): AdditionalState => ({
