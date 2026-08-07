@@ -26,6 +26,15 @@ export default defineAppConfig({
           class: 'bg-linear-to-t from-inverted via-inverted to-inverted/50'
         }
       ]
+    },
+    table: {
+      slots: {
+        base: 'border-separate border-spacing-y-1',
+        tr: 'group [&>td]:border-none',
+        td: 'group-data-[selectable=true]:group-hover:bg-elevated/50 py-2 px-3 first:rounded-l-lg last:rounded-r-lg',
+        th: 'py-2 px-3',
+        tbody: '[&>tr]:data-[selectable=true]:hover:bg-transparent [&>tr]:data-[selectable=true]:hover>td:bg-elevated/25 [&>tr]:data-[selectable=true]:hover:cursor-pointer',
+      }
     }
   }
 });

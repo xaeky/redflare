@@ -1,18 +1,29 @@
 <script setup lang="ts">
-import type { TableColumn } from '@nuxt/ui';
-import { UButton, UIcon, ULink, SharedCommissionStatusBadge, BackofficeCommissionEditSlideover } from '#components';
+import type { TableColumn, TableRow } from '@nuxt/ui';
+import { UButton, UTooltip, SharedCommissionStatusBadge, BackofficeCommissionEditSlideover } from '#components';
 
 defineProps<{
   commissions: WithCustomer<DeserializedCommission>[]
 }>();
-const sorting = defineModel('sorting', {
-  type: Array as () => { id: string; desc: boolean }[],
+const sorting = defineModel<{ id: string; desc: boolean }[]>({
   default: () => [{ id: 'created_at', desc: true }]
 });
 
 // Overlays
 const overlay = useOverlay();
 const editSlideoverOverlay = overlay.create(BackofficeCommissionEditSlideover);
+
+// Clipboard
+const clipboard = useClipboard();
+const copyCommissionLink = (commissionId: string) => {
+  const link = `${window.location.origin}/commission/${commissionId}`;
+  clipboard.copy(link);
+  useToast().add({ title: 'Copied commission link to clipboard.', duration: 3000, color: 'success', icon: 'i-lucide-clipboard-check' });
+};
+const copyCommissionId = (commissionId: string) => {
+  clipboard.copy(commissionId);
+  useToast().add({ title: 'Copied commission ID to clipboard.', duration: 3000, color: 'success', icon: 'i-lucide-clipboard-check' });
+};
 
 type DeserializedCommissionWithCustomer = WithCustomer<DeserializedCommission>;
 const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
@@ -24,9 +35,10 @@ const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
       const thisCommission = row.original;
       const idDigit = thisCommission._id.substring(thisCommission._id.length - 6);
       return h('div', { class: 'flex items-center gap-2' }, [
-        h(ULink, { to: `/commission/${thisCommission._id}`, target: '_blank', class: 'inline-flex items-center' },
-          () => [ h(UIcon, { name: 'i-lucide-link-2' }) ]),
-        h('span', { class: 'font-mono uppercase' }, idDigit)
+        h(UButton, { onClick: () => copyCommissionLink(thisCommission._id), icon: 'i-lucide-link-2', size: 'sm', variant: 'soft', color: 'neutral' }),
+        h(UTooltip, { text: 'Copy full commission ID', delayDuration: 0 }, {
+          default: () => h('span', { onClick: (e: MouseEvent) => { e.stopPropagation(); copyCommissionId(thisCommission._id) }, class: 'font-mono uppercase' }, idDigit)
+        })
       ])
     }
   },
@@ -66,24 +78,14 @@ const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
     sortingFn: 'datetime',
     header: ({ column }) => sortingHeader('Updated at', column),
     cell: ({row}) => new Date(row.getValue('updated_at')).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-  },
-  {
-    id: 'actions',
-    header: 'Actions',
-    cell: ({ row }) => {
-      return h(UButton, {
-        icon: 'i-heroicons-pencil-square-20-solid',
-        size: 'lg',
-        variant: 'soft',
-        onClick() {
-          editSlideoverOverlay.open({
-            commission_id: row.original._id
-          });
-        }
-      })
-    }
-  },
+  }
 ];
+
+function onRowSelect(_e: Event, row: TableRow<DeserializedCommissionWithCustomer>) {
+  editSlideoverOverlay.open({
+    commission_id: row.original._id
+  });
+}
 </script>
 
 <template>
@@ -91,5 +93,6 @@ const columns: TableColumn<DeserializedCommissionWithCustomer>[] = [
     v-model:sorting="sorting"
     :columns
     :data="commissions"
+    @select="onRowSelect"
   />
 </template>
