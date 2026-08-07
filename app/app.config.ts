@@ -25,7 +25,14 @@ export default defineAppConfig({
           variant: 'solid',
           class: 'bg-linear-to-t from-inverted via-inverted to-inverted/50'
         }
-      ]
+      ],
+      variants: {
+        size: {
+          md: {
+            base: 'px-3.5 gap-2'
+          }
+        }
+      }
     },
     table: {
       slots: {
