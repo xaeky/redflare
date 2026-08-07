@@ -42,6 +42,17 @@ export default defineAppConfig({
         th: 'py-2 px-3',
         tbody: '[&>tr]:data-[selectable=true]:hover:bg-transparent [&>tr]:data-[selectable=true]:hover>td:bg-elevated/25 [&>tr]:data-[selectable=true]:hover:cursor-pointer',
       }
+    },
+    slideover: {
+      compoundVariants: [
+        {
+          transition: true,
+          side: 'right',
+          class: {
+            content: 'data-[state=open]:animate-[slide-in-from-right_500ms_var(--ease-expo)] data-[state=closed]:animate-[slide-out-to-right_500ms_var(--ease-expo)]'
+          }
+        }
+      ]
     }
   }
 });
