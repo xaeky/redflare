@@ -10,3 +10,4 @@ Dockerfile
 *.md
 .env.*
 .env
+./services/

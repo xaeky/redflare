@@ -20,6 +20,7 @@
     "@clack/prompts": "^1.7.0",
     "@google-cloud/secret-manager": "^6.1.1",
     "@google-cloud/storage": "^7.17.3",
+    "@infisical/sdk": "^5.0.2",
     "@mercadopago/sdk-js": "^0.0.3",
     "@nuxt/fonts": "^0.14.0",
     "@nuxt/icon": "^2.3.1",
