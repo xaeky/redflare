@@ -50,32 +50,9 @@ export default defineNuxtConfig({
     defaultTheme: 'vitesse-dark'
   },
   runtimeConfig: {
-    mp: {
-      public: '',
-      service: '',
-      marketplace: '',
-      endpointBase: ''
-    },
-    pp: {
-      cid: '',
-      sid: '',
-      endpointBase: ''
-    },
     public: {
-      creator: {
-        marketName: '',
-        callbackUri: ''
-      },
       env: process.env.NODE_ENV || '',
       redflare_env: '',
-      legal: {
-        serviceUrl: '',
-        privacyUrl: ''
-      },
-      homepageUrl: '',
-      help: {
-        privateUploadUrl: ''
-      }
     },
     backoffice: {
       skipRoles: false,
