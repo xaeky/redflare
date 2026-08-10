@@ -39,7 +39,13 @@ const actions = {
       <p v-text="message" />
     </template>
     <template #footer>
-      <div class="flex w-full items-center justify-end gap-4">
+      <div
+        class="flex w-full items-center gap-4"
+        :class="{
+          'flex-row-reverse justify-start': danger,
+          'justify-end': !danger
+        }"
+      >
         <UButton label="Cancel" variant="subtle" color="neutral" @click="actions.cancel" />
         <UButton :label="confirmLabel" :color="danger ? 'error' : 'primary'" @click="actions.confirm" />
       </div>
