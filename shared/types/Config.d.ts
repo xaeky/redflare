@@ -35,9 +35,17 @@ export type RedflareConfigEmail = RedflareConfigBase & {
   }
 }
 
+export type RedflareConfigAuthSetup = RedflareConfigBase & {
+  category: RedflareConfigCategory.AuthSetup;
+  locked: boolean;
+  lockedAt?: string;
+  lockedByUsername?: string;
+}
+
 export type RedflareConfig = RedflareConfigGeneral
   | RedflareConfigKnowledgeBase
   | RedflareConfigLegal
-  | RedflareConfigEmail;
+  | RedflareConfigEmail
+  | RedflareConfigAuthSetup;
 
 export type RedflareConfigUpsertOptions = WithoutCategory<Partial<RedflareConfig>>;

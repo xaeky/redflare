@@ -1,22 +1,26 @@
 <script setup lang="ts">
-import type { User } from '#auth-utils';
 import _ from 'lodash';
 import type { AgentUserSettings } from '~~/shared/types';
+import { useAccountPasskeyCredentialsMutation, useAccountProfileMutation } from '~/mutations/accounts';
 
 const { user, fetch: userFetch } = useUserSession();
 const toast = useToast();
 
-definePageMeta({
-  title: 'User Settings',
-  middleware: 'auth',
-  layout: 'backoffice',
-  keepalive: true
-});
+const {
+  data: passkeysData,
+  isPending: passkeysPending,
+  refetch: passkeysRefetch,
+  safeDelete: passkeySafeDelete,
+  formRegisterSchema: passkeyRegisterSchema,
+  formRegisterState: passkeyRegisterState,
+  mutateRegister: passkeyRegister
+} = useAccountPasskeyCredentialsMutation();
 
-const meProfileUpdateState = reactive({
-  nickname: '',
-  picture: ''
-});
+const {
+  formSchema: meProfileFormSchema,
+  formState: meProfileFormState,
+  mutate: meProfileMutate
+} = useAccountProfileMutation();
 
 const meSecurityUpdatePasswordState = reactive({
   oldPassword: '',
@@ -46,30 +50,6 @@ const meSecurityUpdatePassword = async () => {
   }
 };
 
-const meProfileUpdate = async () => {
-  try {
-    await useAPI('/api/me', {
-      method: 'PUT',
-      body: {
-        nickname: meProfileUpdateState.nickname,
-        picture: meProfileUpdateState.picture
-      }
-    });
-    toast.add({
-      title: 'Success',
-      description: 'Your profile has been updated successfully.',
-      color: 'success'
-    });
-    await userFetch();
-  } catch (error) {
-    toast.add({
-      title: 'Error',
-      description: (error as any).data.message || 'An error occurred while updating your profile.',
-      color: 'error'
-    });
-  }
-};
-
 const meSettingUpdate = async () => {
   try {
     await useAPI('/api/me/settings', {
@@ -82,6 +62,7 @@ const meSettingUpdate = async () => {
       color: 'success'
     });
     await userFetch();
+    await passkeysRefetch();
   } catch (error) {
     toast.add({
       title: 'Error',
@@ -93,13 +74,12 @@ const meSettingUpdate = async () => {
 
 const clonedUserSettings = reactive<AgentUserSettings>(_.cloneDeep(user.value?.settings) as AgentUserSettings);
 
-onMounted(() => {
-  if (user.value) {
-    meProfileUpdateState.nickname = user.value.nickname || '';
-    meProfileUpdateState.picture = user.value.picture || '';
-  }
+definePageMeta({
+  title: 'User Settings',
+  middleware: 'auth',
+  layout: 'backoffice',
+  keepalive: true
 });
-
 </script>
 
 <template>
@@ -110,12 +90,9 @@ onMounted(() => {
           <UIcon name="i-heroicons-user-16-solid" class="text-primary" :size="20" />
           <h2>Profile</h2>
         </div>
-        <UForm :state="meProfileUpdateState" @submit="meProfileUpdate" class="space-y-4" v-slot="{ loading }">
-          <UFormField label="Nickname">
-            <UInput type="text" name="username" v-model="meProfileUpdateState.nickname" class="w-full" />
-          </UFormField>
-          <UFormField label="Profile Picture URL">
-            <UInput type="url" name="picture" v-model="meProfileUpdateState.picture" class="w-full" />
+        <UForm :schema="meProfileFormSchema" :state="meProfileFormState" @submit="() => meProfileMutate()" class="space-y-4" v-slot="{ loading }">
+          <UFormField label="Display name" name="displayName">
+            <UInput type="text" v-model="(meProfileFormState.displayName as string)" class="w-full" />
           </UFormField>
           <div>
             <UButton icon="i-heroicons-pencil-16-solid" label="Update profile" type="submit" :loading />
@@ -141,6 +118,36 @@ onMounted(() => {
               <UButton icon="i-heroicons-pencil-16-solid" label="Update password" type="submit" :loading />
             </div>
           </UForm>
+        </div>
+        <div>
+          <h3>Passkeys</h3>
+          <div v-if="passkeysPending">Loading passkeys...</div>
+          <div v-else class="space-y-2">
+            <div v-if="passkeysData && passkeysData.length > 0">
+              <ul class="space-y-2">
+                <li v-for="passkey in passkeysData" :key="passkey.id" class="bg-neutral-900/50 p-4 rounded-lg flex items-center justify-between">
+                  <div class="space-y-2">
+                    <div class="font-medium">{{ passkey.alias }}</div>
+                    <div class="text-sm text-muted">{{ useDateFormat(passkey.createdAt, 'MMM Do YYYY, HH:MM') }}</div>
+                  </div>
+                  <UButton icon="i-heroicons-trash-16-solid" label="Delete" @click="passkeySafeDelete(passkey.id)" />
+                </li>
+              </ul>
+            </div>
+            <div v-else class="flex items-center gap-2 justify-center p-4">
+              <UIcon name="i-heroicons-key-16-solid" class="text-muted" :size="20" />
+              <span>No passkeys registered.</span>
+            </div>
+            <div class="border border-muted p-4 rounded-lg space-y-2">
+              <h4>Add New Passkey</h4>
+              <UForm :schema="passkeyRegisterSchema" :state="passkeyRegisterState" @submit="() => passkeyRegister()" class="space-y-2">
+                <UFormField required label="Passkey Alias" name="alias">
+                  <UInput type="text" v-model="passkeyRegisterState.alias" class="w-full" />
+                </UFormField>
+                <UButton icon="i-heroicons-key-16-solid" label="Setup Passkey" type="submit" />
+              </UForm>
+            </div>
+          </div>
         </div>
       </div>
       <div class="rf-profile-section" v-if="clonedUserSettings">
@@ -188,5 +195,8 @@ h2 {
 }
 h3 {
   @apply text-xl font-semibold;
+}
+h4 {
+  @apply text-lg font-semibold;
 }
 </style>

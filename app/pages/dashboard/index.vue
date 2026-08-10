@@ -33,7 +33,7 @@ const session = useUserSession();
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h1>Welcome, {{ session.user.value?.nickname }}!</h1>
+      <h1>Welcome, {{ session.user.value?.displayName || session.user.value?.username }}!</h1>
       <div v-if="!statsLoading">
         <UButton
           @click="() => { statsRefetch() }"

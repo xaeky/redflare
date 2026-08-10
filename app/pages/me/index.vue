@@ -73,6 +73,6 @@ h1 {
 }
 
 .rf-public-commission-card {
-  @apply bg-muted/50 p-6 rounded-xl space-y-4 cursor-pointer hover:shadow-lg hover:bg-muted/100 duration-200;
+  @apply bg-muted/50 p-6 rounded-xl space-y-4 cursor-pointer hover:shadow-lg hover:bg-muted duration-200;
 }
 </style>

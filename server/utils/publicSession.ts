@@ -7,7 +7,6 @@
  */
 
 import _ from 'lodash';
-import { randomUUID } from 'crypto'
 import type { H3Event } from 'h3';
 
 interface PublicSessionData {
@@ -35,7 +34,7 @@ const initPublicSession = async (event: H3Event) => {
   // Verify if session has data or data structure is ok, if not initialize it
   if (_.isEmpty(session.data)) {
     await session.update({
-      id: randomUUID(),
+      id: Bun.randomUUIDv7(),
       user: null,
       secure: {}
     });

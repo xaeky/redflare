@@ -10,18 +10,15 @@ declare module '#app' {
 }
 
 declare module '#auth-utils' {
-  interface User {
-    sub: string;
-    nickname: string;
-    name: string;
-    picture: string;
-    updated_at: string;
-    settings: AgentUserSettings
-  }
   interface SecureSessionData {
-    access_token: string;
-    refresh_token: string;
-    id_token: string;
+    webauthnChallenges?: Record<string, string>;
+  }
+  interface User {
+    id: string;
+    username: string;
+    displayName?: string | null;
+    permissions: Permission[];
+    settings: AgentUserSettings
   }
 }
 

@@ -14,6 +14,9 @@ export default defineNuxtConfig({
       { baseName: 'svg', dir: 'assets/svg' },
       { baseName: 'img', dir: 'assets/img' },
     ],
+    rollupConfig: {
+      external: ['node-fetch-native', 'uncrypto', 'ofetch']
+    }
   },
   imports: { dirs: ['shared/enums'], },
   alias: {
@@ -48,6 +51,9 @@ export default defineNuxtConfig({
   },
   shiki: {
     defaultTheme: 'vitesse-dark'
+  },
+  auth: {
+    webAuthn: true
   },
   runtimeConfig: {
     public: {

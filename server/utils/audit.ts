@@ -4,8 +4,8 @@ import { H3Event } from 'h3';
 export const auditOperation = async (event: H3Event, audit: WithoutAuthor<AuditInsertOptions>) => {
   const agentSession = await getUserSession(event);
   await useAuditModel().insertOne({
-    author_id: agentSession.user?.sub as string,
-    author_nickname: agentSession.user?.nickname as string,
+    author_id: agentSession.user?.id as string,
+    author_nickname: agentSession.user?.username as string,
     ...audit,
   });
 };
@@ -13,8 +13,8 @@ export const auditOperation = async (event: H3Event, audit: WithoutAuthor<AuditI
 export const auditPublicOperation = async (event: H3Event, audit: WithoutAuthor<AuditInsertOptions>) => {
   const publicSession = await getPublicUserSession(event);
   const agentSession = await getUserSession(event);
-  const authorId = publicSession.user?.id || agentSession.user?.sub;
-  const authorNickname = publicSession.user?.username || agentSession.user?.nickname;
+  const authorId = publicSession.user?.id || agentSession.user?.id;
+  const authorNickname = publicSession.user?.username || agentSession.user?.username;
   if (!authorId || !authorNickname) {
     throw createError({ status: 500, statusText: 'Failed to retrieve author information for audit' });
   }

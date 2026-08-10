@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   // TODO: Enhance service token validation
   const isService = getHeader(event, 'X-RF-Service') === runtime.backoffice.service;
   const authenticatedData = isService ? false : await needAuth(event);
-  const isAuthenticated = isService || !!_.get(authenticatedData, 'user') || !!_.get(authenticatedData, 'secure.access_token');
+  const isAuthenticated = isService || !!_.get(authenticatedData, 'user.id');
   if (!isAuthenticated) {
     logger.warn('Unauthorized access attempt to', event.path);
     throw createError({ status: 401, statusText: 'Unauthorized' });

@@ -1,8 +1,6 @@
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{ nickname?: string }>(event);
-  // Remove password if present
-  if ('password' in body) delete body.password;
-  if (!body || Object.keys(body).length === 0) throw createError({ status: 400, statusText: 'At least one field to update must be provided' });
-  await updateCurrentUserProfile(event, body);
+  const { data: newProfile, error: errorProfile } = await readValidatedBody(event, agentAccountProfilePutSchema.safeParse);
+  if (!newProfile || errorProfile) throw createError({ status: 400, statusText: 'Invalid body' });
+  await updateCurrentUserProfile(event, newProfile);
   return { success: true };
 });
