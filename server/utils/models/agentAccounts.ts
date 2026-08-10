@@ -112,7 +112,6 @@ const resetFailedLogins = async (id: string) => {
   );
 }
 
-// TODO: Implement passkey credential management functions
 const recordPasskeyCredential = async (credential: AgentAccountPasskeyCredential) => {
   const collection = await useMongoCollection<AgentAccountPasskeyCredential>(collectionCredentialsName);
   await collection.insertOne(credential);
