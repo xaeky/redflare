@@ -20,6 +20,7 @@
         "@pinia/nuxt": "0.11.1",
         "@simplewebauthn/browser": "^13.3.0",
         "@simplewebauthn/server": "^13.3.2",
+        "@types/cloudflare-turnstile": "^0.2.2",
         "@vueuse/nuxt": "^14.3.0",
         "auth0": "^4.26.0",
         "aws4fetch": "^1.0.20",
@@ -942,6 +943,8 @@
     "@types/caseless": ["@types/caseless@0.12.5", "", {}, "sha512-hWtVTC2q7hc7xZ/RLbxapMvDMgUnDvKvMOpKal4DrMyfGBUfB1oKaZlIRr6mJL+If3bAP6sV/QneGzF6tJjZDg=="],
 
     "@types/chai": ["@types/chai@5.2.3", "", { "dependencies": { "@types/deep-eql": "*", "assertion-error": "^2.0.1" } }, "sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA=="],
+
+    "@types/cloudflare-turnstile": ["@types/cloudflare-turnstile@0.2.2", "", {}, "sha512-3Yf7b1Glci+V2bFWwWBbZkRgTuegp7RDgNTOG4U0UNPB9RV4AWvwqg2/qqLff8G+SwKFNXoXvTkqaRBZrAFdKA=="],
 
     "@types/deep-eql": ["@types/deep-eql@4.0.2", "", {}, "sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw=="],
 

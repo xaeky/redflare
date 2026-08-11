@@ -62,6 +62,9 @@ export default defineNuxtConfig({
     public: {
       env: process.env.NODE_ENV || '',
       redflare_env: '',
+      turnstile: {
+        site_key: '',
+      }
     },
     backoffice: {
       mongo: '',
@@ -70,6 +73,9 @@ export default defineNuxtConfig({
     },
     frontoffice: {
       sessionPassword: ''
+    },
+    turnstile: {
+      secret_key: ''
     }
   }
 })
