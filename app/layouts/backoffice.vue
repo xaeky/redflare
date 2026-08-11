@@ -45,7 +45,7 @@ useHead({
 }
 
 .rf_backoffice_content {
-  @apply px-12 py-6 w-full overflow-y-auto;
+  @apply px-4 sm:px-12 py-4 sm:py-6 w-full overflow-y-auto;
 }
 
 .rf_backoffice_content_header_actions {
