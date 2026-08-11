@@ -67,10 +67,10 @@ export async function updateCurrentUserPassword(event: EventUserSession, oldPass
 export async function updateCurrentUserProfile(event: EventUserSession, profileUpdateData: Record<string, any>) {
   const session = await needAuth(event);
   const accountsModel = useAgentAccountsModel();
-  const allowedFields = _.pick(profileUpdateData, ['displayName']);
+  const allowedFields = _.pick(profileUpdateData, ['displayName', 'username']);
   await accountsModel.updateOne(session.user!.id as string, allowedFields);
   await setUserSession(event as H3Event, {
-    user: { displayName: allowedFields.displayName }
+    user: { displayName: allowedFields.displayName, username: allowedFields.username }
   });
   return true;
 }

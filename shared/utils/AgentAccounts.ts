@@ -43,7 +43,8 @@ export const agentAccountLoginSchema = z.object({
 });
 
 export const agentAccountProfilePutSchema = z.object({
-  displayName: z.string().max(64).optional().nullable()
+  displayName: z.string().max(64).optional().nullable(),
+  username: agentAccountUsernameSchema.optional(),
 });
 
 export const agentAccountPasskeyAlias = z.string().trim().min(1, 'Alias is required.').regex(/^[a-zA-Z0-9-_ ]+$/, 'Alias can only contain letters, numbers, spaces, hyphens, and underscores.').max(32);
