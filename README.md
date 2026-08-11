@@ -9,7 +9,6 @@ Many note-taking applications charges to the final user for general usage, those
 ## ⭐ Features & planned ideas
 - Management for billing and asset storage (`.unitypackage`, `.spp`, etc.).
 - Audit logs for artists.
-- Role management with Auth0: **Artist** and **Manager**.
 - Separated sessions for artists (Agent User) and customers (Public User).
 - Simple and practical user interface for artists and customers.
   - UI isn't customizable in-app.
@@ -18,7 +17,6 @@ Many note-taking applications charges to the final user for general usage, those
 Redflare uses many services to work:
 
 - **MongoDB** database (MongoDB Atlas cloud solution works fine).
-- **Auth0 tenant** for artist authentication.
 - **Discord OAuth App** for customer authentication
 - **Any S3-compatible storage** to store files like `.unitypackage`, `.spp`, etc.
 
@@ -30,7 +28,6 @@ Redflare uses many services to work:
 2. Make sure to copy the `.env.example` file, paste and rename it to `.env`. You'll have to fill every field to make the app work properly. **For E2E testing**, same step but for `.env.test.example`.
 3. Setup the following services, don't forget to fill `.env` with your API keys!
     - Set up the database for the app, a MongoDB Atlas cloud instance should work.
-    - Set up the Auth0 tenant for the artist authentication.
     - Create a Discord developer app for the customer authentication.
     - Set up an S3-compatible storage for the file storage. I recommend using **Cloudflare R2** for this.
 4. Install the dependencies with `bun i`.

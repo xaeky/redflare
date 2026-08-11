@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Redflare is a Nuxt 4 / TypeScript web app for avatar artists to manage commissions, billing, and file attachments — a Trello/Notion-style commission organizer. Stack: Nuxt 4, MongoDB (native driver, no ODM), Auth0 (artist auth), Discord OAuth (customer auth), S3-compatible storage, Bun runtime, Nitro `bun` preset.
+Redflare is a Nuxt 4 / TypeScript web app for avatar artists to manage commissions, billing, and file attachments — a Trello/Notion-style commission organizer. Stack: Nuxt 4, MongoDB (native driver, no ODM), Discord OAuth (customer auth), S3-compatible storage, Bun runtime, Nitro `bun` preset.
 
 ## Prohibitions
 
@@ -35,7 +35,7 @@ docker compose up -d
 
 Redflare has two distinct kinds of users that must not be conflated:
 
-- **Agent users** (artists/managers) — authenticated via Auth0, session managed by `nuxt-auth-utils`' built-in `useUserSession`/`getUserSession`. Logic lives in `server/utils/agentSession.ts`. In the future this will be replaced with a custom native session system.
+- **Agent users** (artists/managers) — authenticated via a custom native session system, session managed by `nuxt-auth-utils`' built-in `useUserSession`/`getUserSession`. Logic lives in `server/utils/agentSession.ts`.
 - **Public users** (customers) — authenticated via Discord OAuth, session is a *separate* custom cookie-backed session implemented from scratch in `server/utils/publicSession.ts` (`getPublicUserSession`/`setPublicUserSession`, its own `rf_public_session` cookie, temp authorizations for e.g. one-off attachment access).
 
 A single commission can be viewed by either kind of user (or anonymously), and much of the API branches on a `ViewAs` type (`'agent' | 'customer' | 'anon'`) that controls field projection (e.g. hiding `secure_note`, `internal_note`, customer PII). See `validateCommission` in `server/utils/database.ts` for the canonical "who is viewing this commission and what can they see" resolution — it checks both sessions and an agent-only `forceAgentView` setting that lets an artist preview a commission as its owning customer would see it.
@@ -43,7 +43,7 @@ A single commission can be viewed by either kind of user (or anonymously), and m
 ### Server middleware pipeline
 
 `server/middleware/*` run in filename order for every request:
-1. `agent_auth.ts` — global auth gate. Every `/api/**` route is treated as restricted **unless** it's under `/api/auth`, `/api/_auth`, `/api/_nuxt_icon`, `/api/public`, or (test env only) `/api/test`. Restricted routes need either a valid Auth0 session or the `X-RF-Service` header matching `runtime.backoffice.service` (used for server-to-server calls, e.g. from the "Geisha" service).
+1. `agent_auth.ts` — global auth gate. Every `/api/**` route is treated as restricted **unless** it's under `/api/auth`, `/api/_auth`, `/api/_nuxt_icon`, `/api/public`, or (test env only) `/api/test`. Restricted routes need either a valid session or the `X-RF-Service` header matching `runtime.backoffice.service` (used for server-to-server calls, e.g. from the "Geisha" service).
 2. `public_auth.ts` — currently a no-op pass-through for `/api/public` and `/commission` paths (session already resolved lazily via `getPublicUserSession`).
 3. `test_only.ts` — 404s any `/api/test/**` call unless `isTestEnv`.
 
