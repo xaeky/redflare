@@ -34,6 +34,7 @@ export const agentAccountSetupSchema = z.object({
   username: agentAccountUsernameSchema,
   password: agentAccountPasswordSchema,
   displayName: z.string().max(64).optional().nullable(),
+  permissions: z.array(z.enum(ALL_PERMISSIONS as [Permission, ...Permission[]])).optional(),
 });
 
 export const agentAccountLoginSchema = z.object({

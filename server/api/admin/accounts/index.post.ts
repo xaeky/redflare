@@ -3,13 +3,13 @@ export default defineEventHandler(async (event) => {
 
   const { data, error } = await readValidatedBody(event, agentAccountSetupSchema.safeParse);
   if (error || !data) throw createError({ status: 400, statusText: 'Invalid body', data: error });
-  const { username, password, displayName } = data;
+  const { username, password, displayName, permissions } = data;
 
   const result = await useAgentAccountsModel().insertOne({
     username,
     password,
     displayName,
-    permissions: ALL_PERMISSIONS
+    permissions: permissions || []
   });
 
   event.context.audit = {

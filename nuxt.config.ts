@@ -47,6 +47,9 @@ export default defineNuxtConfig({
     plugins: [require('vite-svg-loader')()],
     server: {
       allowedHosts: ['local.xavis.redflare']
+    },
+    optimizeDeps: {
+      include: ['zod', 'lodash', 'three', '@internationalized/date']
     }
   },
   shiki: {

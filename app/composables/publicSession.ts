@@ -23,7 +23,6 @@ export function usePublicUserSession() {
       retry: false
     });
     publicSessionState.value = { user: null, id: '' };
-    if (window) window.location.reload();
   }
 
   const login = async () => {

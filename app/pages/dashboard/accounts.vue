@@ -16,9 +16,18 @@ const { data: accounts, refresh, asyncStatus } = useQuery(agentAccountsQuery, ()
 const createFormState = reactive({
   username: '',
   password: '',
-  displayName: ''
+  displayName: '',
+  permissions: [] as Permission[]
 });
 const createBusy = ref(false);
+
+const togglePermission = (permission: Permission, checked: boolean | 'indeterminate') => {
+  if (checked) {
+    if (!createFormState.permissions.includes(permission)) createFormState.permissions.push(permission);
+  } else {
+    createFormState.permissions = createFormState.permissions.filter(p => p !== permission);
+  }
+};
 
 const createAccount = async () => {
   createBusy.value = true;
@@ -28,12 +37,14 @@ const createAccount = async () => {
       body: {
         username: createFormState.username,
         password: createFormState.password,
-        displayName: createFormState.displayName || undefined
+        displayName: createFormState.displayName || undefined,
+        permissions: createFormState.permissions
       }
     });
     createFormState.username = '';
     createFormState.password = '';
     createFormState.displayName = '';
+    createFormState.permissions = [];
     toast.add({ title: 'Account created', color: 'success' });
     await refresh();
   } catch (error) {
@@ -94,6 +105,19 @@ const deleteAccount = async (id: string) => {
         <UInput v-model="createFormState.username" placeholder="Username" autocomplete="off" />
         <UInput v-model="createFormState.displayName" placeholder="Display name (optional)" />
         <UInput v-model="createFormState.password" type="password" placeholder="Password" autocomplete="new-password" />
+
+        <div class="space-y-1">
+          <span class="text-sm font-medium">Permissions</span>
+          <UCheckbox
+            v-for="permission in ALL_PERMISSIONS"
+            :key="permission"
+            :model-value="createFormState.permissions.includes(permission)"
+            :name="`permission-${permission}`"
+            :label="permission"
+            @update:model-value="(checked) => togglePermission(permission, checked)"
+          />
+        </div>
+
         <UButton type="submit" :loading="createBusy" label="Create account" block />
       </form>
     </div>
