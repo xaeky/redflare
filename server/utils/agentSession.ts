@@ -9,9 +9,13 @@ export async function needAuth(event: EventUserSession) {
   const userSession = await getUserSession(event);
   // On test environment, skip auth checks
   if (isTestEnv) return userSession;
-  if (!_.get(userSession, 'user.id')) throw createError({ status: 401, statusText: 'Unauthorized' });
+  if (!_.get(userSession, 'user.id')) throw createError({ status: 401, message: 'Your user has not an ID.' });
   const userId = userSession.user!.id as string;
-  // Validate the account still exists (and isn't locked out), cached briefly to avoid a Mongo hit on every request
+  // Validate the account still exists, cached briefly to avoid a Mongo hit on every request.
+  // NOTE: lockout (`isLockedOut`) is intentionally NOT re-checked here — it only gates new
+  // logins (see server/api/auth/login.post.ts). An already active session must keep working
+  // even if the account gets locked out afterwards (e.g. someone else brute-forcing the login
+  // form shouldn't be able to kick the legitimate user out of their current session).
   const cacheKey = `agent-account-${userId}`;
   let cachedSession = await cache.get<boolean>(cacheKey);
   if (!cachedSession) {
@@ -19,11 +23,7 @@ export async function needAuth(event: EventUserSession) {
     const account = await accountsModel.getById(userId).catch(() => null);
     if (!account) {
       clearUserSession(event as H3Event);
-      throw createError({ status: 403, statusText: 'Your account no longer exists.' });
-    }
-    if (accountsModel.isLockedOut(account)) {
-      clearUserSession(event as H3Event);
-      throw createError({ status: 403, statusText: 'This account is temporarily locked.' });
+      throw createError({ status: 403, message: 'Your account no longer exists.' });
     }
     await cache.set<boolean>(cacheKey, true);
   }
@@ -35,7 +35,7 @@ export async function getPermissions(event: EventUserSession, useTrustedSession:
   // if such variable is not true, use session provided by server that might be outdated.
   // Useful to speed up certain processes.
   const session = useTrustedSession ? await needAuth(event) : await getUserSession(event);
-  if (!session.user) throw createError({ status: 500, statusText: 'Could not read user from the session key.' });
+  if (!session.user) throw createError({ status: 500, message: 'Could not read user from the session key.' });
   if (!useTrustedSession) return (session.user.permissions || []) as Permission[];
   // Re-pull permissions from Mongo so admin-driven changes propagate without requiring re-login
   const account = await useAgentAccountsModel().getById(session.user.id as string);
@@ -45,7 +45,7 @@ export async function getPermissions(event: EventUserSession, useTrustedSession:
 export async function hasPermission(event: EventUserSession, permissionName: Permission, throwError?: boolean) {
   const permissions = await getPermissions(event, false);
   const itHasPermission = permissions.includes(permissionName);
-  if (throwError && !itHasPermission) throw createError({ status: 403, statusText: 'Missing permissions to perform this action' });
+  if (throwError && !itHasPermission) throw createError({ status: 403, message: 'Missing permissions to perform this action' });
   return permissions.includes(permissionName);
 }
 
@@ -124,7 +124,7 @@ export async function setWebauthnChallenge(event: EventUserSession, { challenge,
 export async function getWebauthnChallenge(event: EventUserSession, attemptId: string) {
   const session = await needAuth(event);
   const challenge = session?.secure?.webauthnChallenges?.[attemptId];
-  if (!challenge) throw createError({ status: 400, statusText: 'No WebAuthn challenge found for the given attempt ID.' });
+  if (!challenge) throw createError({ status: 400, message: 'No WebAuthn challenge found for the given attempt ID.' });
   return challenge;
 };
 

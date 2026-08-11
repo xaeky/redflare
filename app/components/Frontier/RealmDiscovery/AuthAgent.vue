@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { SecurityTurnstileWidget } from '#components';
+
 const agentSession = useUserSession();
 const isAgentLoggedIn = computed(() => agentSession.loggedIn.value);
 
@@ -6,21 +8,22 @@ const { authenticate } = useWebAuthn({
   authenticateEndpoint: '/api/auth/passkey/attempt'
 });
 
+const turnstileWidgetRef = ref<InstanceType<typeof SecurityTurnstileWidget> | null>(null);
+
 const handlePasskeyLogin = async () => {
   try {
     await authenticate();
     await agentSession.fetch();
     navigateTo('/dashboard', { external: true });
   } catch (error) {
-    useToast().add({
-      title: 'Error',
+    invokeErrorToast({
+      title: 'Passkey authentication failed',
       description: (error as any).data?.statusText || (error as any).data?.message || 'An error occurred during passkey authentication.',
-      color: 'error'
     });
   }
 }
 
-const agentLoginState = reactive({ username: '', password: '' });
+const agentLoginState = reactive({ username: '', password: '', turnstileToken: '' });
 const agentLoginBusy = ref(false);
 const agentLoginError = ref('');
 
@@ -33,6 +36,7 @@ const handleAgentLogin = async () => {
     navigateTo('/dashboard');
   } catch (error) {
     agentLoginError.value = (error as any).data?.statusText || (error as any).data?.message || 'Invalid credentials.';
+    turnstileWidgetRef.value?.resetWidget();
   } finally {
     agentLoginBusy.value = false;
   }
@@ -43,6 +47,10 @@ const handleAgentLogout = async () => {
   invokeInfoToast({
     title: 'You\'ve been logged out as an artist',
   })
+}
+
+function handleTurnstileVerified(token: string) {
+  agentLoginState.turnstileToken = token;
 }
 
 const isMobile = useMediaQuery('(max-width: 640px)');
@@ -71,6 +79,7 @@ const emit = defineEmits<{
         <UFormField label="Password" name="password">
           <UInput type="password" v-model="agentLoginState.password" required class="w-full" />
         </UFormField>
+        <SecurityTurnstileWidget ref="turnstileWidgetRef" @verified="handleTurnstileVerified" />
         <div>
           <UButton
             :loading="agentLoginBusy" type="submit" block
