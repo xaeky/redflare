@@ -54,8 +54,11 @@ export async function updateCurrentUserPassword(event: EventUserSession, oldPass
   const accountsModel = useAgentAccountsModel();
   const account = await accountsModel.getById(session.user!.id as string);
   // Verify user's old password
-  const isValid = await accountsModel.verifyPassword(account, oldPassword);
-  if (!isValid) throw createError({ status: 403, statusText: 'Your current password is incorrect.' });
+  const isOldValid = await accountsModel.verifyPassword(account, oldPassword);
+  if (!isOldValid) throw createError({ status: 403, message: 'Your current password is incorrect.' });
+  // Validate new password against schema
+  const isNewValid = agentAccountPasswordSchema.safeParse(newPassword);
+  if (!isNewValid.success) throw createError({ status: 400, message: isNewValid.error.errors[0]?.message });
   // If we reach this point, the old password is correct, so we can update to the new password
   await accountsModel.updatePassword(account._id.toString(), newPassword);
   return true;
@@ -64,10 +67,10 @@ export async function updateCurrentUserPassword(event: EventUserSession, oldPass
 export async function updateCurrentUserProfile(event: EventUserSession, profileUpdateData: Record<string, any>) {
   const session = await needAuth(event);
   const accountsModel = useAgentAccountsModel();
-  const allowedFields = _.pick(profileUpdateData, ['displayName']);
+  const allowedFields = _.pick(profileUpdateData, ['displayName', 'username']);
   await accountsModel.updateOne(session.user!.id as string, allowedFields);
   await setUserSession(event as H3Event, {
-    user: { displayName: allowedFields.displayName }
+    user: { displayName: allowedFields.displayName, username: allowedFields.username }
   });
   return true;
 }

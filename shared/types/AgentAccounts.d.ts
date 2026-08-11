@@ -43,4 +43,5 @@ export type AgentAccountPasskeyCredential = AgentAccountPasskeyCredentialRespons
 
 export type AgentAccountProfile = {
   displayName: string | null;
+  username: string;
 }

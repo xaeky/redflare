@@ -10,7 +10,8 @@ export const useAccountProfileMutation = defineMutation(() => {
   const formSchema = agentAccountProfilePutSchema;
   type FormSchemaOutput = z.output<typeof formSchema>;
   const formState = reactive<FormSchemaOutput>({
-    displayName: data.value?.displayName || null,
+    displayName: '',
+    username: '',
   });
 
   watch(data, (remote) => {
@@ -21,11 +22,11 @@ export const useAccountProfileMutation = defineMutation(() => {
   const { mutate } = useMutation({
     mutation: () => useAPI('/api/me', { method: 'PUT', body: formState }),
     onSuccess: () => {
-      invokeSuccessToast({ title: 'Profile updated successfully.' });
+      invokeSuccessToast({ description: 'Profile updated successfully.' });
       useQueryCache().invalidateQueries(agentAccountProfileQuery());
     },
     onError: (error) => {
-      invokeErrorToast({ title: 'Failed to update profile', description: error.message || 'An error occurred while updating the profile.' });
+      invokeErrorToast({ description: error.message || 'An error occurred while updating the profile.' });
     },
   });
 
