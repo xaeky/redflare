@@ -64,18 +64,11 @@ export default defineNuxtConfig({
       redflare_env: '',
     },
     backoffice: {
-      skipRoles: false,
       mongo: '',
       mongoDb: '',
       service: ''
     },
     frontoffice: {
-      oauth: {
-        discord: {
-          clientId: '',
-          clientSecret: ''
-        }
-      },
       sessionPassword: ''
     }
   }

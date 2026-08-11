@@ -65,7 +65,6 @@ jobs:
             NUXT_OAUTH_AUTH0_CLIENT_ID=${{ vars.A0_CLIENT_ID }}
             NUXT_OAUTH_AUTH0_DOMAIN=${{ vars.A0_TENANT }}
             NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_ID=${{ vars.FO_DISCORD_CLIENT }}
-            NUXT_BACKOFFICE_SKIP_ROLES=${{ vars.BO_SKIP_ROLES }}
             NUXT_PUBLIC_REDFLARE_ENV=${{ vars.ENV }}
             PLAYWRIGHT_TEST=${{ steps.config.outputs.playwright_test }}
           env_vars_update_strategy: overwrite
