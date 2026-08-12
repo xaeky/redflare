@@ -20,7 +20,7 @@ const isMobile = useMediaQuery('(max-width: 640px)');
 </script>
 
 <template>
-  <UModal title="Passkey Credential Details"" :dismissible="false">
+  <UModal title="Passkey Credential Details" :dismissible="false">
     <template #body>
       <div class="space-y-3">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
