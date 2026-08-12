@@ -20,7 +20,6 @@ jobs:
       applied_count: ${{ steps.run.outputs.applied_count }}
     permissions:
       contents: read
-      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

@@ -1,0 +1,22 @@
+name: Authenticate to Google Cloud
+description: "Authenticate using the repository's Workload Identity Federation provider."
+
+inputs:
+  token_format:
+    description: Token format to generate, when a downstream step requires one.
+    required: false
+
+outputs:
+  access_token:
+    description: Generated OAuth 2.0 access token.
+    value: ${{ steps.auth.outputs.access_token }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: auth
+      uses: google-github-actions/auth@v3
+      with:
+        workload_identity_provider: projects/802419610472/locations/global/workloadIdentityPools/gh-pool/providers/github-provider
+        service_account: redflare-ci@redflare-prod.iam.gserviceaccount.com
+        token_format: ${{ inputs.token_format }}

@@ -44,11 +44,9 @@ jobs:
             echo "is_canary=false"                              >> $GITHUB_OUTPUT
           fi
 
-      - id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/gcp-auth
 
       - id: deploy
         uses: google-github-actions/deploy-cloudrun@v2

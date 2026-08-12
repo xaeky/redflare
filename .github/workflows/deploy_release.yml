@@ -17,12 +17,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Auth Cloud SDK
-      id: 'auth'
-      uses: google-github-actions/auth@v2
+    - name: Authenticate to Google Cloud
+      id: auth
+      uses: ./.github/actions/gcp-auth
       with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
         token_format: 'access_token'
 
     - name: Login to pkg.dev
@@ -101,10 +99,7 @@ jobs:
 
       - name: Auth Cloud SDK
         if: always()
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+        uses: ./.github/actions/gcp-auth
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
@@ -185,11 +180,9 @@ jobs:
       id-token: write
     needs: deploy-production
     steps:
-      - id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/gcp-auth
 
       - name: Send all traffic to this new version
         run: gcloud run services update-traffic ${{ vars.SERVICE_NAME }} --to-latest --region=us-west1 --quiet
