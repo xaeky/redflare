@@ -1,36 +1,44 @@
 <script setup lang="ts">
 // Props w/defaults
-const props = withDefaults(defineProps<{
-  title?: string;
-  message?: string;
-  confirmLabel?: string;
-  confirmAdditional?: false | null | 'name'
-  confirmAdditionalValue?: string;
-  danger?: boolean;
-  open?: boolean
-}>(), {
-  title: 'Confirmation',
-  message: 'Are you sure you want to perform this action?',
-  confirmLabel: 'Continue'
-});
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    message?: string;
+    confirmLabel?: string;
+    confirmAdditional?: false | null | 'name';
+    confirmAdditionalValue?: string;
+    danger?: boolean;
+    open?: boolean;
+  }>(),
+  {
+    title: 'Confirmation',
+    message: 'Are you sure you want to perform this action?',
+    confirmLabel: 'Continue',
+  },
+);
 
 // Emits
 const emit = defineEmits<{
-  (e: 'update:open', value: boolean): void,
-  (e: 'confirm'): void
+  (e: 'update:open', value: boolean): void;
+  (e: 'confirm'): void;
 }>();
 
 // Inputs
 const modalOpen = computed({
   get: () => props.open,
-  set: (value: boolean) => emit('update:open', value)
+  set: (value: boolean) => emit('update:open', value),
 });
 
 // Actions
 const actions = {
-  cancel() { modalOpen.value = false; },
-  confirm() { modalOpen.value = false; emit('confirm'); }
-}
+  cancel() {
+    modalOpen.value = false;
+  },
+  confirm() {
+    modalOpen.value = false;
+    emit('confirm');
+  },
+};
 </script>
 
 <template>
@@ -46,8 +54,17 @@ const actions = {
           'justify-end': !danger
         }"
       >
-        <UButton label="Cancel" variant="subtle" color="neutral" @click="actions.cancel" />
-        <UButton :label="confirmLabel" :color="danger ? 'error' : 'primary'" @click="actions.confirm" />
+        <UButton
+          label="Cancel"
+          variant="subtle"
+          color="neutral"
+          @click="actions.cancel"
+        />
+        <UButton
+          :label="confirmLabel"
+          :color="danger ? 'error' : 'primary'"
+          @click="actions.confirm"
+        />
       </div>
     </template>
   </UModal>

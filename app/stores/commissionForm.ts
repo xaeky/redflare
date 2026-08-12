@@ -1,22 +1,22 @@
-import { defineStore } from 'pinia';
 import _ from 'lodash';
-import z from 'zod';
-import { CommissionStatusType } from '~~/shared/enums/Commissions';
+import { defineStore } from 'pinia';
+import type z from 'zod';
 import { commissionsQuery } from '~/queries/commissions';
+import { CommissionStatusType } from '~~/shared/enums/Commissions';
 
 function toUpdateData(remoteData: CommissionBaseRaw): CommissionUpdate {
   const rawClone = _.cloneDeep(remoteData);
   const localData: CommissionUpdate = {
     ...rawClone,
     created_at: new Date(rawClone.created_at),
-    characters: rawClone.characters.map(c => ({
+    characters: rawClone.characters.map((c) => ({
       name: c.name,
       base: c.base._id.toString(), // Ensure base is an ID
       note: c.note,
       tasks: c.tasks || [],
       changelog: c.changelog,
     })) as CommissionCharacterOptions[],
-    payments: rawClone.payments.map(p => p.toString()),
+    payments: rawClone.payments.map((p) => p.toString()),
   };
   return localData;
 }
@@ -26,8 +26,11 @@ type Schema = z.output<typeof schema>;
 type AdditionalState = {
   id: string | null;
   customer: Partial<CustomerRaw> | null;
-  attachments: Record<string, CommissionCharacterAttachmentRaw>;
-}
+  attachments: Record<
+    string,
+    CommissionCharacterAttachmentRaw | CommissionCharacterAttachmentOptions
+  >;
+};
 
 const defaultState = (): Schema => ({
   customer: '',
@@ -36,14 +39,14 @@ const defaultState = (): Schema => ({
   status: CommissionStatusType.InSetup,
   characters: [],
   payments: [],
-  created_at: new Date()
+  created_at: new Date(),
 });
 
 const defaultAdditionalState = (): AdditionalState => ({
   id: null,
   customer: {},
-  attachments: {}
-})
+  attachments: {},
+});
 
 export const useCommissionFormStore = defineStore('commissionForm', () => {
   const toast = useToast();
@@ -58,7 +61,10 @@ export const useCommissionFormStore = defineStore('commissionForm', () => {
     _.assign(additionalState, defaultAdditionalState());
   }
 
-  function addAttachmentMetadata(attachmentId: string, metadata: CommissionCharacterAttachmentRaw) {
+  function addAttachmentMetadata(
+    attachmentId: string,
+    metadata: CommissionCharacterAttachmentOptions,
+  ) {
     additionalState.attachments[attachmentId] = metadata;
   }
 
@@ -67,15 +73,18 @@ export const useCommissionFormStore = defineStore('commissionForm', () => {
   }
 
   const { mutate: insert, isLoading: insertBusy } = useMutation({
-    mutation: () => useAPI(`/api/commissions`, {
-      method: 'POST',
-      body: _.mapValues(formState, v => (typeof v === 'string' && v?.trim()) === '' ? null : v)
-    }),
-    async onSuccess() { 
+    mutation: () =>
+      useAPI(`/api/commissions`, {
+        method: 'POST',
+        body: _.mapValues(formState, (v) =>
+          (typeof v === 'string' && v?.trim()) === '' ? null : v,
+        ),
+      }),
+    async onSuccess() {
       await queryCache.invalidateQueries(commissionsQuery({}));
       useOverlay().closeAll();
       toast.add({ description: 'Commission created.' });
-    }
+    },
   });
 
   async function fetch(commissionId: string) {
@@ -87,26 +96,37 @@ export const useCommissionFormStore = defineStore('commissionForm', () => {
     try {
       busy.value = true;
       additionalState.id = commissionId;
-      const response = await useAPI<SingleCommissionResponse>(`/api/commissions/${commissionId}`);
+      const response = await useAPI<SingleCommissionResponse>(
+        `/api/commissions/${commissionId}`,
+      );
       const localData = toUpdateData(response.data);
       _.assign(formState, _.pick(localData, Object.keys(schema.shape)));
       _.assign(additionalState, {
         attachments: response.attachments || {},
-        customer: response.customer || null
+        customer: response.customer || null,
       });
       errors.value = {};
-    } catch (error: any) {
+    } catch (_error) {
       toast.add({
         color: 'error',
         description: errors.value.general,
-        duration: 5000
+        duration: 5000,
       });
     }
     busy.value = false;
-  };
+  }
 
   return {
-    formState, additionalState, addAttachmentMetadata, removeAttachmentMetadata, schema, reset, errors, fetch, busy,
-    insert, insertBusy
+    formState,
+    additionalState,
+    addAttachmentMetadata,
+    removeAttachmentMetadata,
+    schema,
+    reset,
+    errors,
+    fetch,
+    busy,
+    insert,
+    insertBusy,
   };
 });

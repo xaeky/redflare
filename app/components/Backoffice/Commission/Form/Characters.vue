@@ -1,37 +1,35 @@
 <script setup lang="ts">
-import _ from 'lodash';
-import { avatarBasesQuery } from '~/queries/commissions';
 import { BackofficeCommissionModalEditCharacterChangelog } from '#components';
+import { avatarBasesQuery } from '~/queries/commissions';
 
 const commissionFormStore = useCommissionFormStore();
 
 const characterSchema = commissionCharacterOptionsSchema;
 const formsCharacterRef = ref();
 
-// Overlays
 const overlay = useOverlay();
-const editChangelogModalOverlay = overlay.create(BackofficeCommissionModalEditCharacterChangelog);
+const editChangelogModalOverlay = overlay.create(
+  BackofficeCommissionModalEditCharacterChangelog,
+);
 
-// Queries
-const { data:remoteBasesRaw, isLoading:remoteBasesBusy } = useQuery(avatarBasesQuery);
+const { data: remoteBasesRaw, isLoading: remoteBasesBusy } =
+  useQuery(avatarBasesQuery);
 
-// Computed queries
 const remoteBases = computed(() => {
   if (!remoteBasesRaw.value) return [];
-  return remoteBasesRaw.value.map(b => ({
+  return remoteBasesRaw.value.map((b) => ({
     label: b.name,
-    value: b._id
-  }))
+    value: b._id,
+  }));
 });
 
-// Methods
 function addCharacterObject() {
   const characterObject = {
     name: '',
     base: '',
     note: '',
     tasks: [],
-    changelog: []
+    changelog: [],
   };
   commissionFormStore.formState.characters.push(characterObject);
 }
@@ -41,28 +39,45 @@ function handleAddTask(characterIndex: number) {
   if (!commissionFormStore.formState.characters[characterIndex].tasks) {
     commissionFormStore.formState.characters[characterIndex].tasks = [];
   }
-  commissionFormStore.formState.characters[characterIndex].tasks.push({ description: '', completed: false });
+  commissionFormStore.formState.characters[characterIndex].tasks.push({
+    description: '',
+    completed: false,
+  });
 }
 
 function handleCharacterChangelogEdit(characterIndex: number) {
   if (!commissionFormStore.formState.characters[characterIndex]) return;
   editChangelogModalOverlay.open({
-    characterIndex, overlay: editChangelogModalOverlay
+    characterIndex,
+    overlay: editChangelogModalOverlay,
   });
-} 
+}
 
 defineExpose({
-  forms: formsCharacterRef
+  forms: formsCharacterRef,
 });
 </script>
 
 <template>
   <div class="space-y-4">
     <div class="space-y-4">
-      <div v-for="(character, index) in commissionFormStore.formState.characters" :key="index" class="space-y-4 bg-muted/50 p-4 rounded-lg shadow-xl">
-        <UForm ref="formsCharacterRef" :state="character" :schema="characterSchema" class="space-y-2">
+      <div
+        v-for="(character, index) in commissionFormStore.formState.characters"
+        :key="index"
+        class="space-y-4 bg-muted/50 p-4 rounded-lg shadow-xl"
+      >
+        <UForm
+          ref="formsCharacterRef"
+          :state="character"
+          :schema="characterSchema"
+          class="space-y-2"
+        >
           <UFormField label="Character name" name="name">
-            <UInput v-model="character.name" placeholder="Character name" class="w-full" />
+            <UInput
+              v-model="character.name"
+              placeholder="Character name"
+              class="w-full"
+            />
           </UFormField>
           <UFormField label="Base avatar" name="base">
             <USelect
@@ -74,14 +89,26 @@ defineExpose({
             />
           </UFormField>
           <UFormField label="Note" name="note">
-            <UTextarea v-model="(character.note as string)" placeholder="Optional character note" class="w-full" />
+            <UTextarea
+              v-model="(character.note as string)"
+              placeholder="Optional character note"
+              class="w-full"
+            />
           </UFormField>
           <div>
             <UFormField label="Tasks" name="tasks">
               <div class="space-y-2">
-                <div v-for="(task, taskIndex) in character.tasks" :key="taskIndex" class="flex items-center gap-2">
+                <div
+                  v-for="(task, taskIndex) in character.tasks"
+                  :key="taskIndex"
+                  class="flex items-center gap-2"
+                >
                   <UCheckbox v-model="task.completed" />
-                  <UInput v-model="task.description" placeholder="Task description" class="w-full" />
+                  <UInput
+                    v-model="task.description"
+                    placeholder="Task description"
+                    class="w-full"
+                  />
                   <UButton
                     icon="i-heroicons-trash-16-solid"
                     color="error"
@@ -120,7 +147,12 @@ defineExpose({
       </div>
     </div>
     <div>
-      <UButton label="Add character" @click="addCharacterObject" icon="i-heroicons-plus-16-solid" block />
+      <UButton
+        label="Add character"
+        @click="addCharacterObject"
+        icon="i-heroicons-plus-16-solid"
+        block
+      />
     </div>
   </div>
 </template>

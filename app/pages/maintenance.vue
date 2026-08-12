@@ -1,13 +1,13 @@
 <script setup lang="ts">
 definePageMeta({
-  title: 'Under Maintenance'
+  title: 'Under Maintenance',
 });
 
 const breakpoints = useBreakpoints({
   sm: 640,
   md: 768,
   lg: 1024,
-  xl: 1280
+  xl: 1280,
 });
 const isMobile = breakpoints.smaller('sm');
 </script>
@@ -20,14 +20,17 @@ const isMobile = breakpoints.smaller('sm');
       </div>
       <div>
         <h1>Under Maintenance</h1>
-        <p>We are currently performing maintenance on the platform. Please check back later.</p>
+        <p>
+          We are currently performing maintenance on the platform. Please check
+          back later.
+        </p>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 h1 {
   @apply text-3xl font-bold text-primary;

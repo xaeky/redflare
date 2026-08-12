@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { auditsQuery } from '~/queries/audits';
-import { AuditCategory, AuditAction } from '~~/shared/enums/Audit';
-import { humanizeAuditAction, humanizeAuditCategory,
-  getAllAuditCategoriesValues, getAllAuditActionsValues,
-  iconizeAuditAction, iconizeAuditCategory } from '~~/shared/utils/Audit';
+import { AuditAction, type AuditCategory } from '~~/shared/enums/Audit';
+import {
+  getAllAuditActionsValues,
+  getAllAuditCategoriesValues,
+  humanizeAuditAction,
+  humanizeAuditCategory,
+  iconizeAuditAction,
+  iconizeAuditCategory,
+} from '~~/shared/utils/Audit';
 
 const page = ref(1);
 const filtersCategoryValue = ref<AuditCategory | undefined>(undefined);
@@ -18,17 +23,19 @@ const { data: audits, refetch: auditsRefetch } = useQuery(auditsQuery, () => ({
     action: filtersActionValue.value,
   } as Partial<Audit>,
   page: page.value,
-  sorting: { by: 'created_at', order: -1 as -1 }
+  sorting: { by: 'created_at', order: -1 as -1 },
 }));
 
-const actions:PageAction[] = [
+const actions: PageAction[] = [
   {
     label: 'Refresh',
     icon: 'i-heroicons-arrow-path-16-solid',
     color: 'neutral',
     variant: 'subtle',
-    action: () => { auditsRefetch(); }
-  }
+    action: () => {
+      auditsRefetch();
+    },
+  },
 ];
 
 definePageMeta({
@@ -36,13 +43,13 @@ definePageMeta({
   description: 'View the audit logs of the system.',
   middleware: 'auth',
   layout: 'backoffice',
-  keepalive: true
+  keepalive: true,
 });
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
-    <BackofficeHeaderActions :actions />
+    <BackofficeHeaderActions :actions="actions" />
     <div class="rf_auditfilters">
       <USelectMenu
         v-model="filtersCategoryValue"
@@ -60,7 +67,12 @@ definePageMeta({
       />
     </div>
     <ul v-if="audits?.data" class="rf_auditslist">
-      <li v-for="(audit, auditIndex) in audits.data" :key="auditIndex" class="rf_audititem" @click="openedDetails = openedDetails === auditIndex ? -1 : auditIndex">
+      <li
+        v-for="(audit, auditIndex) in audits.data"
+        :key="auditIndex"
+        class="rf_audititem"
+        @click="openedDetails = openedDetails === auditIndex ? -1 : auditIndex"
+      >
         <div class="rf_auditheader">
           <div
             class="rf_auditheader-item rf_auditaction_label"
@@ -77,12 +89,23 @@ definePageMeta({
             <span v-text="humanizeAuditCategory(audit.category)" />
           </div>
         </div>
-        <div class="rf_auditcontents" v-show="openedDetails === auditIndex" @click.stop>
-          <Shiki lang="json" :code="JSON.stringify(audit.details, null, 2)" as="span" />
+        <!-- biome-ignore lint/a11y/noStaticElementInteractions: use to stop propagation -->
+        <div
+          class="rf_auditcontents"
+          v-show="openedDetails === auditIndex"
+          @click.stop
+        >
+          <Shiki
+            lang="json"
+            :code="JSON.stringify(audit.details, null, 2)"
+            as="span"
+          />
         </div>
         <div class="rf_auditfooter">
           <span v-text="audit.author_nickname" />
-          <UTooltip :text="useDateFormat(audit.created_at, 'YYYY-MM-DD HH:mm:ss').value">
+          <UTooltip
+            :text="useDateFormat(audit.created_at, 'YYYY-MM-DD HH:mm:ss').value"
+          >
             <span v-text="useTimeAgo(audit.created_at)" />
           </UTooltip>
         </div>
@@ -99,7 +122,7 @@ definePageMeta({
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 .rf_auditfilters {
   @apply flex gap-2;
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  title: 'Welcome back'
+  title: 'Welcome back',
 });
 
 // Get agreement URLs from Redflare config
@@ -10,12 +10,15 @@ const legalConfig = config.value?.legal as RedflareConfigLegal;
 // Check if app has legal pages configured
 const appHasConfiguredAgreements = computed(() => {
   if (!legalConfig) return false;
-  return !!(legalConfig.termsOfServiceUrl?.length && legalConfig.privacyPolicyUrl?.length);
+  return !!(
+    legalConfig.termsOfServiceUrl?.length &&
+    legalConfig.privacyPolicyUrl?.length
+  );
 });
 
 const legalAgreements = [
   { name: 'Terms of Service', to: legalConfig?.termsOfServiceUrl },
-  { name: 'Privacy Policy', to: legalConfig?.privacyPolicyUrl }
+  { name: 'Privacy Policy', to: legalConfig?.privacyPolicyUrl },
 ];
 
 const isMobile = useMediaQuery('(max-width: 768px)');
@@ -35,7 +38,9 @@ const isMobile = useMediaQuery('(max-width: 768px)');
         :rotation="45"
       />
     </div>
-    <div class="sm:hidden fixed -z-1 inset-0 bg-linear-to-t from-neutral-950 via-neutral-950"></div>
+    <div
+      class="sm:hidden fixed -z-1 inset-0 bg-linear-to-t from-neutral-950 via-neutral-950"
+    ></div>
     <div class="text-center space-y-4 w-full sm:w-auto relative z-10">
       <div class="py-2 mx-auto">
         <HeaderLogo :size="isMobile ? 'lg' : 'xl'" />
@@ -45,7 +50,13 @@ const isMobile = useMediaQuery('(max-width: 768px)');
       <div v-if="appHasConfiguredAgreements">
         By signing in, you agree to our
         <span v-for="(page, index) in legalAgreements" :key="index">
-          <ULink external :to="page.to" target="_blank" class="text-primary-400 hover:underline">{{ page.name }}</ULink>
+          <ULink
+            external
+            :to="page.to"
+            target="_blank"
+            class="text-primary-400 hover:underline"
+            >{{ page.name }}</ULink
+          >
           <span v-if="index < legalAgreements.length - 1"> and </span>
         </span>.
       </div>
@@ -54,11 +65,13 @@ const isMobile = useMediaQuery('(max-width: 768px)');
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 .rf-login-card {
   @apply flex items-center gap-6 bg-muted/25 w-full rounded-xl p-6;
-  .frontier-content { @apply flex flex-col gap-4 items-start; }
+  .frontier-content {
+    @apply flex flex-col gap-4 items-start;
+  }
   .welcome-content {
     @apply text-center flex flex-col items-center gap-4;
     .welcome-header {

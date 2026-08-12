@@ -2,8 +2,8 @@
 @import "@nuxt/ui";
 
 @theme static {
-  --font-sans: 'Geist', sans-serif;
-  --font-mono: 'Inconsolata', monospace;
+  --font-sans: "Geist", sans-serif;
+  --font-mono: "Inconsolata", monospace;
   --ease-expo: cubic-bezier(0.2, 1, 0.25, 1), cubic-bezier(0.2, 1, 0.25, 1);
   --ease-expo-smoothrelease: cubic-bezier(0.05, 1, 0.6, 1);
   --ease-expo-smoothattack: cubic-bezier(0.75, 0, 1, 0.9);
@@ -13,5 +13,9 @@
   --ui-radius: 0.25rem;
 }
 
-pre:not(.shiki) { @apply font-mono bg-neutral-800 border border-neutral-700 overflow-x-auto p-4 rounded-md; }
-pre.shiki { @apply font-mono p-4 rounded-md; }
+pre:not(.shiki) {
+  @apply font-mono bg-neutral-800 border border-neutral-700 overflow-x-auto p-4 rounded-md;
+}
+pre.shiki {
+  @apply font-mono p-4 rounded-md;
+}

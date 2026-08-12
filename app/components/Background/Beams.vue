@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch, computed, useTemplateRef } from 'vue';
 import * as THREE from 'three';
 import { degToRad } from 'three/src/math/MathUtils.js';
+import { computed, onMounted, onUnmounted, useTemplateRef, watch } from 'vue';
 
 interface BeamsProps {
   beamWidth?: number;
@@ -26,7 +26,7 @@ const props = withDefaults(defineProps<BeamsProps>(), {
   speed: 2,
   noiseIntensity: 1.75,
   scale: 0.2,
-  rotation: 0
+  rotation: 0,
 });
 
 const containerRef = useTemplateRef<HTMLDivElement>('containerRef');
@@ -34,7 +34,8 @@ const containerRef = useTemplateRef<HTMLDivElement>('containerRef');
 let renderer: THREE.WebGLRenderer | null = null;
 let scene: THREE.Scene | null = null;
 let camera: THREE.PerspectiveCamera | null = null;
-let beamMesh: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial> | null = null;
+let beamMesh: THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial> | null =
+  null;
 let directionalLight: THREE.DirectionalLight | null = null;
 let ambientLight: THREE.AmbientLight | null = null;
 let animationId: number | null = null;
@@ -142,13 +143,18 @@ float cnoise(vec3 P){
 
 function extendMaterial<T extends THREE.Material = THREE.Material>(
   BaseMaterial: new (params?: THREE.MaterialParameters) => T,
-  cfg: ExtendMaterialConfig
+  cfg: ExtendMaterialConfig,
 ): THREE.ShaderMaterial {
   const physical = THREE.ShaderLib.physical as ShaderWithDefines;
-  const { vertexShader: baseVert, fragmentShader: baseFrag, uniforms: baseUniforms } = physical;
+  const {
+    vertexShader: baseVert,
+    fragmentShader: baseFrag,
+    uniforms: baseUniforms,
+  } = physical;
   const baseDefines = physical.defines ?? {};
 
-  const uniforms: Record<string, THREE.IUniform> = THREE.UniformsUtils.clone(baseUniforms);
+  const uniforms: Record<string, THREE.IUniform> =
+    THREE.UniformsUtils.clone(baseUniforms);
 
   const defaults = new BaseMaterial(cfg.material || {}) as T & {
     color?: THREE.Color;
@@ -162,7 +168,8 @@ function extendMaterial<T extends THREE.Material = THREE.Material>(
   if ('roughness' in defaults) uniforms.roughness.value = defaults.roughness;
   if ('metalness' in defaults) uniforms.metalness.value = defaults.metalness;
   if ('envMap' in defaults) uniforms.envMap.value = defaults.envMap;
-  if ('envMapIntensity' in defaults) uniforms.envMapIntensity.value = defaults.envMapIntensity;
+  if ('envMapIntensity' in defaults)
+    uniforms.envMapIntensity.value = defaults.envMapIntensity;
 
   Object.entries(cfg.uniforms ?? {}).forEach(([key, u]) => {
     uniforms[key] =
@@ -187,7 +194,7 @@ function extendMaterial<T extends THREE.Material = THREE.Material>(
     vertexShader: vert,
     fragmentShader: frag,
     lights: true,
-    fog: !!cfg.material?.fog
+    fog: !!cfg.material?.fog,
   });
 
   return mat;
@@ -198,7 +205,7 @@ function createStackedPlanesBufferGeometry(
   width: number,
   height: number,
   spacing: number,
-  heightSegments: number
+  heightSegments: number,
 ): THREE.BufferGeometry {
   const geometry = new THREE.BufferGeometry();
   const numVertices = n * (heightSegments + 1) * 2;
@@ -225,7 +232,10 @@ function createStackedPlanesBufferGeometry(
       positions.set([...v0, ...v1], vertexOffset * 3);
 
       const uvY = j / heightSegments;
-      uvs.set([uvXOffset, uvY + uvYOffset, uvXOffset + 1, uvY + uvYOffset], uvOffset);
+      uvs.set(
+        [uvXOffset, uvY + uvYOffset, uvXOffset + 1, uvY + uvYOffset],
+        uvOffset,
+      );
 
       if (j < heightSegments) {
         const a = vertexOffset,
@@ -281,12 +291,12 @@ const beamMaterial = computed(() =>
     fragmentHeader: '',
     vertex: {
       '#include <begin_vertex>': `transformed.z += getPos(transformed.xyz);`,
-      '#include <beginnormal_vertex>': `objectNormal = getNormal(position.xyz);`
+      '#include <beginnormal_vertex>': `objectNormal = getNormal(position.xyz);`,
     },
     fragment: {
       '#include <dithering_fragment>': `
     float randomNoise = noise(gl_FragCoord.xy);
-    gl_FragColor.rgb -= randomNoise / 15. * uNoiseIntensity;`
+    gl_FragColor.rgb -= randomNoise / 15. * uNoiseIntensity;`,
     },
     material: { fog: true },
     uniforms: {
@@ -297,9 +307,9 @@ const beamMaterial = computed(() =>
       uSpeed: { shared: true, mixed: true, linked: true, value: props.speed },
       envMapIntensity: 10,
       uNoiseIntensity: props.noiseIntensity,
-      uScale: props.scale
-    }
-  })
+      uScale: props.scale,
+    },
+  }),
 );
 
 const initThreeJS = () => {
@@ -318,7 +328,13 @@ const initThreeJS = () => {
   camera = new THREE.PerspectiveCamera(30, 1, 0.1, 1000);
   camera.position.set(0, 0, 20);
 
-  const geometry = createStackedPlanesBufferGeometry(props.beamNumber, props.beamWidth, props.beamHeight, 0, 100);
+  const geometry = createStackedPlanesBufferGeometry(
+    props.beamNumber,
+    props.beamWidth,
+    props.beamHeight,
+    0,
+    100,
+  );
 
   const material = beamMaterial.value;
   beamMesh = new THREE.Mesh(geometry, material);
@@ -328,9 +344,13 @@ const initThreeJS = () => {
   group.add(beamMesh);
   scene.add(group);
 
-  directionalLight = new THREE.DirectionalLight(new THREE.Color(props.lightColor), 1);
+  directionalLight = new THREE.DirectionalLight(
+    new THREE.Color(props.lightColor),
+    1,
+  );
   directionalLight.position.set(0, 3, 10);
-  const shadowCamera = directionalLight.shadow.camera as THREE.OrthographicCamera;
+  const shadowCamera = directionalLight.shadow
+    .camera as THREE.OrthographicCamera;
   shadowCamera.top = 24;
   shadowCamera.bottom = -24;
   shadowCamera.left = -24;
@@ -363,7 +383,7 @@ const initThreeJS = () => {
   const animate = () => {
     animationId = requestAnimationFrame(animate);
 
-    if (beamMesh && beamMesh.material) {
+    if (beamMesh?.material) {
       beamMesh.material.uniforms.time.value += 0.1 * 0.016;
     }
 
@@ -373,7 +393,9 @@ const initThreeJS = () => {
   };
 
   animationId = requestAnimationFrame(animate);
-  (container as HTMLDivElement & { _resizeObserver?: ResizeObserver })._resizeObserver = resizeObserver;
+  (
+    container as HTMLDivElement & { _resizeObserver?: ResizeObserver }
+  )._resizeObserver = resizeObserver;
 };
 
 const cleanup = () => {
@@ -383,7 +405,9 @@ const cleanup = () => {
   }
 
   if (containerRef.value) {
-    const container = containerRef.value as HTMLDivElement & { _resizeObserver?: ResizeObserver };
+    const container = containerRef.value as HTMLDivElement & {
+      _resizeObserver?: ResizeObserver;
+    };
 
     if (container._resizeObserver) {
       container._resizeObserver.disconnect();
@@ -421,12 +445,12 @@ watch(
     props.speed,
     props.noiseIntensity,
     props.scale,
-    props.rotation
+    props.rotation,
   ],
   () => {
     initThreeJS();
   },
-  { deep: true }
+  { deep: true },
 );
 
 onMounted(() => {

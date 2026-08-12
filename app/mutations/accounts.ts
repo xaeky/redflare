@@ -1,9 +1,9 @@
+import _ from 'lodash';
+import type { z } from 'zod';
 import {
   agentAccountPasskeyCredentialsListQuery,
   agentAccountProfileQuery,
 } from '~/queries/accounts';
-import { z } from 'zod';
-import _ from 'lodash';
 
 export const useAccountProfileMutation = defineMutation(() => {
   const { data, ...query } = useQuery(agentAccountProfileQuery);
@@ -14,10 +14,14 @@ export const useAccountProfileMutation = defineMutation(() => {
     username: '',
   });
 
-  watch(data, (remote) => {
-    if (!remote) return;
-    _.assign(formState, _.pick(remote, Object.keys(formSchema.shape)));
-  }, { immediate: true });
+  watch(
+    data,
+    (remote) => {
+      if (!remote) return;
+      _.assign(formState, _.pick(remote, Object.keys(formSchema.shape)));
+    },
+    { immediate: true },
+  );
 
   const { mutate } = useMutation({
     mutation: () => useAPI('/api/me', { method: 'PUT', body: formState }),
@@ -26,7 +30,10 @@ export const useAccountProfileMutation = defineMutation(() => {
       useQueryCache().invalidateQueries(agentAccountProfileQuery());
     },
     onError: (error) => {
-      invokeErrorToast({ description: error.message || 'An error occurred while updating the profile.' });
+      invokeErrorToast({
+        description:
+          error.message || 'An error occurred while updating the profile.',
+      });
     },
   });
 
@@ -35,11 +42,11 @@ export const useAccountProfileMutation = defineMutation(() => {
     ...query,
     formSchema,
     formState,
-    mutate
+    mutate,
   };
 });
 
-export const useAccountPasskeyCredentialsMutation = defineMutation(() => { 
+export const useAccountPasskeyCredentialsMutation = defineMutation(() => {
   const { data, ...query } = useQuery(agentAccountPasskeyCredentialsListQuery);
   const { user } = useUserSession();
   const { register } = useWebAuthn({
@@ -52,27 +59,39 @@ export const useAccountPasskeyCredentialsMutation = defineMutation(() => {
   const formRegisterState = reactive<FormRegisterSchemaOutput>({
     alias: '',
   });
-  
+
   const { mutate: mutateRegister } = useMutation({
     mutation: () => {
-      return register({ userName: user.value?.username as string, alias: formRegisterState.alias });
+      return register({
+        userName: user.value?.username as string,
+        alias: formRegisterState.alias,
+      });
     },
     onError: (error) => {
-      invokeErrorToast({ title: 'Failed to register passkey', description: error.message || 'An error occurred while registering the passkey.' });
+      invokeErrorToast({
+        title: 'Failed to register passkey',
+        description:
+          error.message || 'An error occurred while registering the passkey.',
+      });
     },
     onSuccess: () => {
       invokeSuccessToast({ title: 'Passkey registered successfully.' });
       formRegisterState.alias = '';
-      useQueryCache().invalidateQueries(agentAccountPasskeyCredentialsListQuery());
+      useQueryCache().invalidateQueries(
+        agentAccountPasskeyCredentialsListQuery(),
+      );
     },
   });
 
   // Remove a passkey credential by its ID
   const { mutate: mutateDelete } = useMutation({
-    mutation: (credentialId: string) => useAPI(`/api/auth/passkey/${credentialId}`, { method: 'DELETE' }),
+    mutation: (credentialId: string) =>
+      useAPI(`/api/auth/passkey/${credentialId}`, { method: 'DELETE' }),
     onSuccess: () => {
       invokeInfoToast({ title: 'Passkey deleted successfully.' });
-      useQueryCache().invalidateQueries(agentAccountPasskeyCredentialsListQuery())
+      useQueryCache().invalidateQueries(
+        agentAccountPasskeyCredentialsListQuery(),
+      );
     },
   });
 
@@ -84,7 +103,7 @@ export const useAccountPasskeyCredentialsMutation = defineMutation(() => {
       danger: true,
       onConfirm() {
         mutateDelete(credentialId);
-      }
+      },
     });
   };
 
@@ -95,6 +114,6 @@ export const useAccountPasskeyCredentialsMutation = defineMutation(() => {
     formRegisterState,
     mutateRegister,
     mutateDelete,
-    safeDelete
+    safeDelete,
   };
 });

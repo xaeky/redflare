@@ -3,7 +3,7 @@ export default defineEventHandler(async (event) => {
   if (!category) {
     throw createError({
       status: 400,
-      statusText: 'Missing category parameter'
+      statusText: 'Missing category parameter',
     });
   }
 
@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   if (!config) {
     throw createError({
       status: 404,
-      statusText: `Configuration for category "${category}" not found`
+      statusText: `Configuration for category "${category}" not found`,
     });
   }
 

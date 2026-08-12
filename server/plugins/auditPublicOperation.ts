@@ -1,5 +1,5 @@
-import { AuditCategory, AuditAction } from '~~/shared/enums/Audit';
-import { H3Event } from 'h3';
+import type { H3Event } from 'h3';
+import { AuditAction, AuditCategory } from '~~/shared/enums/Audit';
 
 export default defineNitroPlugin(async (nitroApp) => {
   nitroApp.hooks.hook('afterResponse', async (event: H3Event) => {
@@ -13,8 +13,8 @@ export default defineNitroPlugin(async (nitroApp) => {
         pathRegex: /^\/api\/public\/commissions\/(.*)\/retrieve_attachment/,
         method: 'GET',
         category: AuditCategory.DownloadAttachment,
-        action: AuditAction.Access
-      }
+        action: AuditAction.Access,
+      },
     ];
 
     const requestMatch = trackPerRoute.find((routeConfig) => {
@@ -24,11 +24,13 @@ export default defineNitroPlugin(async (nitroApp) => {
 
     if (!requestMatch) return;
 
-    logger.withTag('auditPublicOperation').info(`Auditing public operation for: ${method} ${route}`);
+    logger
+      .withTag('auditPublicOperation')
+      .info(`Auditing public operation for: ${method} ${route}`);
     await auditPublicOperation(event, {
       category: requestMatch.category,
       action: requestMatch.action,
-      details: event.context.audit
+      details: event.context.audit,
     });
   });
 });

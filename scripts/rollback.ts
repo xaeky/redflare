@@ -1,22 +1,29 @@
-import { MongoClient } from 'mongodb';
+import { join } from 'node:path';
 import { consola } from 'consola';
-import { join } from 'path';
+import { MongoClient } from 'mongodb';
 
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) throw new Error('MONGO_URI is not set');
 const logger = consola.create({
-  defaults: { tag: 'redflare:rollback' }
+  defaults: { tag: 'redflare:rollback' },
 });
 
-const count = parseInt(process.argv[2] ?? '0');
-if (count === 0) { logger.info('Nothing to roll back.'); process.exit(0); }
+const count = parseInt(process.argv[2] ?? '0', 10);
+if (count === 0) {
+  logger.info('Nothing to roll back.');
+  process.exit(0);
+}
 
 const client = new MongoClient(MONGO_URI);
 await client.connect();
 const db = client.db();
 const migrationsCollection = db.collection('migrations');
 
-const toRollback = (await migrationsCollection.find().sort({ appliedAt: -1 }).limit(count).toArray());
+const toRollback = await migrationsCollection
+  .find()
+  .sort({ appliedAt: -1 })
+  .limit(count)
+  .toArray();
 
 if (toRollback.length === 0) {
   logger.info('No migrations to roll back.');

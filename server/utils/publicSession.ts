@@ -6,8 +6,8 @@
  * Public users should login with Discord OAuth only.
  */
 
-import _ from 'lodash';
 import type { H3Event } from 'h3';
+import _ from 'lodash';
 
 interface PublicSessionData {
   id: string;
@@ -29,60 +29,84 @@ const initPublicSession = async (event: H3Event) => {
   // Check session.data has the expected properties
   // TODO: Improve session data structure validation with Zod or similar
   const sessionProps = ['id', 'user', 'secure'];
-  const hasInvalidProps = _.some(sessionProps, prop => !_.has(session.data, prop));
+  const hasInvalidProps = _.some(
+    sessionProps,
+    (prop) => !_.has(session.data, prop),
+  );
   if (hasInvalidProps) await session.clear();
   // Verify if session has data or data structure is ok, if not initialize it
   if (_.isEmpty(session.data)) {
     await session.update({
       id: Bun.randomUUIDv7(),
       user: null,
-      secure: {}
+      secure: {},
     });
   }
   return session;
-}
+};
 
-export const setPublicUserSession = async (event: H3Event, sessionData: Record<string, any>) => {
+export const setPublicUserSession = async (
+  event: H3Event,
+  sessionData: Record<string, any>,
+) => {
   const session = await initPublicSession(event);
   await session.update(sessionData);
   return session.data;
-}
+};
 
 export const getPublicUserSession = async (event: H3Event) => {
   const session = await initPublicSession(event);
   return session.data;
-}
+};
 
 export const clearPublicUserSession = async (event: H3Event) => {
   const session = await initPublicSession(event);
   await session.clear();
-}
+};
 
-export const publicGrantTempAuthorization = async (event: H3Event, authorizationKey: string) => {
+export const publicGrantTempAuthorization = async (
+  event: H3Event,
+  authorizationKey: string,
+) => {
   const currentPublicUser = await getPublicUserSession(event);
   const currentSecureObject = currentPublicUser.secure || {};
-  currentSecureObject.tempAuthorizations = _.castArray(currentSecureObject.tempAuthorizations);
+  currentSecureObject.tempAuthorizations = _.castArray(
+    currentSecureObject.tempAuthorizations,
+  );
   // Add authorization if not already present
   if (!_.includes(currentSecureObject.tempAuthorizations, authorizationKey)) {
     currentSecureObject.tempAuthorizations.push(authorizationKey);
     await setPublicUserSession(event, { secure: currentSecureObject });
   }
-}
+};
 
-export const publicRevokeTempAuthorization = async (event: H3Event, authorizationKey: string) => {
+export const publicRevokeTempAuthorization = async (
+  event: H3Event,
+  authorizationKey: string,
+) => {
   const currentPublicUser = await getPublicUserSession(event);
   const currentSecureObject = currentPublicUser.secure || {};
-  currentSecureObject.tempAuthorizations = _.castArray(currentSecureObject.tempAuthorizations);
+  currentSecureObject.tempAuthorizations = _.castArray(
+    currentSecureObject.tempAuthorizations,
+  );
   // Remove authorization if present
   if (_.includes(currentSecureObject.tempAuthorizations, authorizationKey)) {
-    currentSecureObject.tempAuthorizations = _.without(currentSecureObject.tempAuthorizations, authorizationKey);
+    currentSecureObject.tempAuthorizations = _.without(
+      currentSecureObject.tempAuthorizations,
+      authorizationKey,
+    );
     await setPublicUserSession(event, { secure: currentSecureObject });
   }
-}
+};
 
-export const publicHasTempAuthorization = async (event: H3Event, authorizationKey: string) => {
+export const publicHasTempAuthorization = async (
+  event: H3Event,
+  authorizationKey: string,
+) => {
   const currentPublicUser = await getPublicUserSession(event);
   const currentSecureObject = currentPublicUser.secure || {};
-  currentSecureObject.tempAuthorizations = _.castArray(currentSecureObject.tempAuthorizations);
+  currentSecureObject.tempAuthorizations = _.castArray(
+    currentSecureObject.tempAuthorizations,
+  );
   return _.includes(currentSecureObject.tempAuthorizations, authorizationKey);
-}
+};

@@ -9,14 +9,17 @@ export interface AuditBase {
   created_at: string;
 }
 
-export type WithoutAuthor<T extends AuditBase | AuditInsertOptions> = Omit<T, 'author_id' | 'author_nickname'>;
+export type WithoutAuthor<T extends AuditBase | AuditInsertOptions> = Omit<
+  T,
+  'author_id' | 'author_nickname'
+>;
 
 export interface AuditCustomer extends AuditBase {
   action: AuditAction.Create | AuditAction.Update | AuditAction.Delete;
   category: AuditCategory.Customer;
   details: {
     customer_id: string;
-  }
+  };
 }
 
 export interface AuditCommission extends AuditBase {
@@ -24,7 +27,7 @@ export interface AuditCommission extends AuditBase {
   category: AuditCategory.Commission;
   details: {
     commission_id: string;
-  }
+  };
 }
 
 export interface AuditAvatarBase extends AuditBase {
@@ -32,7 +35,7 @@ export interface AuditAvatarBase extends AuditBase {
   category: AuditCategory.AvatarBase;
   details: {
     avatar_base_id: string;
-  }
+  };
 }
 
 export interface AuditDownloadAttachment extends AuditBase {
@@ -40,7 +43,7 @@ export interface AuditDownloadAttachment extends AuditBase {
   category: AuditCategory.DownloadAttachment;
   details: {
     file_id: string;
-  }
+  };
 }
 
 export interface AuditBilling extends AuditBase {
@@ -50,7 +53,7 @@ export interface AuditBilling extends AuditBase {
     transaction_id: string;
     deleted_completely?: boolean;
     body?: Record<string, any>;
-  }
+  };
 }
 
 export interface AuditGlobalConfig extends AuditBase {
@@ -59,10 +62,11 @@ export interface AuditGlobalConfig extends AuditBase {
   details: {
     config_category: string;
     body?: Record<string, any>;
-  }
+  };
 }
 
-export type Audit = AuditCustomer
+export type Audit =
+  | AuditCustomer
   | AuditCommission
   | AuditAvatarBase
   | AuditDownloadAttachment

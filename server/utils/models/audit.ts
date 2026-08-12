@@ -5,9 +5,14 @@ type AuditGetAllParams = {
   pageSize?: number;
   filters: Partial<Audit>;
   sort?: { by: string; order: 1 | -1 };
-}
+};
 
-const getAll = async ({ page, pageSize = 50, filters, sort }: AuditGetAllParams) => {
+const getAll = async ({
+  page,
+  pageSize = 50,
+  filters,
+  sort,
+}: AuditGetAllParams) => {
   const collection = await useMongoCollection<Audit>(collectionName);
   page ||= 1;
   const skip = (page - 1) * pageSize;
@@ -18,7 +23,12 @@ const getAll = async ({ page, pageSize = 50, filters, sort }: AuditGetAllParams)
   sort ||= { by: 'created_at', order: 1 };
   const sortStage: Record<string, 1 | -1> = { [sort.by]: sort.order };
 
-  const data = await collection.find(filterObject).sort(sortStage).skip(skip).limit(pageSize).toArray();
+  const data = await collection
+    .find(filterObject)
+    .sort(sortStage)
+    .skip(skip)
+    .limit(pageSize)
+    .toArray();
   const total = await collection.countDocuments(filterObject);
   return { data, total };
 };

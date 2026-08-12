@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { SecurityTurnstileWidget } from '#components';
-import { z } from 'zod';
 
-const { data: setupStatus } = await useAsyncData('setup-page-status', () => useAPI<{ locked: boolean }>('/api/auth/setup'));
+const { data: setupStatus } = await useAsyncData('setup-page-status', () =>
+  useAPI<{ locked: boolean }>('/api/auth/setup'),
+);
 if (setupStatus.value?.locked) {
   await navigateTo('/', { replace: true });
 }
 
-const turnstileWidgetRef = ref<InstanceType<typeof SecurityTurnstileWidget> | null>(null);
+const turnstileWidgetRef = ref<InstanceType<
+  typeof SecurityTurnstileWidget
+> | null>(null);
 
 const formSchema = agentAccountSetupSchema;
 const formState = reactive({
@@ -15,7 +18,7 @@ const formState = reactive({
   username: '',
   password: '',
   confirmPassword: '',
-  displayName: ''
+  displayName: '',
 });
 const turnstileToken = ref('');
 
@@ -41,22 +44,25 @@ const handleSetupSubmit = async () => {
         username: formState.username,
         password: formState.password,
         displayName: formState.displayName || undefined,
-        turnstileToken: turnstileToken.value
-      }
+        turnstileToken: turnstileToken.value,
+      },
     });
     const agentSession = useUserSession();
     await agentSession.fetch();
     await navigateTo('/dashboard', { replace: true });
   } catch (error) {
-    errorMessage.value = (error as any).data?.statusText || (error as any).data?.message || 'Failed to set up this instance.';
+    errorMessage.value =
+      (error as any).data?.statusText ||
+      (error as any).data?.message ||
+      'Failed to set up this instance.';
     turnstileWidgetRef.value?.resetWidget();
   } finally {
     busy.value = false;
   }
-}
+};
 
 definePageMeta({
-  title: 'Set up Redflare'
+  title: 'Set up Redflare',
 });
 </script>
 
@@ -70,7 +76,12 @@ definePageMeta({
         <h1>Set up Redflare</h1>
         <p>Create the first artist account. This can only be done once.</p>
       </div>
-      <UForm :schema="formSchema" :state="formState" class="flex flex-col gap-3 text-left" @submit.prevent="handleSetupSubmit">
+      <UForm
+        :schema="formSchema"
+        :state="formState"
+        class="flex flex-col gap-3 text-left"
+        @submit.prevent="handleSetupSubmit"
+      >
         <UFormField label="Setup token" name="setupToken" required>
           <UInput v-model="formState.setupToken" class="w-full" />
         </UFormField>
@@ -84,10 +95,17 @@ definePageMeta({
           <UInput v-model="formState.password" type="password" class="w-full" />
         </UFormField>
         <UFormField label="Confirm password" name="confirmPassword" required>
-          <UInput v-model="formState.confirmPassword" type="password" class="w-full" />
+          <UInput
+            v-model="formState.confirmPassword"
+            type="password"
+            class="w-full"
+          />
         </UFormField>
         <div class="flex justify-center">
-          <SecurityTurnstileWidget ref="turnstileWidgetRef" @verified="handleTurnstileVerified" />
+          <SecurityTurnstileWidget
+            ref="turnstileWidgetRef"
+            @verified="handleTurnstileVerified"
+          />
         </div>
         <p v-if="errorMessage" class="text-error text-sm">{{ errorMessage }}</p>
         <UButton type="submit" :loading="busy" label="Create account" block />
@@ -97,7 +115,7 @@ definePageMeta({
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 h1 {
   @apply text-3xl font-bold;

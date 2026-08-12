@@ -5,15 +5,27 @@ import { useGeneralConfigMutation } from '~/mutations/config';
 
 const formRef = ref<ComponentExposed<typeof UForm>>();
 
-const { formState, schema, submit, busy } = useGeneralConfigMutation(formRef as Ref<ComponentExposed<typeof UForm>>)();
+const { formState, schema, submit, busy } = useGeneralConfigMutation(
+  formRef as Ref<ComponentExposed<typeof UForm>>,
+)();
 </script>
 
 <template>
-  <BackofficeAppSettingsFormBox title="General" icon="i-heroicons-cog-6-tooth-solid">
-    <UForm ref="formRef" :schema :state="formState" class="space-y-4" :disabled="busy">
+  <BackofficeAppSettingsFormBox
+    title="General"
+    icon="i-heroicons-cog-6-tooth-solid"
+  >
+    <UForm
+      ref="formRef"
+      :schema="schema"
+      :state="formState"
+      class="space-y-4"
+      :disabled="busy"
+    >
       <div>
         <USwitch
-          v-model="formState.maintenanceMode" label="Maintenance mode"
+          v-model="formState.maintenanceMode"
+          label="Maintenance mode"
           description="Prevent public users from accessing the application while you perform maintenance tasks."
         />
       </div>

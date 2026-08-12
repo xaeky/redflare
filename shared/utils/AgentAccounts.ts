@@ -20,13 +20,18 @@ export const ALL_PERMISSIONS: Permission[] = [
   'manage:managers',
 ];
 
-export const agentAccountUsernameSchema = z.string()
+export const agentAccountUsernameSchema = z
+  .string()
   .trim()
   .min(3, 'Username must be at least 3 characters long.')
   .max(32, 'Username is too long.')
-  .regex(/^[a-zA-Z0-9_.-]+$/, 'Username can only contain letters, numbers, dots, dashes and underscores.');
+  .regex(
+    /^[a-zA-Z0-9_.-]+$/,
+    'Username can only contain letters, numbers, dots, dashes and underscores.',
+  );
 
-export const agentAccountPasswordSchema = z.string()
+export const agentAccountPasswordSchema = z
+  .string()
   .min(10, 'Password must be at least 10 characters long.')
   .max(256, 'Password is too long.');
 
@@ -35,7 +40,9 @@ export const agentAccountSetupSchema = z.object({
   username: agentAccountUsernameSchema,
   password: agentAccountPasswordSchema,
   displayName: z.string().max(64).optional().nullable(),
-  permissions: z.array(z.enum(ALL_PERMISSIONS as [Permission, ...Permission[]])).optional(),
+  permissions: z
+    .array(z.enum(ALL_PERMISSIONS as [Permission, ...Permission[]]))
+    .optional(),
 });
 
 export const agentAccountLoginSchema = z.object({
@@ -48,7 +55,15 @@ export const agentAccountProfilePutSchema = z.object({
   username: agentAccountUsernameSchema.optional(),
 });
 
-export const agentAccountPasskeyAlias = z.string().trim().min(1, 'Alias is required.').regex(/^[a-zA-Z0-9-_ ]+$/, 'Alias can only contain letters, numbers, spaces, hyphens, and underscores.').max(32);
+export const agentAccountPasskeyAlias = z
+  .string()
+  .trim()
+  .min(1, 'Alias is required.')
+  .regex(
+    /^[a-zA-Z0-9-_ ]+$/,
+    'Alias can only contain letters, numbers, spaces, hyphens, and underscores.',
+  )
+  .max(32);
 
 export const agentAccountPasskeyOptionsSchema = z.object({
   alias: agentAccountPasskeyAlias,

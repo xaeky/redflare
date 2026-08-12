@@ -17,6 +17,6 @@ export default defineEventHandler(async (event) => {
   event.context.audit = {
     config_category: category,
     body,
-  }
+  };
   return;
 });

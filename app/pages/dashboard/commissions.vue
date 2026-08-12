@@ -1,15 +1,19 @@
 <script setup lang="ts">
-import { commissionsQuery } from '~/queries/commissions';
 import { BackofficeCommissionAddSlideover } from '#components';
+import { commissionsQuery } from '~/queries/commissions';
 
 const tableSorting = ref([{ id: 'created_at', desc: true }]);
 const tablePage = ref(1);
-const { data:commissions, refetch:refetchCommissions, asyncStatus } = useQuery(commissionsQuery, () => ({
+const {
+  data: commissions,
+  refetch: refetchCommissions,
+  asyncStatus,
+} = useQuery(commissionsQuery, () => ({
   sorting: {
     by: tableSorting.value[0]?.id || 'created_at',
-    order: tableSorting.value[0]?.desc ? -1 : 1
+    order: tableSorting.value[0]?.desc ? -1 : 1,
   },
-  page: tablePage.value
+  page: tablePage.value,
 }));
 // Overlays
 const overlay = useOverlay();
@@ -21,13 +25,15 @@ const actions: PageAction[] = [
     icon: 'i-heroicons-arrow-path-16-solid',
     color: 'neutral',
     variant: 'subtle',
-    action: () => refetchCommissions()
+    action: () => refetchCommissions(),
   },
   {
     label: 'New commission',
     icon: 'i-heroicons-plus-16-solid',
-    action: () => { addSlideoverOverlay.open(); }
-  }
+    action: () => {
+      addSlideoverOverlay.open();
+    },
+  },
 ];
 
 definePageMeta({
@@ -35,19 +41,23 @@ definePageMeta({
   description: 'Manage your commissions',
   middleware: 'auth',
   layout: 'backoffice',
-  keepalive: true
+  keepalive: true,
 });
 </script>
 
 <template>
   <div class="space-y-4">
-    <BackofficeHeaderActions :actions />
+    <BackofficeHeaderActions :actions="actions" />
     <div>
       <div v-if="asyncStatus === 'loading'" class="space-y-4">
+        <!-- biome-ignore lint/correctness/useVueVForKey: generic list render -->
         <USkeleton class="w-full h-12" v-for="_ in new Array(4)" />
       </div>
-      <div v-else-if="commissions && commissions.data.length">
-        <BackofficeCommissionTable :commissions="commissions.data" v-model:sorting="tableSorting" />
+      <div v-else-if="commissions?.data.length">
+        <BackofficeCommissionTable
+          :commissions="commissions.data"
+          v-model:sorting="tableSorting"
+        />
       </div>
       <div v-else-if="commissions && !commissions.data.length">
         No commissions found!

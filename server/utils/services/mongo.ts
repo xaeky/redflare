@@ -1,7 +1,7 @@
-import { MongoClient, Db, Document } from 'mongodb';
 import type { H3Event } from 'h3';
+import { type Db, type Document, MongoClient } from 'mongodb';
 
-let client:  MongoClient | null = null;
+let client: MongoClient | null = null;
 let db: Db | null = null;
 
 export const useMongo = async (event?: H3Event) => {
@@ -11,12 +11,15 @@ export const useMongo = async (event?: H3Event) => {
     await client.connect();
   }
   return client;
-}
+};
 
-export const useMongoCollection = async <T extends Document>(collectionName: string, event?: H3Event) => {
+export const useMongoCollection = async <T extends Document>(
+  collectionName: string,
+  event?: H3Event,
+) => {
   if (!db) {
     const mongoClient = await useMongo(event);
     db = mongoClient.db();
   }
   return db.collection<T>(collectionName);
-}
+};

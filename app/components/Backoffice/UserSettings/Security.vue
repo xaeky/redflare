@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useAccountPasskeyCredentialsMutation } from '~/mutations/accounts';
 import { BackofficeUserSettingsModalPasskeyDetails } from '#components';
+import { useAccountPasskeyCredentialsMutation } from '~/mutations/accounts';
 
 const {
   data: passkeysData,
@@ -8,12 +8,12 @@ const {
   safeDelete: passkeySafeDelete,
   formRegisterSchema: passkeyRegisterSchema,
   formRegisterState: passkeyRegisterState,
-  mutateRegister: passkeyRegister
+  mutateRegister: passkeyRegister,
 } = useAccountPasskeyCredentialsMutation();
 
 const meSecurityUpdatePasswordState = reactive({
   oldPassword: '',
-  newPassword: ''
+  newPassword: '',
 });
 
 const meSecurityUpdatePassword = async () => {
@@ -22,12 +22,18 @@ const meSecurityUpdatePassword = async () => {
       method: 'PUT',
       body: {
         oldPassword: meSecurityUpdatePasswordState.oldPassword,
-        newPassword: meSecurityUpdatePasswordState.newPassword
-      }
+        newPassword: meSecurityUpdatePasswordState.newPassword,
+      },
     });
-    invokeSuccessToast({ description: 'Your password has been updated successfully.' });
+    invokeSuccessToast({
+      description: 'Your password has been updated successfully.',
+    });
   } catch (error) {
-    invokeErrorToast({ description: (error as any).data.message || 'An error occurred while updating your password.' })
+    invokeErrorToast({
+      description:
+        (error as any).data.message ||
+        'An error occurred while updating your password.',
+    });
   }
 };
 
@@ -36,11 +42,14 @@ const isMobile = useMediaQuery('(max-width: 640px)');
 const overlay = useOverlay();
 
 const openPasskeyDetails = (passkey: AgentAccountPasskeyCredential) => {
-  const passkeyDetailsModal = overlay.create(BackofficeUserSettingsModalPasskeyDetails, { destroyOnClose: true });
+  const passkeyDetailsModal = overlay.create(
+    BackofficeUserSettingsModalPasskeyDetails,
+    { destroyOnClose: true },
+  );
   passkeyDetailsModal.open({
     passkey,
     overlay: passkeyDetailsModal,
-    onDelete: (credentialId: string) => passkeySafeDelete(credentialId)
+    onDelete: (credentialId: string) => passkeySafeDelete(credentialId),
   });
 };
 </script>
@@ -48,17 +57,40 @@ const openPasskeyDetails = (passkey: AgentAccountPasskeyCredential) => {
 <template>
   <div class="space-y-4">
     <div>
-      <UForm :state="meSecurityUpdatePasswordState" class="space-y-4" @submit="meSecurityUpdatePassword" v-slot="{ loading }">
+      <UForm
+        :state="meSecurityUpdatePasswordState"
+        class="space-y-4"
+        @submit="meSecurityUpdatePassword"
+        v-slot="{ loading }"
+      >
         <div class="flex flex-col sm:flex-row gap-4">
           <UFormField label="Current Password" class="w-full" required>
-            <UInput type="password" required placeholder="Enter current password" v-model="meSecurityUpdatePasswordState.oldPassword" class="w-full" />
+            <UInput
+              type="password"
+              required
+              placeholder="Enter current password"
+              v-model="meSecurityUpdatePasswordState.oldPassword"
+              class="w-full"
+            />
           </UFormField>
           <UFormField label="New Password" class="w-full" required>
-            <UInput type="password" required placeholder="Enter new password" v-model="meSecurityUpdatePasswordState.newPassword" class="w-full" />
+            <UInput
+              type="password"
+              required
+              placeholder="Enter new password"
+              v-model="meSecurityUpdatePasswordState.newPassword"
+              class="w-full"
+            />
           </UFormField>
         </div>
         <div>
-          <UButton icon="i-heroicons-pencil-16-solid" label="Update password" type="submit" :loading :block="isMobile" />
+          <UButton
+            icon="i-heroicons-pencil-16-solid"
+            label="Update password"
+            type="submit"
+            :loading
+            :block="isMobile"
+          />
         </div>
       </UForm>
     </div>
@@ -69,17 +101,34 @@ const openPasskeyDetails = (passkey: AgentAccountPasskeyCredential) => {
       <div v-else class="space-y-2">
         <div class="border border-muted p-4 rounded-lg space-y-2">
           <h4>Add New Passkey</h4>
-          <UForm :schema="passkeyRegisterSchema" :state="passkeyRegisterState" @submit="() => passkeyRegister()" class="space-y-2">
+          <UForm
+            :schema="passkeyRegisterSchema"
+            :state="passkeyRegisterState"
+            @submit="() => passkeyRegister()"
+            class="space-y-2"
+          >
             <UFormField required label="Passkey Alias" name="alias">
-              <UInput type="text" v-model="passkeyRegisterState.alias" class="w-full" />
+              <UInput
+                type="text"
+                v-model="passkeyRegisterState.alias"
+                class="w-full"
+              />
             </UFormField>
-            <UButton icon="i-heroicons-key-16-solid" label="Setup Passkey" type="submit" :block="isMobile" />
+            <UButton
+              icon="i-heroicons-key-16-solid"
+              label="Setup Passkey"
+              type="submit"
+              :block="isMobile"
+            />
           </UForm>
         </div>
         <div v-if="passkeysData && passkeysData.length > 0">
-          <ul class="space-y-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <li
-              v-for="passkey in passkeysData" :key="passkey.id" @click="openPasskeyDetails(passkey)"
+          <div class="space-y-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              v-for="passkey in passkeysData"
+              :key="passkey.id"
+              @click="openPasskeyDetails(passkey)"
               class="registered_passkeycredential_item"
             >
               <div class="space-y-2 w-full">
@@ -87,13 +136,19 @@ const openPasskeyDetails = (passkey: AgentAccountPasskeyCredential) => {
                   <span v-text="passkey.alias" class="flex-1" />
                   <UIcon name="i-lucide-arrow-up-right" />
                 </div>
-                <div class="text-sm text-muted">{{ useDateFormat(passkey.createdAt, 'MMM Do YYYY, HH:MM') }}</div>
+                <div class="text-sm text-muted">
+                  {{ useDateFormat(passkey.createdAt, 'MMM Do YYYY, HH:MM') }}
+                </div>
               </div>
-            </li>
-          </ul>
+            </button>
+          </div>
         </div>
         <div v-else class="flex items-center gap-2 justify-center p-4">
-          <UIcon name="i-heroicons-key-16-solid" class="text-muted" :size="20" />
+          <UIcon
+            name="i-heroicons-key-16-solid"
+            class="text-muted"
+            :size="20"
+          />
           <span>No passkeys registered.</span>
         </div>
       </div>
@@ -102,11 +157,10 @@ const openPasskeyDetails = (passkey: AgentAccountPasskeyCredential) => {
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 .registered_passkeycredential_item {
-  @apply bg-linear-to-t from-muted/50 hover:from-muted ring ring-muted/50 p-4 rounded-lg
-  flex items-center justify-between cursor-pointer duration-100 ease-expo transition-all sm:active:scale-97;
+  @apply text-left bg-linear-to-t from-muted/50 hover:from-muted ring ring-muted/50 p-4 rounded-lg flex items-center justify-between cursor-pointer duration-100 ease-expo transition-all sm:active:scale-97;
 }
 
 h3 {

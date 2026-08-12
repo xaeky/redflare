@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {
-  FrontierRealmDiscoveryWhoAreYou,
   FrontierRealmDiscoveryAuthAgent,
   FrontierRealmDiscoveryAuthPublic,
+  FrontierRealmDiscoveryWhoAreYou,
 } from '#components';
 
 type RealmView = 'who-are-you' | 'auth-agent' | 'auth-public';
@@ -49,10 +49,14 @@ const handleAuthenticated = (realm: Realm) => {
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
-.slide-left-enter-from { transform: translateX(15%); }
-.slide-left-leave-to { transform: translateX(-5%); }
+.slide-left-enter-from {
+  transform: translateX(15%);
+}
+.slide-left-leave-to {
+  transform: translateX(-5%);
+}
 .slide-left-leave-active {
   transition-duration: 0.125s;
   transition-timing-function: var(--ease-expo-smoothattack);
@@ -64,8 +68,12 @@ const handleAuthenticated = (realm: Realm) => {
   position: relative;
 }
 
-.slide-right-enter-from { transform: translateX(-15%); }
-.slide-right-leave-to { transform: translateX(5%); }
+.slide-right-enter-from {
+  transform: translateX(-15%);
+}
+.slide-right-leave-to {
+  transform: translateX(5%);
+}
 .slide-right-leave-active {
   transition-duration: 0.125s;
   transition-timing-function: var(--ease-expo-smoothattack);
@@ -78,7 +86,6 @@ const handleAuthenticated = (realm: Realm) => {
 }
 
 .realm-discovery-view-container {
-  @apply w-full sm:max-w-md mx-auto sm:ring ring-muted/35 sm:shadow-xl sm:p-8 rounded-lg
-  sm:bg-linear-to-t from-muted/25 via-muted/25 to-neutral-600/25 sm:backdrop-blur-md relative;
+  @apply w-full sm:max-w-md mx-auto sm:ring ring-muted/35 sm:shadow-xl sm:p-8 rounded-lg sm:bg-linear-to-t from-muted/25 via-muted/25 to-neutral-600/25 sm:backdrop-blur-md relative;
 }
 </style>

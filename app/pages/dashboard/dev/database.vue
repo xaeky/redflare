@@ -4,7 +4,7 @@ const dbStatus = await useAPI('/api/service/database/health');
 definePageMeta({
   title: 'Database Health',
   layout: 'backoffice',
-  keepalive: true
+  keepalive: true,
 });
 </script>
 

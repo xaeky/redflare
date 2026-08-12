@@ -1,5 +1,5 @@
-import { ObjectId } from 'mongodb';
 import _ from 'lodash';
+import { ObjectId } from 'mongodb';
 
 type CustomerGetAllParams = {
   page?: number;
@@ -7,7 +7,12 @@ type CustomerGetAllParams = {
   filters: Partial<CustomerFilterOptions>;
   sort?: { by: string; order: 1 | -1 };
 };
-const getAll = async ({ page, pageSize = 20, filters, sort }: CustomerGetAllParams) => {
+const getAll = async ({
+  page,
+  pageSize = 20,
+  filters,
+  sort,
+}: CustomerGetAllParams) => {
   const collection = await useMongoCollection('customers');
   page ||= 1;
   const skip = (page - 1) * pageSize;
@@ -15,10 +20,19 @@ const getAll = async ({ page, pageSize = 20, filters, sort }: CustomerGetAllPara
   // Prepare filters
   filters ||= {};
   const filterObject: Record<string, any> = {};
-  if (filters.name) filterObject.name = { $regex: new RegExp(_.escapeRegExp(filters.name), 'i') };
-  if (filters.vrc_id) filterObject.vrc_id = { $regex: new RegExp(_.escapeRegExp(filters.vrc_id), 'i') };
-  if (filters.note) filterObject.note = { $regex: new RegExp(_.escapeRegExp(filters.note), 'i') };
-  
+  if (filters.name)
+    filterObject.name = {
+      $regex: new RegExp(_.escapeRegExp(filters.name), 'i'),
+    };
+  if (filters.vrc_id)
+    filterObject.vrc_id = {
+      $regex: new RegExp(_.escapeRegExp(filters.vrc_id), 'i'),
+    };
+  if (filters.note)
+    filterObject.note = {
+      $regex: new RegExp(_.escapeRegExp(filters.note), 'i'),
+    };
+
   // Prepare sort, default sort is created_at desc
   sort ||= { by: 'created_at', order: 1 };
   let sortStage: Record<string, 1 | -1>;
@@ -32,20 +46,19 @@ const getAll = async ({ page, pageSize = 20, filters, sort }: CustomerGetAllPara
   // Prepare pipeline
   const pipelineObject: Record<string, any>[] = [
     { $match: filterObject },
-    ...(sort.by === 'name' ? [
-      { $addFields: { lowerName: { $toLower: "$name" } } },
-      { $project: { lowerName: 0 } }
-    ] : []),
+    ...(sort.by === 'name'
+      ? [
+          { $addFields: { lowerName: { $toLower: '$name' } } },
+          { $project: { lowerName: 0 } },
+        ]
+      : []),
     { $sort: sortStage },
     { $skip: skip },
     { $limit: pageSize },
   ];
 
   // Prepare separate pipeline for count
-  const countPipeline = [
-    { $match: filterObject },
-    { $count: 'total' }
-  ];
+  const countPipeline = [{ $match: filterObject }, { $count: 'total' }];
 
   // Execute count pipeline
   const countResult = await collection.aggregate(countPipeline).toArray();
@@ -54,21 +67,23 @@ const getAll = async ({ page, pageSize = 20, filters, sort }: CustomerGetAllPara
   // Execute main pipeline
   const data = await collection.aggregate(pipelineObject).toArray();
   return { data, total };
-}
+};
 
 const getById = async (id: string) => {
   const collection = await useMongoCollection<CustomerRaw>('customers');
   const result = await collection.findOne({ _id: new ObjectId(id) });
-  if (!result) throw createError({ status: 404, statusText: 'Customer not found' });
+  if (!result)
+    throw createError({ status: 404, statusText: 'Customer not found' });
   return result;
-}
+};
 
 const getByDiscordId = async (discordId: string) => {
   const collection = await useMongoCollection<CustomerRaw>('customers');
   const result = await collection.findOne({ discord_id: discordId });
-  if (!result) throw createError({ status: 404, statusText: 'Customer not found' });
+  if (!result)
+    throw createError({ status: 404, statusText: 'Customer not found' });
   return result;
-}
+};
 
 const insertOne = async (dataInput: CustomerInsertOptions) => {
   const collection = await useMongoCollection('customers');
@@ -76,52 +91,78 @@ const insertOne = async (dataInput: CustomerInsertOptions) => {
   const data: Customer = {
     ...dataInput,
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   };
   return await collection.insertOne(data);
-}
+};
 
 const updateOne = async (id: string, data: CustomerUpdateOptions) => {
   const collection = await useMongoCollection('customers');
   (data as Customer).updated_at = new Date().toISOString();
-  const result = await collection.updateOne({ _id: new ObjectId(id) }, { $set: data });
+  const result = await collection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: data },
+  );
   return result;
-}
+};
 
 const deleteOne = async (id: string, force = false) => {
   const collection = await useMongoCollection('customers');
   // Make sure customer exists before deleting
   const existing = await collection.findOne({ _id: new ObjectId(id) });
-  if (!existing) throw createError({ status: 404, statusText: 'Customer not found' });
+  if (!existing)
+    throw createError({ status: 404, statusText: 'Customer not found' });
   // Make sure customer is not linked to any commissions before deleting
   const commissionsCollection = await useMongoCollection('commissions');
-  const linkedCommissions = await commissionsCollection.find({ customer: new ObjectId(id) }).toArray();
+  const linkedCommissions = await commissionsCollection
+    .find({ customer: new ObjectId(id) })
+    .toArray();
   if (linkedCommissions.length > 0) {
-    if (!force) throw createError({ status: 400, statusText: 'Customer is linked to existing commissions, please delete them first!' });
+    if (!force)
+      throw createError({
+        status: 400,
+        statusText:
+          'Customer is linked to existing commissions, please delete them first!',
+      });
     await commissionsCollection.deleteMany({ customer: new ObjectId(id) });
   }
   const result = await collection.deleteOne({ _id: new ObjectId(id) });
   return result;
-}
+};
 
 const filterManyByName = async (name: string) => {
   const collection = await useMongoCollection<CustomerRaw>('customers');
-  const result = await collection.find({ name: { $regex: new RegExp(_.escapeRegExp(name), 'i') } }).toArray();
+  const result = await collection
+    .find({ name: { $regex: new RegExp(_.escapeRegExp(name), 'i') } })
+    .toArray();
   return result;
-}
+};
 
 const findOneWithCommission = async () => {
   const collection = await useMongoCollection<CustomerRaw>('customers');
-  const result = await collection.aggregate([
-    { $match: { discord_id: { $exists: true, $nin: [null, ''] } } },
-    { $lookup: { from: 'commissions', localField: '_id', foreignField: 'customer', as: 'commissions' } },
-    { $match: { 'commissions.0': { $exists: true } } },
-    { $sample: { size: 1 } },
-    { $project: { commissions: 0 } }
-  ]).toArray();
-  if (!result[0]) throw createError({ status: 404, statusText: 'No eligible test customer found' });
+  const result = await collection
+    .aggregate([
+      { $match: { discord_id: { $exists: true, $nin: [null, ''] } } },
+      {
+        $lookup: {
+          from: 'commissions',
+          localField: '_id',
+          foreignField: 'customer',
+          as: 'commissions',
+        },
+      },
+      { $match: { 'commissions.0': { $exists: true } } },
+      { $sample: { size: 1 } },
+      { $project: { commissions: 0 } },
+    ])
+    .toArray();
+  if (!result[0])
+    throw createError({
+      status: 404,
+      statusText: 'No eligible test customer found',
+    });
   return result[0] as CustomerRaw;
-}
+};
 
 export const useCustomerModel = () => ({
   getAll,
@@ -131,5 +172,5 @@ export const useCustomerModel = () => ({
   updateOne,
   deleteOne,
   filterManyByName,
-  findOneWithCommission
+  findOneWithCommission,
 });

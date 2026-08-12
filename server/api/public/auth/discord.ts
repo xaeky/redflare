@@ -7,54 +7,75 @@ type DiscordOAuthResponseQuery = {
 
 export default defineEventHandler(async (event) => {
   const runtimeConfig = useRuntimeConfig();
-  const { clientId: client_id, clientSecret: client_secret } = runtimeConfig.frontoffice.oauth.discord;
-  const redirect_uri = getRequestURL(event).origin + '/api/public/auth/discord';
+  // TODO: Restore OAuth for Discord login in runtime config
+  const { clientId: client_id, clientSecret: client_secret } =
+    runtimeConfig.frontoffice.oauth.discord;
+  const redirect_uri = `${getRequestURL(event).origin}/api/public/auth/discord`;
   const discordUrls = {
     authorization: 'https://discord.com/api/oauth2/authorize',
     token: 'https://discord.com/api/oauth2/token',
-    userInfo: 'https://discord.com/api/users/@me'
-  }
+    userInfo: 'https://discord.com/api/users/@me',
+  };
   const query = getQuery<DiscordOAuthResponseQuery>(event);
 
-  if (query.error) throw createError({ status: 400, statusText: `Discord OAuth Error: ${query.error}` });
-  let scope = ['identify'].join(' ');
+  if (query.error)
+    throw createError({
+      status: 400,
+      statusText: `Discord OAuth Error: ${query.error}`,
+    });
+  const scope = ['identify'].join(' ');
   if (!query.code) {
-    return sendRedirect(event,
+    return sendRedirect(
+      event,
       withQuery(discordUrls.authorization, {
         response_type: 'code',
         client_id,
         redirect_uri,
-        scope
-      })
+        scope,
+      }),
     );
-  };
+  }
 
   let tokens: any;
   try {
     const body = new URLSearchParams({
-      client_id, client_secret, grant_type: 'authorization_code', redirect_uri, code: query.code, scope
+      client_id,
+      client_secret,
+      grant_type: 'authorization_code',
+      redirect_uri,
+      code: query.code,
+      scope,
     }).toString();
     const result = await $fetch(discordUrls.token, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded' 
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body
+      body,
     });
     tokens = result;
   } catch (error) {
-    throw createError({ status: 500, statusText: `Discord OAuth Error: ${(error as Error).message}` });
+    throw createError({
+      status: 500,
+      statusText: `Discord OAuth Error: ${(error as Error).message}`,
+    });
   }
 
-  const discordAccessToken = 'Bearer ' + tokens.access_token;
+  const discordAccessToken = `Bearer ${tokens.access_token}`;
   const discordUser = await $fetch<DiscordOAuthUser>(discordUrls.userInfo, {
     headers: {
       'user-agent': 'RedflareApi',
-      'Authorization': discordAccessToken
-    }
+      Authorization: discordAccessToken,
+    },
   });
 
   const customerUser = await useCustomerModel().getByDiscordId(discordUser.id);
-  await setPublicUserSession(event, { user: discordUser, secure: { access_token: discordAccessToken, customer: customerUser._id.toString() } });
+  await setPublicUserSession(event, {
+    user: discordUser,
+    secure: {
+      access_token: discordAccessToken,
+      customer: customerUser._id.toString(),
+    },
+  });
   return sendRedirect(event, '/me');
 });

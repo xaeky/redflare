@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 </script>
 
 <template>
@@ -12,7 +11,7 @@
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 .rf_settingsforms {
   @apply grid grid-cols-2 gap-4 items-start;

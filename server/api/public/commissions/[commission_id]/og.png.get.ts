@@ -6,20 +6,30 @@ import { CommissionStatusType } from '~~/shared/enums/Commissions';
 // let _fontRegular: Buffer | null = null;
 // let _fontBold: Buffer | null = null;
 // let _logoSvg: Buffer | null = null;
-let assets = {} as Record<string, Buffer>;
+const assets = {} as Record<string, Buffer>;
 
 async function loadResources() {
   // Load fonts
   const fontStorage = useStorage('assets:fonts');
-  assets.fontRegular = Buffer.from(await fontStorage.getItemRaw('Geist-Regular.ttf') as Uint8Array);
-  assets.fontBold = Buffer.from(await fontStorage.getItemRaw('Geist-Bold.ttf') as Uint8Array);
+  assets.fontRegular = Buffer.from(
+    (await fontStorage.getItemRaw('Geist-Regular.ttf')) as Uint8Array,
+  );
+  assets.fontBold = Buffer.from(
+    (await fontStorage.getItemRaw('Geist-Bold.ttf')) as Uint8Array,
+  );
   // Load SVG assets as strings
   const svgStorage = useStorage('assets:svg');
-  assets.logoSvg = Buffer.from(await svgStorage.getItem<string>('xa_logotype.svg') as string);
-  assets.userIconSvg = Buffer.from(await svgStorage.getItem<string>('lucide-user_round.svg') as string);
+  assets.logoSvg = Buffer.from(
+    (await svgStorage.getItem<string>('xa_logotype.svg')) as string,
+  );
+  assets.userIconSvg = Buffer.from(
+    (await svgStorage.getItem<string>('lucide-user_round.svg')) as string,
+  );
   // Load images
   const imgStorage = useStorage('assets:img');
-  assets.background = Buffer.from(await imgStorage.getItemRaw('REDFLARE.GENERIC_SEO_BG.jpg') as Uint8Array);
+  assets.background = Buffer.from(
+    (await imgStorage.getItemRaw('REDFLARE.GENERIC_SEO_BG.jpg')) as Uint8Array,
+  );
 }
 
 const STATUS_LABELS: Partial<Record<CommissionStatusType, string>> = {
@@ -48,11 +58,10 @@ const STATUS_COLORS: Partial<Record<CommissionStatusType, string>> = {
   [CommissionStatusType.Cancelled]: '#dc2626',
 };
 
-
-
 export default defineEventHandler(async (event) => {
   const { data: rawCommission } = await validateCommission(event, true, true);
-  if (!rawCommission) throw createError({ status: 404, statusText: 'Commission not found' });
+  if (!rawCommission)
+    throw createError({ status: 404, statusText: 'Commission not found' });
   const commission = rawCommission as unknown as PublicSerializedCommission;
 
   await loadResources();
@@ -61,12 +70,14 @@ export default defineEventHandler(async (event) => {
   const statusLabel = STATUS_LABELS[status] ?? 'Commission';
   const statusColor = STATUS_COLORS[status] ?? '#71717a';
 
-  const formattedDate = new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(
-    new Date(commission.data.created_at as string)
-  );
+  const formattedDate = new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'long',
+  }).format(new Date(commission.data.created_at as string));
 
   // Replace "currentColor" in SVG with actual color for better compatibility with satori
-  const logoSvg = assets.logoSvg!.toString('utf-8').replace(/currentColor/g, '#06b6d4');
+  const logoSvg = assets.logoSvg
+    ?.toString('utf-8')
+    .replace(/currentColor/g, '#06b6d4');
 
   const element = {
     type: 'div',
@@ -77,7 +88,7 @@ export default defineEventHandler(async (event) => {
         justifyContent: 'space-between',
         width: '100%',
         height: '100%',
-        backgroundImage: `url(data:image/jpeg;base64,${assets.background.toString('base64')})`,
+        backgroundImage: `url(data:image/jpeg;base64,${assets.background?.toString('base64')})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         padding: '60px',
@@ -98,7 +109,7 @@ export default defineEventHandler(async (event) => {
               {
                 type: 'img',
                 props: {
-                  src: `data:image/svg+xml;base64,${Buffer.from(logoSvg).toString('base64')}`,
+                  src: `data:image/svg+xml;base64,${Buffer.from(logoSvg as string).toString('base64')}`,
                   height: 60,
                 },
               },
@@ -128,23 +139,32 @@ export default defineEventHandler(async (event) => {
             style: {
               display: 'flex',
               flexDirection: 'column',
-              marginBottom: '24px'
+              marginBottom: '24px',
             },
             children: [
               {
                 type: 'span',
                 props: {
-                  style: { color: '#ffffff', fontWeight: 700, fontSize: '64px' },
+                  style: {
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '64px',
+                  },
                   children: ['Commission'],
                 },
               },
               {
                 type: 'span',
                 props: {
-                  style: { color: '#818192', fontWeight: 400, fontSize: '32px', marginTop: '8px' },
+                  style: {
+                    color: '#818192',
+                    fontWeight: 400,
+                    fontSize: '32px',
+                    marginTop: '8px',
+                  },
                   children: [`${commission.data._id}`],
                 },
-              }
+              },
             ],
           },
         },
@@ -154,7 +174,7 @@ export default defineEventHandler(async (event) => {
           props: {
             style: {
               display: 'flex',
-              justifyContent: 'space-between'
+              justifyContent: 'space-between',
             },
             children: [
               {
@@ -170,7 +190,7 @@ export default defineEventHandler(async (event) => {
                     {
                       type: 'img',
                       props: {
-                        src: `data:image/svg+xml;base64,${Buffer.from(assets.userIconSvg).toString('base64')}`,
+                        src: `data:image/svg+xml;base64,${Buffer.from(assets.userIconSvg as Buffer<ArrayBufferLike>).toString('base64')}`,
                         width: 24,
                         height: 24,
                         style: { marginRight: '8px' },
@@ -217,8 +237,18 @@ export default defineEventHandler(async (event) => {
     width: 1200,
     height: 630,
     fonts: [
-      { name: 'Geist', data: assets.fontRegular!.buffer as ArrayBuffer, weight: 400, style: 'normal' },
-      { name: 'Geist', data: assets.fontBold!.buffer as ArrayBuffer, weight: 700, style: 'normal' },
+      {
+        name: 'Geist',
+        data: assets.fontRegular?.buffer as ArrayBuffer,
+        weight: 400,
+        style: 'normal',
+      },
+      {
+        name: 'Geist',
+        data: assets.fontBold?.buffer as ArrayBuffer,
+        weight: 700,
+        style: 'normal',
+      },
     ],
   });
 

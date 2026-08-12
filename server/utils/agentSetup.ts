@@ -1,7 +1,9 @@
 import { RedflareConfigCategory } from '~~/shared/enums/Config';
 
 export async function isSetupLocked() {
-  const config = await getCachedConfigByCategory(RedflareConfigCategory.AuthSetup);
+  const config = await getCachedConfigByCategory(
+    RedflareConfigCategory.AuthSetup,
+  );
   return !!(config as RedflareConfigAuthSetup | null)?.locked;
 }
 
@@ -12,7 +14,7 @@ export async function generateSetupToken() {
     category: RedflareConfigCategory.AuthSetup,
     locked: false,
     setupToken: token,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   });
   await invalidateCachedConfigByCategory(RedflareConfigCategory.AuthSetup);
   return token;
@@ -21,8 +23,11 @@ export async function generateSetupToken() {
 export async function lockSetup(username: string, token: string) {
   const configModel = useConfigModel();
   // Verify the provided token matches the stored setup token before locking the setup
-  const configDocument = await configModel.getByCategory(RedflareConfigCategory.AuthSetup);
-  const storedToken = (configDocument as RedflareConfigAuthSetup | null)?.setupToken;
+  const configDocument = await configModel.getByCategory(
+    RedflareConfigCategory.AuthSetup,
+  );
+  const storedToken = (configDocument as RedflareConfigAuthSetup | null)
+    ?.setupToken;
   if (storedToken !== token) {
     throw new Error('Invalid setup token provided.');
   }
@@ -31,7 +36,7 @@ export async function lockSetup(username: string, token: string) {
     category: RedflareConfigCategory.AuthSetup,
     locked: true,
     lockedAt: new Date().toISOString(),
-    lockedByUsername: username
+    lockedByUsername: username,
   });
   await invalidateCachedConfigByCategory(RedflareConfigCategory.AuthSetup);
 }

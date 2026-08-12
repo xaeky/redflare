@@ -5,7 +5,7 @@ export const createPaymentLinkOptionsSchema = z.object({
   customer_id: z.string(),
   attachment: z.object({
     currency: z.enum(['ARS', 'USD']),
-    amount: z.number()
+    amount: z.number(),
   }),
-  note: z.string().max(256).optional()
+  note: z.string().max(256).optional(),
 });

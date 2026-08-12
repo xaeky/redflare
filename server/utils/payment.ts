@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _ from 'lodash';
 
 interface PaymentAttachment {
   id: string;
@@ -8,31 +8,48 @@ interface PaymentAttachment {
   processor: CommissionPaymentProcessor;
 }
 
-export const createPaymentPreference = async (options: CreatePaymentLinkOptions, runtimeConfig: any) => {
+export const createPaymentPreference = async (
+  options: CreatePaymentLinkOptions,
+  runtimeConfig: any,
+) => {
   const { title, currency, amount } = options;
-  const paymentObject:Partial<PaymentAttachment> = {};
+  const paymentObject: Partial<PaymentAttachment> = {};
   const paymentFunctionMap = {
-    'ARS': async () => {
+    ARS: async () => {
       try {
-        const result = await mpCreatePreference({ title, amount }, runtimeConfig);
+        const result = await mpCreatePreference(
+          { title, amount },
+          runtimeConfig,
+        );
         // Assign values to paymentObject
         return _.assign(paymentObject, {
           id: result.id,
           currency: 'ARS',
           amount,
           init_point: result.init_point,
-          processor: 'mercadopago'
+          processor: 'mercadopago',
         });
       } catch (error) {
-        throw createError({ status: 500, statusText: 'Unable to create MercadoPago preference', data: error });
+        throw createError({
+          status: 500,
+          statusText: 'Unable to create MercadoPago preference',
+          data: error,
+        });
       }
     },
-    'USD': async () => {
+    USD: async () => {
       // TODO: PayPal integration
-      throw createError({ status: 501, statusText: 'PayPal integration not implemented yet' });
-    }
+      throw createError({
+        status: 501,
+        statusText: 'PayPal integration not implemented yet',
+      });
+    },
   };
   await paymentFunctionMap[currency]();
-  if (!paymentObject) throw createError({ status: 500, statusText: 'Payment object not created' });
+  if (!paymentObject)
+    throw createError({
+      status: 500,
+      statusText: 'Payment object not created',
+    });
   return paymentObject as PaymentAttachment;
 };

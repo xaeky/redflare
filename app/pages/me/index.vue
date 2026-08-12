@@ -2,23 +2,22 @@
 const { isLoggedIn, login, session } = usePublicUserSession();
 
 definePageMeta({
-  title: 'My Account'
+  title: 'My Account',
 });
 
 const commissionsQueryOptions = defineQueryOptions({
   key: ['public', 'me', 'commissions'],
-  query: () => useAPI<{ data: WithCustomer<DeserializedCommission>[], total: number }>('/api/public/me/commissions'),
+  query: () =>
+    useAPI<{ data: WithCustomer<DeserializedCommission>[]; total: number }>(
+      '/api/public/me/commissions',
+    ),
   refetchOnWindowFocus: false,
-  enabled: typeof document !== 'undefined' && isLoggedIn.value
+  enabled: typeof document !== 'undefined' && isLoggedIn.value,
 });
 
-const {
-  data: commissionsData,
-  error: commissionsError,
-  isLoading: commissionsLoading,
-  isPending: commissionsPending,
-  refetch: commissionsRefetch
-} = useQuery(commissionsQueryOptions);
+const { data: commissionsData, isLoading: commissionsLoading } = useQuery(
+  commissionsQueryOptions,
+);
 
 const handleCommissionCardClick = (commissionId: string) => {
   navigateTo(`/commission/${commissionId}`);
@@ -29,10 +28,16 @@ const handleCommissionCardClick = (commissionId: string) => {
   <div class="h-full">
     <div v-if="!isLoggedIn" class="h-full">
       <div class="flex h-full items-center justify-center">
-        <div class="bg-muted p-6 rounded-xl space-y-4 text-center border border-muted/50">
+        <div
+          class="bg-muted p-6 rounded-xl space-y-4 text-center border border-muted/50"
+        >
           <p>Please log in to access your customer account.</p>
           <div>
-            <UButton label="Login with Discord" icon="i-ic-baseline-discord" @click="() => { login() }" />
+            <UButton
+              label="Login with Discord"
+              icon="i-ic-baseline-discord"
+              @click="() => { login() }"
+            />
           </div>
         </div>
       </div>
@@ -41,22 +46,33 @@ const handleCommissionCardClick = (commissionId: string) => {
       <PublicSessionCard size="sm" />
       <div class="space-y-2">
         <h1>My commissions</h1>
-        <ul v-if="!commissionsLoading" class="grid grid-cols-2 gap-8">
-          <li
+        <div v-if="!commissionsLoading" class="grid grid-cols-2 gap-8">
+          <button
+            type="button"
             class="rf-public-commission-card"
-            v-for="commission in commissionsData?.data" :key="commission._id"
+            v-for="commission in commissionsData?.data"
+            :key="commission._id"
             @click.stop="() => { handleCommissionCardClick(commission._id) }"
           >
             <div class="flex items-center justify-between gap-4">
-              <span class="font-mono uppercase text-lg" v-text="commission._id.substring(commission._id.length - 6)" />
-              <SharedCommissionStatusBadge :status="commission.status" size="md" />
+              <span
+                class="font-mono uppercase text-lg"
+                v-text="commission._id.substring(commission._id.length - 6)"
+              />
+              <SharedCommissionStatusBadge
+                :status="commission.status"
+                size="md"
+              />
             </div>
             <div class="flex items-center gap-2">
-              <UIcon class="text-primary" name="i-heroicons-calendar-16-solid" />
+              <UIcon
+                class="text-primary"
+                name="i-heroicons-calendar-16-solid"
+              />
               {{ new Intl.DateTimeFormat('default', { dateStyle: 'long' }).format(new Date(commission.created_at)) }}
             </div>
-          </li>
-        </ul>
+          </button>
+        </div>
         <div v-else>
           <SharedGeneralLoader text="Loading commissions..." />
         </div>
@@ -66,7 +82,7 @@ const handleCommissionCardClick = (commissionId: string) => {
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 h1 {
   @apply text-3xl font-bold;

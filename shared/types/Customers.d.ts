@@ -12,7 +12,10 @@ export type CustomerRaw = WithId<{
 
 export type Customer = CustomerRaw;
 
-export type CustomerInsertOptions = Omit<Customer, 'created_at' | 'updated_at'> & {
+export type CustomerInsertOptions = Omit<
+  Customer,
+  'created_at' | 'updated_at'
+> & {
   vrc_id?: string | null;
   discord_id?: string | null;
   note?: string | null;
@@ -29,7 +32,7 @@ export type CustomerFilterOptions = {
 
 export type DeserializedCustomer = Deserialized<WithId<Customer>>;
 
-export type WithCustomer<T> = T & { customer: Customer; };
-export type WithExistingCustomer<T> = T & { customer: DeserializedCustomer; };
-export type WithCustomerId<T> = T & { customer: string; };
-export type WithCustomerOId<T> = T & { customer: typeof ObjectId; };
+export type WithCustomer<T> = T & { customer: Customer };
+export type WithExistingCustomer<T> = T & { customer: DeserializedCustomer };
+export type WithCustomerId<T> = T & { customer: string };
+export type WithCustomerOId<T> = T & { customer: typeof ObjectId };

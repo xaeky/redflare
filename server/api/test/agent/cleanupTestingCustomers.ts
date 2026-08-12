@@ -1,5 +1,4 @@
-export default defineEventHandler(async (event) => {
-  // Cleanup E2E testing customers
+export default defineEventHandler(async () => {
   const { deleteOne, filterManyByName } = useCustomerModel();
   const testCustomers = await filterManyByName('E2E');
   for (const customer of testCustomers) {

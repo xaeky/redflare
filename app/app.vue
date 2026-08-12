@@ -1,8 +1,6 @@
 <script setup lang="ts">
 useHead({
-  link: [
-    { rel: 'icon', type: 'image/png', href: '/favicon.png' }
-  ]
+  link: [{ rel: 'icon', type: 'image/png', href: '/favicon.png' }],
 });
 </script>
 
@@ -10,7 +8,7 @@ useHead({
   <main id="redflare_root">
     <NuxtLoadingIndicator color="#00d3f2" />
     <NuxtLayout>
-      <NuxtPage/>
+      <NuxtPage />
     </NuxtLayout>
   </main>
 </template>

@@ -16,7 +16,8 @@ onMounted(customerFormStore.reset);
             @click="() => { customerFormStore.insert() }"
             :loading="customerFormStore.insertBusy"
             data-testid="add-customer-submit"
-          >Save</UButton>
+            >Save</UButton
+          >
         </div>
       </div>
     </template>

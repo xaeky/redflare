@@ -3,49 +3,53 @@ import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
 
 const { clear, session, user } = useUserSession();
 
-const links:NavigationMenuItem[] = [
+const links: NavigationMenuItem[] = [
   {
     label: 'Home',
     icon: 'i-heroicons-home-20-solid',
-    to: '/dashboard'
+    to: '/dashboard',
   },
   {
     label: 'Commissions',
     icon: 'i-heroicons-sparkles-solid',
-    to: '/dashboard/commissions'
+    to: '/dashboard/commissions',
   },
   {
     label: 'Avatar Bases',
     icon: 'i-lucide-cat',
-    to: '/dashboard/bases'
+    to: '/dashboard/bases',
   },
   {
     label: 'Customers',
     icon: 'i-heroicons-at-symbol-solid',
-    to: '/dashboard/customers'
+    to: '/dashboard/customers',
   },
   {
     label: 'Audits',
     icon: 'i-heroicons-document-text-20-solid',
-    to: '/dashboard/audits'
+    to: '/dashboard/audits',
   },
   {
     label: 'App Settings',
     icon: 'i-heroicons-cog-16-solid',
-    to: '/dashboard/app-settings'
+    to: '/dashboard/app-settings',
   },
-  ...(user.value?.permissions?.includes('manage:managers') ? [{
-    label: 'Accounts',
-    icon: 'i-heroicons-users-20-solid',
-    to: '/dashboard/accounts'
-  }] : [])
+  ...(user.value?.permissions?.includes('manage:managers')
+    ? [
+        {
+          label: 'Accounts',
+          icon: 'i-heroicons-users-20-solid',
+          to: '/dashboard/accounts',
+        },
+      ]
+    : []),
 ];
 
 const userDropdownItems: DropdownMenuItem[] = [
   {
     label: 'Settings',
     icon: 'i-heroicons-cog-16-solid',
-    onSelect: () => navigateTo('/dashboard/me')
+    onSelect: () => navigateTo('/dashboard/me'),
   },
   {
     label: 'Logout',
@@ -53,9 +57,9 @@ const userDropdownItems: DropdownMenuItem[] = [
     async onSelect() {
       await clear();
       navigateTo('/');
-    }
-  }
-]
+    },
+  },
+];
 </script>
 
 <template>
@@ -71,11 +75,15 @@ const userDropdownItems: DropdownMenuItem[] = [
       />
     </template>
     <template #footer>
-      <UDropdownMenu
-        :items="userDropdownItems"
-        v-if="session && session.user"
-      >
-        <UButton square class="w-full" variant="ghost" color="neutral" :label="session.user.displayName || session.user.username" :avatar="{ alt: session.user.displayName || session.user.username }" />
+      <UDropdownMenu :items="userDropdownItems" v-if="session?.user">
+        <UButton
+          square
+          class="w-full"
+          variant="ghost"
+          color="neutral"
+          :label="session.user.displayName || session.user.username"
+          :avatar="{ alt: session.user.displayName || session.user.username }"
+        />
       </UDropdownMenu>
     </template>
   </USidebar>

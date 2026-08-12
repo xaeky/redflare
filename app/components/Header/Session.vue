@@ -8,7 +8,7 @@ const userDropdownItems: DropdownMenuItem[] = [
   {
     label: 'Settings',
     icon: 'i-heroicons-cog-16-solid',
-    onSelect: () => navigateTo('/dashboard/me')
+    onSelect: () => navigateTo('/dashboard/me'),
   },
   {
     label: 'Logout',
@@ -16,27 +16,32 @@ const userDropdownItems: DropdownMenuItem[] = [
     async onSelect() {
       await clear();
       navigateTo('/');
-    }
-  }
-]
-const userDropdownToggle = () => { userDropdownOpen.value = !userDropdownOpen.value }
+    },
+  },
+];
+const userDropdownToggle = () => {
+  userDropdownOpen.value = !userDropdownOpen.value;
+};
 
 const { session } = useUserSession();
 </script>
 
 <template>
-  <div
+  <button
+    v-if="session?.user"
+    type="button"
     class="border-l border-neutral-800 hover:bg-neutral-800 cursor-pointer h-12 flex items-center px-6"
-    v-if="session && session.user" @click.stop="userDropdownToggle"
+    @click.stop="userDropdownToggle"
   >
     <UDropdownMenu
       :items="userDropdownItems"
-      v-model:open="userDropdownOpen" :ui="{ content: 'w-48' }"
+      v-model:open="userDropdownOpen"
+      :ui="{ content: 'w-48' }"
     >
       <div class="flex items-center gap-4 pointer-events-none select-none">
         <UAvatar :alt="session.user.displayName || session.user.username" />
         <span v-text="session.user.displayName || session.user.username" />
       </div>
     </UDropdownMenu>
-  </div>
+  </button>
 </template>

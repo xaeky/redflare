@@ -1,7 +1,10 @@
-import { AuditInsertOptions, WithoutAuthor } from '~~/shared/types/Audit';
-import { H3Event } from 'h3';
+import type { H3Event } from 'h3';
+import type { AuditInsertOptions, WithoutAuthor } from '~~/shared/types/Audit';
 
-export const auditOperation = async (event: H3Event, audit: WithoutAuthor<AuditInsertOptions>) => {
+export const auditOperation = async (
+  event: H3Event,
+  audit: WithoutAuthor<AuditInsertOptions>,
+) => {
   const agentSession = await getUserSession(event);
   await useAuditModel().insertOne({
     author_id: agentSession.user?.id as string,
@@ -10,13 +13,20 @@ export const auditOperation = async (event: H3Event, audit: WithoutAuthor<AuditI
   });
 };
 
-export const auditPublicOperation = async (event: H3Event, audit: WithoutAuthor<AuditInsertOptions>) => {
+export const auditPublicOperation = async (
+  event: H3Event,
+  audit: WithoutAuthor<AuditInsertOptions>,
+) => {
   const publicSession = await getPublicUserSession(event);
   const agentSession = await getUserSession(event);
   const authorId = publicSession.user?.id || agentSession.user?.id;
-  const authorNickname = publicSession.user?.username || agentSession.user?.username;
+  const authorNickname =
+    publicSession.user?.username || agentSession.user?.username;
   if (!authorId || !authorNickname) {
-    throw createError({ status: 500, statusText: 'Failed to retrieve author information for audit' });
+    throw createError({
+      status: 500,
+      statusText: 'Failed to retrieve author information for audit',
+    });
   }
   await useAuditModel().insertOne({
     author_id: authorId as string,

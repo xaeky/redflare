@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   title: string;
   description: string;
   icon?: string;
@@ -24,11 +24,10 @@ const props = defineProps<{
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 .realm-selection-option {
-  @apply space-y-2 p-4 rounded-lg bg-muted/50 hover:bg-transparent hover:ring ring-inset ring-muted/50
-  active:scale-95 duration-200 cursor-pointer;
+  @apply space-y-2 p-4 rounded-lg bg-muted/50 hover:bg-transparent hover:ring ring-inset ring-muted/50 active:scale-95 duration-200 cursor-pointer;
   transition-timing-function: var(--ease-expo);
   h3 {
     @apply text-lg font-bold;

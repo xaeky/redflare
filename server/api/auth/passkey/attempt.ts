@@ -1,6 +1,7 @@
 export default defineWebAuthnAuthenticateEventHandler({
   async getCredential(_event, credentialId) {
-    const credential = await useAgentAccountsModel().getPasskeyCredentialById(credentialId);
+    const credential =
+      await useAgentAccountsModel().getPasskeyCredentialById(credentialId);
 
     if (!credential)
       throw createError({ status: 400, message: 'Credential not found' });
@@ -18,8 +19,8 @@ export default defineWebAuthnAuthenticateEventHandler({
         username: account.username,
         displayName: account.displayName || undefined,
         permissions: account.permissions,
-        settings: account.settings || {}
-      }
+        settings: account.settings || {},
+      },
     });
   },
-})
+});

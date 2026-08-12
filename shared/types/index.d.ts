@@ -18,8 +18,6 @@ declare module '#auth-utils' {
     username: string;
     displayName?: string | null;
     permissions: Permission[];
-    settings: AgentUserSettings
+    settings: AgentUserSettings;
   }
 }
-
-export {}

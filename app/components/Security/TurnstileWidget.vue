@@ -23,7 +23,7 @@ function renderWidget() {
     sitekey: turnstileConfig.site_key,
     callback: (token: string) => emit('verified', token),
     'expired-callback': () => emit('expired'),
-    'error-callback': () => emit('error')
+    'error-callback': () => emit('error'),
   });
 }
 
@@ -44,9 +44,9 @@ onMounted(() => {
     script: [
       {
         src: `https://challenges.cloudflare.com/turnstile/v0/api.js?onload=${onloadCallbackName}&render=explicit`,
-        defer: true
-      }
-    ]
+        defer: true,
+      },
+    ],
   });
 });
 
@@ -58,7 +58,7 @@ onBeforeUnmount(() => {
 });
 
 defineExpose({
-  resetWidget
+  resetWidget,
 });
 </script>
 

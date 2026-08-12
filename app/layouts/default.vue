@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import xaLogotypeSvg from '~/assets/svg/xa_logotype.svg';
 const route = useRoute();
-
 const title = computed<string>(() => (route.meta.title as string) || '');
 
 useHead({
   titleTemplate: '%s - Redflare Console',
-  title
+  title,
 });
 </script>
 
@@ -21,7 +19,7 @@ useHead({
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 #rf-default {
   @apply min-h-screen flex flex-col;

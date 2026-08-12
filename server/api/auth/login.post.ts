@@ -1,16 +1,27 @@
 export default defineEventHandler(async (event) => {
   await needTurnstileVerification(event);
-  const { data, error } = await readValidatedBody(event, agentAccountLoginSchema.safeParse);
-  if (error || !data) throw createError({ status: 400, message: 'Invalid body' });
+  const { data, error } = await readValidatedBody(
+    event,
+    agentAccountLoginSchema.safeParse,
+  );
+  if (error || !data)
+    throw createError({ status: 400, message: 'Invalid body' });
   const { username, password } = data;
 
   const accountsModel = useAgentAccountsModel();
-  const genericError = createError({ status: 401, message: 'Invalid credentials' });
+  const genericError = createError({
+    status: 401,
+    message: 'Invalid credentials',
+  });
 
   const account = await accountsModel.getByUsername(username);
   if (!account) throw genericError;
   if (accountsModel.isLockedOut(account)) {
-    throw createError({ status: 403, message: 'This account is temporarily locked due to too many failed login attempts.' });
+    throw createError({
+      status: 403,
+      message:
+        'This account is temporarily locked due to too many failed login attempts.',
+    });
   }
 
   const isValid = await accountsModel.verifyPassword(account, password);
@@ -27,8 +38,8 @@ export default defineEventHandler(async (event) => {
       username: account.username,
       displayName: account.displayName || undefined,
       permissions: account.permissions,
-      settings: account.settings || {}
-    }
+      settings: account.settings || {},
+    },
   });
 
   return { success: true };

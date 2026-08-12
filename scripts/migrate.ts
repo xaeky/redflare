@@ -1,12 +1,12 @@
-import { MongoClient } from 'mongodb';
 import { readdir } from 'node:fs/promises';
+import { join } from 'node:path';
 import { consola } from 'consola';
-import { join } from 'path';
+import { MongoClient } from 'mongodb';
 
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) throw new Error('MONGO_URI is not set');
 const logger = consola.create({
-  defaults: { tag: 'redflare:migrate' }
+  defaults: { tag: 'redflare:migrate' },
 });
 
 const client = new MongoClient(MONGO_URI);
@@ -19,8 +19,10 @@ if (collections.length === 0) await db.createCollection('migrations');
 
 const migrationsDir = join(import.meta.dir, 'migrations');
 const files = (await readdir(migrationsDir)).sort();
-const applied = new Set((await migrationsCollection.find({}).toArray()).map(m => m.name));
-const pending = files.filter(f => !applied.has(f));
+const applied = new Set(
+  (await migrationsCollection.find({}).toArray()).map((m) => m.name),
+);
+const pending = files.filter((f) => !applied.has(f));
 
 if (pending.length === 0) {
   logger.info('No pending migrations.');

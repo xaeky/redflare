@@ -1,21 +1,21 @@
-import { isCancel, select, text, log } from '@clack/prompts';
-import { join } from 'path';
+import { join } from 'node:path';
+import { isCancel, log, select, text } from '@clack/prompts';
 
 const PROJECT_ROOT = join(import.meta.dir, '../../');
 const DEFAULT_ENVIRONMENT: HelperEnvironment = {
   database: {
-    uri: ''
-  }
+    uri: '',
+  },
 };
 
 export interface HelperEnvironment {
   database: {
     uri: string;
-  }
+  };
 }
 
 interface HelpersUtilsCache {
-  environments: Record<string, HelperEnvironment>
+  environments: Record<string, HelperEnvironment>;
 }
 
 const logger = log;
@@ -25,10 +25,10 @@ function getCachePath() {
 }
 
 async function initCache() {
-  const cacheData:HelpersUtilsCache = {
+  const cacheData: HelpersUtilsCache = {
     environments: {
-      [process.env.NODE_ENV || 'development']: generateEnvironment()
-    }
+      [process.env.NODE_ENV || 'development']: generateEnvironment(),
+    },
   };
   await Bun.write(getCachePath(), JSON.stringify(cacheData));
 }
@@ -39,7 +39,9 @@ async function useCache() {
     logger.warn('Cache not found, initializing...');
     await initCache();
   }
-  const cacheData: HelpersUtilsCache = JSON.parse(await Bun.file(getCachePath()).text());
+  const cacheData: HelpersUtilsCache = JSON.parse(
+    await Bun.file(getCachePath()).text(),
+  );
   async function set(newData: HelpersUtilsCache) {
     await Bun.write(getCachePath(), JSON.stringify(newData));
   }
@@ -64,7 +66,9 @@ export async function useEnvironments() {
   const cache = await useCache();
   const environments = cache.cacheData.environments;
   if (environments && Object.keys(environments).length === 0) {
-    logger.warn('No environments found in cache, initializing default environment...');
+    logger.warn(
+      'No environments found in cache, initializing default environment...',
+    );
     await initEnvironment('development');
   }
   async function add(environmentName: string, data?: HelperEnvironment) {
@@ -87,7 +91,7 @@ export async function useEnvironment(environmentName: string) {
   return environments.environments[environmentName];
 }
 
-async function manageEnvironmentMenu(environmentName: string) {
+async function _manageEnvironmentMenu(environmentName: string) {
   const thisEnvironment = await useEnvironment(environmentName);
   const actions = {
     view: async () => {
@@ -100,8 +104,8 @@ async function manageEnvironmentMenu(environmentName: string) {
       const environments = await useEnvironments();
       await environments.remove(environmentName);
       logger.info(`Environment "${environmentName}" destroyed.`);
-    }
-  }
+    },
+  };
   const action = await select({
     message: `Manage environment "${environmentName}":`,
     options: [
@@ -109,7 +113,7 @@ async function manageEnvironmentMenu(environmentName: string) {
       { value: 'edit', label: 'Edit Data' },
       { value: 'destroy', label: 'Destroy Environment' },
       { value: 'databaseSetURI', label: 'Set Database URI' },
-    ]
+    ],
   });
 
   if (isCancel(action)) return selectEnvironmentMenu();
@@ -117,7 +121,9 @@ async function manageEnvironmentMenu(environmentName: string) {
   actions[action as keyof typeof actions]();
 }
 
-export async function selectEnvironmentMenu(backMenu?: () => Promise<void>): Promise<string | symbol | null | void> {
+export async function selectEnvironmentMenu(
+  backMenu?: () => Promise<void>,
+): Promise<string | symbol | null> {
   const environments = await useEnvironments();
   const environmentNames = Object.keys(environments.environments);
   const selectedEnvironment = await select({
@@ -126,15 +132,15 @@ export async function selectEnvironmentMenu(backMenu?: () => Promise<void>): Pro
       ...environmentNames.map((env) => ({ value: env, label: env })),
       {
         label: 'Create New Environment',
-        value: 'createNew'
-      }
-    ]
+        value: 'createNew',
+      },
+    ],
   });
   if (backMenu && isCancel(selectedEnvironment)) return backMenu();
   if (selectedEnvironment === 'createNew') {
     const newEnvironmentName = await text({
       message: 'Enter the name for the new environment:',
-      placeholder: 'e.g., staging, production'
+      placeholder: 'e.g., staging, production',
     });
     if (isCancel(newEnvironmentName)) return selectEnvironmentMenu();
     await initEnvironment(newEnvironmentName);

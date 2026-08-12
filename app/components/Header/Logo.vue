@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import Logotype from '~/assets/svg/xa_logotype.svg';
-withDefaults(defineProps<{
-  size?: 'base' | 'lg' | 'xl';
-}>(), {
-  size: 'base'
-});
+
+withDefaults(
+  defineProps<{
+    size?: 'base' | 'lg' | 'xl';
+  }>(),
+  {
+    size: 'base',
+  },
+);
 </script>
 
 <template>

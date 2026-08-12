@@ -13,7 +13,9 @@ async function handleSave() {
     </template>
     <template #footer>
       <div class="flex w-full justify-end gap-2">
-        <UButton @click="handleSave" :loading="commissionFormStore.insertBusy">Save</UButton>
+        <UButton @click="handleSave" :loading="commissionFormStore.insertBusy"
+          >Save</UButton
+        >
       </div>
     </template>
   </USlideover>

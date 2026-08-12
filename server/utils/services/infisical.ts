@@ -1,5 +1,11 @@
-import { InfisicalSDK } from "@infisical/sdk";
-import type { CreateSecretResponse, UpdateSecretResponse, ListSecretsResponse, DeleteSecretResponse, Secret } from "@infisical/sdk";
+import type {
+  CreateSecretResponse,
+  DeleteSecretResponse,
+  ListSecretsResponse,
+  Secret,
+  UpdateSecretResponse,
+} from '@infisical/sdk';
+import { InfisicalSDK } from '@infisical/sdk';
 
 /**
  * Initializes the Infisical SDK with the required configuration.
@@ -23,7 +29,7 @@ const _useInfisicalAuth = async () => {
 
   await infisical.auth().universalAuth.login({
     clientId: INFISICAL_CLIENT_ID,
-    clientSecret: INFISICAL_CLIENT_SECRET
+    clientSecret: INFISICAL_CLIENT_SECRET,
   });
   return infisical;
 };
@@ -35,46 +41,65 @@ const _useInfisicalAuth = async () => {
 export const useInfisical = async () => {
   const instance = await _useInfisicalAuth();
 
-  async function getSecret(secretName: string, environment = DEFAULT_ENVIRONMENT): Promise<Secret> {
-    if (!process.env.INFISICAL_PROJECT_ID) throw new Error('Missing Infisical project ID');
+  async function getSecret(
+    secretName: string,
+    environment = DEFAULT_ENVIRONMENT,
+  ): Promise<Secret> {
+    if (!process.env.INFISICAL_PROJECT_ID)
+      throw new Error('Missing Infisical project ID');
     return await instance.secrets().getSecret({
-      environment, secretName,
-      projectId: process.env.INFISICAL_PROJECT_ID
+      environment,
+      secretName,
+      projectId: process.env.INFISICAL_PROJECT_ID,
     });
   }
 
-  async function setSecret(secretName: string, secretValue: string, environment = DEFAULT_ENVIRONMENT): Promise<CreateSecretResponse|UpdateSecretResponse> {
-    if (!process.env.INFISICAL_PROJECT_ID) throw new Error('Missing Infisical project ID');
+  async function setSecret(
+    secretName: string,
+    secretValue: string,
+    environment = DEFAULT_ENVIRONMENT,
+  ): Promise<CreateSecretResponse | UpdateSecretResponse> {
+    if (!process.env.INFISICAL_PROJECT_ID)
+      throw new Error('Missing Infisical project ID');
     // If the secret already exists, update it; otherwise, create a new secret.
     let alreadyExists = false;
     try {
       await getSecret(secretName, environment); // Check if the secret exists, if not it will throw an error.
       alreadyExists = true;
-    } catch (error) {}
+    } catch (_error) {}
 
     if (alreadyExists) {
       return await instance.secrets().updateSecret(secretName, {
-        environment, secretValue,
+        environment,
+        secretValue,
         projectId: process.env.INFISICAL_PROJECT_ID,
       });
     }
 
     return await instance.secrets().createSecret(secretName, {
-      environment, secretValue,
+      environment,
+      secretValue,
       projectId: process.env.INFISICAL_PROJECT_ID,
     });
   }
 
-  async function deleteSecret(secretName: string, environment = DEFAULT_ENVIRONMENT): Promise<DeleteSecretResponse> {
-    if (!process.env.INFISICAL_PROJECT_ID) throw new Error('Missing Infisical project ID');
+  async function deleteSecret(
+    secretName: string,
+    environment = DEFAULT_ENVIRONMENT,
+  ): Promise<DeleteSecretResponse> {
+    if (!process.env.INFISICAL_PROJECT_ID)
+      throw new Error('Missing Infisical project ID');
     return await instance.secrets().deleteSecret(secretName, {
       environment,
       projectId: process.env.INFISICAL_PROJECT_ID,
     });
   }
 
-  async function listSecrets(environment = DEFAULT_ENVIRONMENT): Promise<ListSecretsResponse> {
-    if (!process.env.INFISICAL_PROJECT_ID) throw new Error('Missing Infisical project ID');
+  async function listSecrets(
+    environment = DEFAULT_ENVIRONMENT,
+  ): Promise<ListSecretsResponse> {
+    if (!process.env.INFISICAL_PROJECT_ID)
+      throw new Error('Missing Infisical project ID');
     return await instance.secrets().listSecrets({
       environment,
       projectId: process.env.INFISICAL_PROJECT_ID,
@@ -87,5 +112,5 @@ export const useInfisical = async () => {
     deleteSecret,
     listSecrets,
     infisical: await _useInfisicalAuth(),
-  }
+  };
 };

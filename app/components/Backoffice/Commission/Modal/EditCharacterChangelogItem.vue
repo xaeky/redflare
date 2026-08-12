@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { success } from 'zod/v4';
-
 const commissionFormStore = useCommissionFormStore();
 
 const props = defineProps<{
-  changelogIndex: number
-  characterIndex: number
+  changelogIndex: number;
+  characterIndex: number;
 }>();
 
-const changelogItemState = commissionFormStore.formState.characters[props.characterIndex]?.changelog[props.changelogIndex];
+const changelogItemState =
+  commissionFormStore.formState.characters[props.characterIndex]?.changelog[
+    props.changelogIndex
+  ];
 
-const emit = defineEmits<{
-  (e: 'remove'): void
-}>();
+const emit = defineEmits<(e: 'remove') => void>();
 const toast = useToast();
 const tempFile = ref<File | null>(null);
 const tempFileUploading = ref(false);
@@ -21,9 +20,9 @@ const dateForInput = computed({
   get() {
     const raw = changelogItemState?.date;
     if (!raw) return '';
-    const hasTZ = /[zZ]|[+\-]\d{2}:?\d{2}$/.test(raw);
-    const d = hasTZ ? new Date(raw) : new Date(raw + 'Z');
-    if (isNaN(d.getTime())) return '';
+    const hasTZ = /[zZ]|[+-]\d{2}:?\d{2}$/.test(raw);
+    const d = hasTZ ? new Date(raw) : new Date(`${raw}Z`);
+    if (Number.isNaN(d.getTime())) return '';
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   },
   set(val: string) {
@@ -33,26 +32,34 @@ const dateForInput = computed({
     const [datePart, timePart = '00:00:00'] = val.split('T');
     const [y, m, day] = (datePart as string).split('-').map(Number);
     const [hh = 0, mm = 0, ss = 0] = timePart.split(':').map(Number);
-    const localDate = new Date((y as number), (m ?? 1) - 1, day ?? 1, hh, mm, ss);
+    const localDate = new Date(y as number, (m ?? 1) - 1, day ?? 1, hh, mm, ss);
     changelogItemState.date = localDate.toISOString().replace(/\.\d{3}Z$/, 'Z');
-  }
+  },
 });
 
 const getUploadSignedUrl = async (file: File) => {
-  return useAPI<{ success: boolean, url?: string, id?: string }>('/api/storage/signedUpload', {
-    method: 'POST',
-    body: { destinationPrefix: 'avatars', fileName: file.name, fileContentType: file.type }
-  });
+  return useAPI<{ success: boolean; url?: string; id?: string }>(
+    '/api/storage/signedUpload',
+    {
+      method: 'POST',
+      body: {
+        destinationPrefix: 'avatars',
+        fileName: file.name,
+        fileContentType: file.type,
+      },
+    },
+  );
 };
 const handleFileUpload = async (file: File) => {
   const { url, id } = await getUploadSignedUrl(file);
   if (!url || !id) return { success: false };
   const uploadResult = await $fetch(url, {
-    method: 'PUT', body: file,
+    method: 'PUT',
+    body: file,
     headers: {
       'Content-Type': file.type,
-      'x-amz-meta-original-name': file.name
-    }
+      'x-amz-meta-original-name': file.name,
+    },
   }).catch(() => {
     throw new Error('Failed to upload file to storage');
   });
@@ -61,43 +68,67 @@ const handleFileUpload = async (file: File) => {
 const handleFileRemove = async (attachmentId: string) => {
   if (!changelogItemState) return;
   if (!attachmentId) return;
-  const thisAttachment = commissionFormStore.additionalState.attachments[attachmentId];
-  const secondaryModal = toast.add({ description: 'Removing file...', color: 'neutral' });
+  const thisAttachment =
+    commissionFormStore.additionalState.attachments[attachmentId];
+  const secondaryModal = toast.add({
+    description: 'Removing file...',
+    color: 'neutral',
+  });
   try {
-    await useAPI('/api/storage', { method: 'DELETE', body: { id: attachmentId, fileType: 'avatarFile', bucketType: thisAttachment?.unconfirmed ? 'temp' : 'default' } });
-    toast.add({ description: `File ${thisAttachment?.filename} has been removed`, color: 'success' });
+    await useAPI('/api/storage', {
+      method: 'DELETE',
+      body: {
+        id: attachmentId,
+        fileType: 'avatarFile',
+        bucketType: thisAttachment?.unconfirmed ? 'temp' : 'default',
+      },
+    });
+    toast.add({
+      description: `File ${thisAttachment?.filename} has been removed`,
+      color: 'success',
+    });
   } catch {
     toast.add({ description: 'Failed to remove file', color: 'error' });
   } finally {
     toast.remove(secondaryModal.id);
-    changelogItemState.attachments = changelogItemState.attachments?.filter(a => a !== attachmentId) || [];
+    changelogItemState.attachments =
+      changelogItemState.attachments?.filter((a) => a !== attachmentId) || [];
   }
 };
 const handleFileRemoveForm = (attachmentId: string) => {
-  const thisAttachment = commissionFormStore.additionalState.attachments[attachmentId];
+  const thisAttachment =
+    commissionFormStore.additionalState.attachments[attachmentId];
   useConfirmationModal({
     message: `Are you sure you want to remove the ${thisAttachment?.filename}? This action cannot be undone.`,
     confirmLabel: 'Remove file',
     danger: true,
-    onConfirm: () => handleFileRemove(attachmentId)
+    onConfirm: () => handleFileRemove(attachmentId),
   });
 };
 const handleVersionRemove = async () => {
   useConfirmationModal({
-    message: 'Are you sure you want to remove this version? This action cannot be undone. Files will also be removed from storage.',
+    message:
+      'Are you sure you want to remove this version? This action cannot be undone. Files will also be removed from storage.',
     confirmLabel: 'Remove version',
     danger: true,
     onConfirm: async () => {
       try {
         // Remove all attached files by using Promise.all
-        if (changelogItemState?.attachments && changelogItemState.attachments.length > 0) {
-          await Promise.all(changelogItemState.attachments.map(attId => handleFileRemove(attId)));
+        if (
+          changelogItemState?.attachments &&
+          changelogItemState.attachments.length > 0
+        ) {
+          await Promise.all(
+            changelogItemState.attachments.map((attId) =>
+              handleFileRemove(attId),
+            ),
+          );
         }
         emit('remove');
-      } catch (e) {
-        toast.add({ description: 'Failed to remove version', color: 'error' });
+      } catch (_error) {
+        invokeErrorToast({ description: 'Failed to remove version' });
       }
-    }
+    },
   });
 };
 
@@ -107,9 +138,13 @@ watch(tempFile, async (newFile) => {
   toast.add({ description: 'Uploading file...', color: 'neutral' });
   const result = await handleFileUpload(newFile);
   tempFileUploading.value = false;
-  if (result && result.success) toast.add({ description: 'Uploaded file successfully', color: 'success' });
-  else return toast.add({ description: 'Failed to upload file', color: 'error' });
-  const toastToRemove = toast.toasts.value.find(t => t.description === 'Uploading file...');
+  if (result?.success)
+    toast.add({ description: 'Uploaded file successfully', color: 'success' });
+  else
+    return toast.add({ description: 'Failed to upload file', color: 'error' });
+  const toastToRemove = toast.toasts.value.find(
+    (t) => t.description === 'Uploading file...',
+  );
   if (toastToRemove) toast.remove(toastToRemove.id);
   if (!changelogItemState) return;
   changelogItemState.attachments ||= [];
@@ -119,7 +154,7 @@ watch(tempFile, async (newFile) => {
     filename: newFile.name,
     filetype: getContentTypeByExtension(newFile.name),
     size: newFile.size,
-    unconfirmed: true // Mark as unconfirmed since this file is not saved in the permanent storage yet.
+    unconfirmed: true, // Mark as unconfirmed since this file is not saved in the permanent storage yet.
   });
   // Push attachment ID to changelog attachments
   changelogItemState.attachments?.push(result?.id as string);
@@ -128,19 +163,34 @@ watch(tempFile, async (newFile) => {
 </script>
 
 <template>
-  <div class="space-y-2 p-4 bg-muted/50 rounded-lg shadow-md" v-if="changelogItemState">
+  <div
+    class="space-y-2 p-4 bg-muted/50 rounded-lg shadow-md"
+    v-if="changelogItemState"
+  >
     <div class="flex gap-4">
       <UFormField label="Date" name="date" :required="true" class="flex-1">
         <UInput v-model="dateForInput" class="w-full" type="datetime-local" />
       </UFormField>
       <UFormField label="Version" name="version" :required="true">
-        <UInput v-model="changelogItemState.version" class="w-full font-mono" type="text" />
+        <UInput
+          v-model="changelogItemState.version"
+          class="w-full font-mono"
+          type="text"
+        />
       </UFormField>
     </div>
     <div class="space-y-2">
       <span class="text-sm">Changes</span>
-      <div v-for="(_item, itemIndex) in changelogItemState.items" :key="itemIndex" class="flex items-center gap-2">
-        <UInput v-model="changelogItemState.items[itemIndex]" placeholder="Describe the change made..." class="w-full" />
+      <div
+        v-for="(_item, itemIndex) in changelogItemState.items"
+        :key="itemIndex"
+        class="flex items-center gap-2"
+      >
+        <UInput
+          v-model="changelogItemState.items[itemIndex]"
+          placeholder="Describe the change made..."
+          class="w-full"
+        />
         <UButton
           icon="i-lucide-trash-2"
           color="error"
@@ -150,24 +200,39 @@ watch(tempFile, async (newFile) => {
         />
       </div>
       <div class="flex justify-start">
-        <UButton color="neutral" variant="soft" @click="() => { changelogItemState.items.push('') }" label="Add change" />
+        <UButton
+          color="neutral"
+          variant="soft"
+          @click="() => { changelogItemState.items.push('') }"
+          label="Add change"
+        />
       </div>
     </div>
     <div class="space-y-2">
       <h3>Attachments</h3>
       <div class="flex items-center gap-4">
-        <div v-for="attachment in changelogItemState.attachments" :key="attachment">
-          <UTooltip class="w-full h-full" :text="commissionFormStore.additionalState.attachments[attachment]?.filename || 'Unknown file'">
-            <div class="rf-backoffice-commission-modal-file" @click.stop="handleFileRemoveForm(attachment)">
+        <div
+          v-for="attachment in changelogItemState.attachments"
+          :key="attachment"
+        >
+          <UTooltip
+            class="w-full h-full"
+            :text="commissionFormStore.additionalState.attachments[attachment]?.filename || 'Unknown file'"
+          >
+            <button
+              type="button"
+              class="rf-backoffice-commission-modal-file"
+              @click.stop="handleFileRemoveForm(attachment)"
+            >
               <UIcon name="i-lucide-file-text" />
-            </div>
+            </button>
           </UTooltip>
         </div>
         <div class="rf-backoffice-commission-modal-file empty">
           <UFileUpload
             v-model="tempFile"
             variant="button"
-            :accept="getAllowedAttachmentExtensions().map(ext => '.' + ext).join(',')"
+            :accept="getAllowedAttachmentExtensions().map(ext => `.${ext}`).join(',')"
             class="w-16 h-16"
             :disabled="tempFileUploading"
           />
@@ -175,13 +240,19 @@ watch(tempFile, async (newFile) => {
       </div>
     </div>
     <div v-if="changelogItemState" class="flex justify-end">
-      <UButton color="error" variant="soft" @click="handleVersionRemove" label="Remove version" icon="i-lucide-trash-2" />
+      <UButton
+        color="error"
+        variant="soft"
+        @click="handleVersionRemove"
+        label="Remove version"
+        icon="i-lucide-trash-2"
+      />
     </div>
   </div>
 </template>
 
 <style scoped>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 .rf-backoffice-commission-modal-file {
   @apply w-16 h-16 rounded-lg cursor-pointer flex items-center justify-center bg-muted/50 hover:bg-muted/70 duration-150;

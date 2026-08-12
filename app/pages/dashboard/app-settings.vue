@@ -4,7 +4,7 @@ definePageMeta({
   description: 'Manage Redflare global settings.',
   middleware: 'auth',
   layout: 'backoffice',
-  keepalive: true
+  keepalive: true,
 });
 </script>
 

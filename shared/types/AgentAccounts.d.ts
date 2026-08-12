@@ -1,5 +1,5 @@
-import type { WithId } from 'mongodb';
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
+import type { WithId } from 'mongodb';
 
 export type AgentAccountRaw = WithId<{
   username: string;
@@ -24,7 +24,9 @@ export type AgentAccountInsertOptions = {
   permissions?: Permission[];
 };
 
-export type AgentAccountUpdateOptions = Partial<Pick<AgentAccount, 'displayName' | 'permissions' | 'settings'>>;
+export type AgentAccountUpdateOptions = Partial<
+  Pick<AgentAccount, 'displayName' | 'permissions' | 'settings'>
+>;
 
 export type AgentAccountPasskeyCredentialResponse = {
   id: string;
@@ -34,13 +36,14 @@ export type AgentAccountPasskeyCredentialResponse = {
   transports?: AuthenticatorTransportFuture[];
 };
 
-export type AgentAccountPasskeyCredential = AgentAccountPasskeyCredentialResponse & {
-  belongsTo: string; // User ID of the account this credential belongs to
-  alias: string;
-  createdAt: string;
-  updatedAt: string;
-  lastUsedAt: string | null;
-};
+export type AgentAccountPasskeyCredential =
+  AgentAccountPasskeyCredentialResponse & {
+    belongsTo: string; // User ID of the account this credential belongs to
+    alias: string;
+    createdAt: string;
+    updatedAt: string;
+    lastUsedAt: string | null;
+  };
 
 export type AgentAccountProfile = {
   displayName: string | null;
@@ -58,4 +61,12 @@ export type AgentConfirmIntent = {
   confirmationToken: string;
 };
 
-export type AgentConfirmIntentCreateOptions = Omit<AgentConfirmIntent, 'accountId' | 'createdAt' | 'expiresAt' | 'confirmed' | 'confirmedAt' | 'confirmationToken'>;
+export type AgentConfirmIntentCreateOptions = Omit<
+  AgentConfirmIntent,
+  | 'accountId'
+  | 'createdAt'
+  | 'expiresAt'
+  | 'confirmed'
+  | 'confirmedAt'
+  | 'confirmationToken'
+>;

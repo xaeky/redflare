@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { ModalGenericConfirmation, BackofficeCommissionModalEditBillingTransaction } from '#components';
 import type { DropdownMenuItem } from '@nuxt/ui';
+import {
+  BackofficeCommissionModalEditBillingTransaction,
+  ModalGenericConfirmation,
+} from '#components';
 
 const toast = useToast();
 const overlay = useOverlay();
 const clipboard = useClipboard();
 const props = defineProps<{
-  commission: string,
-  transaction: Deserialized<PaymentTransaction>
+  commission: string;
+  transaction: Deserialized<PaymentTransaction>;
 }>();
 const emit = defineEmits<{
-  (e: 'deleted', id: string): void,
-  (e: 'updated'): void
+  (e: 'deleted', id: string): void;
+  (e: 'updated'): void;
 }>();
 
 // Delete transaction log method
@@ -21,66 +24,74 @@ const billingTransactionDeleteHandle = () => {
   async function tryDelete() {
     try {
       billingTransactionDeleteBusy.value = true;
-      await useAPI(`/api/commissions/${props.commission}/billing/${props.transaction._id}`, {
-        method: 'DELETE'
-      });
+      await useAPI(
+        `/api/commissions/${props.commission}/billing/${props.transaction._id}`,
+        {
+          method: 'DELETE',
+        },
+      );
       toast.add({
         title: 'Transaction deleted',
         description: 'The billing transaction has been deleted successfully.',
-        color: 'success'
+        color: 'success',
       });
       emit('deleted', props.transaction._id as unknown as string);
     } catch (error) {
       toast.add({
         title: 'Error deleting transaction',
         description: (error as Error).message,
-        color: 'error'
+        color: 'error',
       });
     }
   }
-  const billingTransactionDeleteModal = overlay.create(ModalGenericConfirmation);
+  const billingTransactionDeleteModal = overlay.create(
+    ModalGenericConfirmation,
+  );
   billingTransactionDeleteModal.open({
     title: 'Remove payment transaction',
-    message: 'Are you sure you want to remove this payment transaction? When a transaction has no associated commissions, it will be deleted from the database entirely.',
+    message:
+      'Are you sure you want to remove this payment transaction? When a transaction has no associated commissions, it will be deleted from the database entirely.',
     confirmLabel: 'Remove',
     danger: true,
-    onConfirm: tryDelete
+    onConfirm: tryDelete,
   });
-}
+};
 
 const transactionApprovedAt = computed(() => {
-  return new Intl.DateTimeFormat('en-US', { timeStyle: 'medium', dateStyle: 'medium' }).format(new Date(props.transaction.approved_at));
+  return new Intl.DateTimeFormat('en-US', {
+    timeStyle: 'medium',
+    dateStyle: 'medium',
+  }).format(new Date(props.transaction.approved_at));
 });
-const transactionLocales: Record<string, string> = {
-  'USD': 'en-US',
-  'USDT': 'en-US',
-  'USDC': 'en-US',
-  'ARS': 'es-AR'
-}
+
 const transactionFormattedProcessor = computed(() => {
   const processors: Record<string, string> = {
-    'paypal': 'PayPal',
-    'mercadopago': 'Mercado Pago'
+    paypal: 'PayPal',
+    mercadopago: 'Mercado Pago',
   };
-  return processors[props.transaction.payment_processor] || props.transaction.payment_processor;
-})
-const transactionLocale = computed(() => getBillingCurrencyLocales(props.transaction.payment_currency) || 'en-US');
+  return (
+    processors[props.transaction.payment_processor] ||
+    props.transaction.payment_processor
+  );
+});
+const transactionLocale = computed(
+  () =>
+    getBillingCurrencyLocales(props.transaction.payment_currency) || 'en-US',
+);
 const transactionAmounts = {
   billed: computed(() => {
-    return new Intl.NumberFormat(
-      transactionLocale.value,
-      { style: 'currency', currency: getBillingCurrencySymbol(props.transaction.payment_currency) }
-    )
-    .format(props.transaction.total_paid_amount);
+    return new Intl.NumberFormat(transactionLocale.value, {
+      style: 'currency',
+      currency: getBillingCurrencySymbol(props.transaction.payment_currency),
+    }).format(props.transaction.total_paid_amount);
   }),
   received: computed(() => {
-    return new Intl.NumberFormat(
-      transactionLocale.value,
-      { style: 'currency', currency: getBillingCurrencySymbol(props.transaction.payment_currency) }
-    )
-    .format(props.transaction.net_received_amount);
-  })
-}
+    return new Intl.NumberFormat(transactionLocale.value, {
+      style: 'currency',
+      currency: getBillingCurrencySymbol(props.transaction.payment_currency),
+    }).format(props.transaction.net_received_amount);
+  }),
+};
 const transactionDropdownItems = ref<DropdownMenuItem[][]>([
   [
     {
@@ -89,50 +100,56 @@ const transactionDropdownItems = ref<DropdownMenuItem[][]>([
       onSelect: async () => {
         try {
           await clipboard.copy(props.transaction._id as unknown as string);
-          toast.add({
-            title: 'Transaction ID has been copied to clipboard.',
-            duration: 2000
-          });
-        } catch (error) {
-          toast.add({
-            title: 'Error copying transaction ID to clipboard.',
-            color: 'error'
+          invokeInfoToast({ title: 'Transaction ID copied to clipboard' });
+        } catch (_error) {
+          invokeErrorToast({
+            title: 'Error copying transaction ID to clipboard',
           });
         }
-      }
+      },
     },
     {
       label: 'Edit transaction',
       icon: 'i-heroicons-pencil-16-solid',
       onSelect: () => {
-        const editModal = overlay.create(BackofficeCommissionModalEditBillingTransaction, { destroyOnClose: true });
+        const editModal = overlay.create(
+          BackofficeCommissionModalEditBillingTransaction,
+          { destroyOnClose: true },
+        );
         editModal.open({
           commission: props.commission,
           transaction: props.transaction,
           onSubmitted: () => {
             editModal.close();
             emit('updated');
-          }
+          },
         });
-      }
+      },
     },
     {
       label: 'Remove transaction',
       icon: 'i-heroicons-trash-16-solid',
       color: 'error',
-      onSelect: () => billingTransactionDeleteHandle()
-    }
-  ]
+      onSelect: () => billingTransactionDeleteHandle(),
+    },
+  ],
 ]);
 </script>
 
 <template>
-  <div class="border border-neutral-800 rounded-lg p-4" :class="{ 'opacity-50': billingTransactionDeleteBusy }">
+  <div
+    class="border border-neutral-800 rounded-lg p-4"
+    :class="{ 'opacity-50': billingTransactionDeleteBusy }"
+  >
     <div class="space-y-4">
       <div class="flex items-center justify-between">
         <span v-text="transactionApprovedAt" class="text-sm" />
         <UDropdownMenu :items="transactionDropdownItems">
-          <UButton icon="i-heroicons-ellipsis-vertical-20-solid" variant="subtle" color="neutral" />
+          <UButton
+            icon="i-heroicons-ellipsis-vertical-20-solid"
+            variant="subtle"
+            color="neutral"
+          />
         </UDropdownMenu>
       </div>
       <div v-if="transaction.internal_note" class="p-3 bg-muted rounded-md">
@@ -146,7 +163,10 @@ const transactionDropdownItems = ref<DropdownMenuItem[][]>([
         </li>
         <li class="flex items-center justify-between gap-8">
           <span>External payment ID</span>
-          <span v-text="transaction.payment_ext_id" class="flex-1 font-mono truncate text-right" />
+          <span
+            v-text="transaction.payment_ext_id"
+            class="flex-1 font-mono truncate text-right"
+          />
         </li>
       </ul>
       <div class="space-y-2">

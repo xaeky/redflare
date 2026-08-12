@@ -1,4 +1,4 @@
-import { fileURLToPath } from "node:url";
+import { fileURLToPath } from 'node:url';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -15,10 +15,10 @@ export default defineNuxtConfig({
       { baseName: 'img', dir: 'assets/img' },
     ],
     rollupConfig: {
-      external: ['uncrypto', 'ofetch']
-    }
+      external: ['uncrypto', 'ofetch'],
+    },
   },
-  imports: { dirs: ['shared/enums'], },
+  imports: { dirs: ['shared/enums'] },
   alias: {
     '#models': fileURLToPath(new URL('./server/utils/models', import.meta.url)),
   },
@@ -46,17 +46,17 @@ export default defineNuxtConfig({
   vite: {
     plugins: [require('vite-svg-loader')()],
     server: {
-      allowedHosts: ['local.xavis.redflare']
+      allowedHosts: ['local.xavis.redflare'],
     },
     optimizeDeps: {
-      include: ['zod', 'lodash', 'three', '@internationalized/date']
-    }
+      include: ['zod', 'lodash', 'three', '@internationalized/date'],
+    },
   },
   shiki: {
-    defaultTheme: 'vitesse-dark'
+    defaultTheme: 'vitesse-dark',
   },
   auth: {
-    webAuthn: true
+    webAuthn: true,
   },
   runtimeConfig: {
     public: {
@@ -64,18 +64,18 @@ export default defineNuxtConfig({
       redflare_env: '',
       turnstile: {
         site_key: '',
-      }
+      },
     },
     backoffice: {
       mongo: '',
       mongoDb: '',
-      service: ''
+      service: '',
     },
     frontoffice: {
-      sessionPassword: ''
+      sessionPassword: '',
     },
     turnstile: {
-      secret_key: ''
-    }
-  }
-})
+      secret_key: '',
+    },
+  },
+});

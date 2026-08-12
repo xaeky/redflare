@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import _ from 'lodash';
+import {
+  BackofficeBasesAddSlideover,
+  BackofficeBasesEditSlideover,
+} from '#components';
 import { avatarBasesQuery } from '~/queries/commissions';
-import { BackofficeBasesAddSlideover, BackofficeBasesEditSlideover } from '#components';
 
-const { data:remoteBases, isLoading:remoteBasesBusy, refetch:remoteBasesRefetch } = useQuery(avatarBasesQuery);
+const {
+  data: remoteBases,
+  isLoading: remoteBasesBusy,
+  refetch: remoteBasesRefetch,
+} = useQuery(avatarBasesQuery);
 
 // Overlays
 const overlay = useOverlay();
@@ -18,19 +24,21 @@ function handleEditBaseButton(base: DeserializedAvatarBase) {
   editSlideoverOverlay.open({ base });
 }
 
-const actions:PageAction[] = [
+const actions: PageAction[] = [
   {
     label: 'Refresh',
     icon: 'i-heroicons-arrow-path-16-solid',
     color: 'neutral',
     variant: 'subtle',
-    action: () => { remoteBasesRefetch(); }
+    action: () => {
+      remoteBasesRefetch();
+    },
   },
   {
     label: 'New base',
     icon: 'i-heroicons-plus-16-solid',
-    action: handleAddBaseButton
-  }
+    action: handleAddBaseButton,
+  },
 ];
 
 definePageMeta({
@@ -38,22 +46,30 @@ definePageMeta({
   description: 'Manage your avatar bases for commissions',
   middleware: 'auth',
   layout: 'backoffice',
-  keepalive: true
+  keepalive: true,
 });
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
-    <BackofficeHeaderActions :actions />
+    <BackofficeHeaderActions :actions="actions" />
     <UAlert
       description="When managing commissions, you'll need to annotate the avatar bases that you own."
-      color="neutral" variant="soft" icon="i-lucide-info"
+      color="neutral"
+      variant="soft"
+      icon="i-lucide-info"
     />
-    <div v-if="remoteBasesBusy">
-      Fetching remote avatar bases...
-    </div>
-    <ul v-else-if="remoteBases && !remoteBasesBusy" class="grid grid-cols-2 gap-4">
-      <BackofficeBasesGridItem v-for="base in remoteBases" :key="base._id" :base @edit="handleEditBaseButton" />
+    <div v-if="remoteBasesBusy">Fetching remote avatar bases...</div>
+    <ul
+      v-else-if="remoteBases && !remoteBasesBusy"
+      class="grid grid-cols-2 gap-4"
+    >
+      <BackofficeBasesGridItem
+        v-for="base in remoteBases"
+        :key="base._id"
+        :base="base"
+        @edit="handleEditBaseButton"
+      />
     </ul>
   </div>
 </template>

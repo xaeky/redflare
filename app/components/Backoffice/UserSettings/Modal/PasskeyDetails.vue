@@ -6,9 +6,7 @@ const props = defineProps<{
   overlay: OverlayInstance;
 }>();
 
-const emit = defineEmits<{
-  (e: 'delete', credentialId: string): void;
-}>();
+const emit = defineEmits<(e: 'delete', credentialId: string) => void>();
 
 const handleClose = () => props.overlay.close();
 const handleDelete = () => {
@@ -30,11 +28,15 @@ const isMobile = useMediaQuery('(max-width: 640px)');
           </div>
           <div>
             <div class="text-xs text-muted">Created</div>
-            <div>{{ useDateFormat(passkey.createdAt, 'MMM Do YYYY, HH:MM') }}</div>
+            <div>
+              {{ useDateFormat(passkey.createdAt, 'MMM Do YYYY, HH:MM') }}
+            </div>
           </div>
           <div>
             <div class="text-xs text-muted">Last used</div>
-            <div>{{ passkey.lastUsedAt ? useDateFormat(passkey.lastUsedAt, 'MMM Do YYYY, HH:MM') : 'Never' }}</div>
+            <div>
+              {{ passkey.lastUsedAt ? useDateFormat(passkey.lastUsedAt, 'MMM Do YYYY, HH:MM') : 'Never' }}
+            </div>
           </div>
           <div>
             <div class="text-xs text-muted">Backed up</div>
@@ -54,10 +56,19 @@ const isMobile = useMediaQuery('(max-width: 640px)');
     <template #footer>
       <div class="flex flex-col sm:flex-row gap-2 justify-between w-full">
         <UButton
-          icon="i-heroicons-trash-16-solid" label="Delete passkey" color="error"
-          @click="handleDelete" :block="isMobile"
+          icon="i-heroicons-trash-16-solid"
+          label="Delete passkey"
+          color="error"
+          @click="handleDelete"
+          :block="isMobile"
         />
-        <UButton color="neutral" variant="subtle" label="Close" @click="handleClose" :block="isMobile" />
+        <UButton
+          color="neutral"
+          variant="subtle"
+          label="Close"
+          @click="handleClose"
+          :block="isMobile"
+        />
       </div>
     </template>
   </UModal>

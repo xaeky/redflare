@@ -1,45 +1,59 @@
 <script setup lang="ts">
-import { customersQuery } from '~/queries/customers';
 import { BackofficeCustomerAddSlideover } from '#components';
+import { customersQuery } from '~/queries/customers';
 
 const toast = useToast();
 const overlay = useOverlay();
 const tableSorting = ref([{ id: 'created_at', desc: true }]);
 const tablePage = ref(1);
-const { data:customers, refresh, asyncStatus, state } = useQuery(customersQuery, () => ({
+const {
+  data: customers,
+  refresh,
+  asyncStatus,
+  state,
+} = useQuery(customersQuery, () => ({
   sorting: {
     by: tableSorting.value[0]?.id || 'created_at',
-    order: tableSorting.value[0]?.desc ? -1 : 1
+    order: tableSorting.value[0]?.desc ? -1 : 1,
   },
-  page: tablePage.value
+  page: tablePage.value,
 }));
 
-watch(state, newState => {
+watch(state, (newState) => {
   const isError = newState.status === 'error';
-  if (isError) toast.add({
-    color: 'error',
-    title: 'Failed to fetch customers'
-  });
+  if (isError)
+    toast.add({
+      color: 'error',
+      title: 'Failed to fetch customers',
+    });
 });
 
-watch(tableSorting, () => {
-  refresh();
-}, { immediate: true, deep: true });
+watch(
+  tableSorting,
+  () => {
+    refresh();
+  },
+  { immediate: true, deep: true },
+);
 
-const actions:PageAction[] = [
+const actions: PageAction[] = [
   {
     label: 'Refresh',
     icon: 'i-heroicons-arrow-path-16-solid',
     color: 'neutral',
     variant: 'subtle',
-    action: refresh
+    action: refresh,
   },
   {
     label: 'Add customer',
     icon: 'i-heroicons-plus-16-solid',
-    action: () => { overlay.create(BackofficeCustomerAddSlideover, { destroyOnClose: true }).open(); },
-    testid: 'add-customer-button'
-  }
+    action: () => {
+      overlay
+        .create(BackofficeCustomerAddSlideover, { destroyOnClose: true })
+        .open();
+    },
+    testid: 'add-customer-button',
+  },
 ];
 
 definePageMeta({
@@ -47,18 +61,22 @@ definePageMeta({
   description: 'Manage your customers',
   middleware: 'auth',
   layout: 'backoffice',
-  keepalive: true
+  keepalive: true,
 });
 </script>
 
 <template>
   <div class="space-y-4">
-    <BackofficeHeaderActions :actions />
+    <BackofficeHeaderActions :actions="actions" />
     <div v-if="asyncStatus === 'loading'" class="space-y-4">
+      <!-- biome-ignore lint/correctness/useVueVForKey: generic list render -->
       <USkeleton class="w-full h-12" v-for="_ in new Array(4)" />
     </div>
-    <div v-else-if="customers && customers.data.length">
-      <BackofficeCustomerTable :customers="customers.data" v-model:sorting="tableSorting" />
+    <div v-else-if="customers?.data.length">
+      <BackofficeCustomerTable
+        :customers="customers.data"
+        v-model:sorting="tableSorting"
+      />
     </div>
     <div v-else-if="customers && !customers.data.length">
       No customers found!

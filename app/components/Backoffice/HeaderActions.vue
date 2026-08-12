@@ -12,8 +12,11 @@ defineProps<{
     <div class="flex items-center gap-4">
       <UButton
         v-for="(action, actionIndex) in actions"
-        :key="actionIndex" :icon="action.icon" :color="action.color"
-        :variant="action.variant" :label="action.label"
+        :key="actionIndex"
+        :icon="action.icon"
+        :color="action.color"
+        :variant="action.variant"
+        :label="action.label"
         :data-testid="action.testid"
         @click="action.action"
       />
@@ -22,7 +25,7 @@ defineProps<{
 </template>
 
 <style>
-@reference '~/assets/global.css';
+@reference "~/assets/global.css";
 
 .rf_pageheader_actions {
   @apply flex items-center gap-2 bg-neutral-950/25 p-4 rounded-lg justify-between select-none;

@@ -16,10 +16,10 @@ const wasConfirmed = ref(false);
 const thisFormRef = ref<ComponentExposed<typeof UForm>>();
 const passwordBusy = ref(false);
 const passwordSchema = z.object({
-  password: z.string().min(1, 'Password is required')
+  password: z.string().min(1, 'Password is required'),
 });
 const passwordState = reactive({
-  password: ''
+  password: '',
 });
 
 const handleConfirmation = async () => {
@@ -28,15 +28,19 @@ const handleConfirmation = async () => {
     await thisFormRef.value?.validate({});
     await useAPI(`/api/admin/confirmation/${props.intentionToken}`, {
       method: 'POST',
-      body: { password: passwordState.password }
+      body: { password: passwordState.password },
     });
     wasConfirmed.value = true;
     emit('confirmed');
   } catch (error) {
-    invokeErrorToast({ description: (error as any).data.message || 'An error occurred while confirming your password.' })
+    invokeErrorToast({
+      description:
+        (error as any).data.message ||
+        'An error occurred while confirming your password.',
+    });
   }
   passwordBusy.value = false;
-}
+};
 
 const isMobile = useMediaQuery('(max-width: 640px)');
 
@@ -54,9 +58,20 @@ onBeforeUnmount(() => {
         </div>
         <div class="space-y-4 flex-1">
           <p>Please enter your current password to confirm this action.</p>
-          <UForm ref="thisFormRef" :state="passwordState" :schema="passwordSchema" class="space-y-4">
+          <UForm
+            ref="thisFormRef"
+            :state="passwordState"
+            :schema="passwordSchema"
+            class="space-y-4"
+          >
             <UFormField label="Current Password" class="w-full" required>
-              <UInput type="password" required placeholder="Enter current password" v-model="passwordState.password" class="w-full" />
+              <UInput
+                type="password"
+                required
+                placeholder="Enter current password"
+                v-model="passwordState.password"
+                class="w-full"
+              />
             </UFormField>
           </UForm>
         </div>
@@ -64,7 +79,13 @@ onBeforeUnmount(() => {
     </template>
     <template #footer>
       <div class="flex flex-col sm:flex-row gap-2 justify-end w-full">
-        <UButton color="primary" label="Confirm" :loading="passwordBusy" @click="handleConfirmation" :block="isMobile" />
+        <UButton
+          color="primary"
+          label="Confirm"
+          :loading="passwordBusy"
+          @click="handleConfirmation"
+          :block="isMobile"
+        />
       </div>
     </template>
   </UModal>

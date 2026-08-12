@@ -1,4 +1,4 @@
-import { UserSession } from "#auth-utils";
+import type { UserSession } from '#auth-utils';
 
 export default defineEventHandler(async (event) => {
   await setUserSession(event, {

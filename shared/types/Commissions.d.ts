@@ -2,14 +2,26 @@ import type { OptionalId, WithId, WithoutId } from 'mongodb';
 
 // TODO: Unused!
 export enum CommissionFlagsType {
-  None           = 0,
-  HideCustomer   = 1 << 0,
+  None = 0,
+  HideCustomer = 1 << 0,
   HideCharacters = 1 << 1,
-  HidePayment    = 1 << 2,
-  HighPriority   = 1 << 3,
+  HidePayment = 1 << 2,
+  HighPriority = 1 << 3,
 }
-export type CommissionPaymentStatus = 'pending' | 'paid_auto' | 'paid_manual' | 'cancelled' | 'refunded' | 'chargeback' | 'disputed';
-export type CommissionPaymentStatusEditable = 'paid_manual' | 'cancelled' | 'refunded' | 'chargeback' | 'disputed';
+export type CommissionPaymentStatus =
+  | 'pending'
+  | 'paid_auto'
+  | 'paid_manual'
+  | 'cancelled'
+  | 'refunded'
+  | 'chargeback'
+  | 'disputed';
+export type CommissionPaymentStatusEditable =
+  | 'paid_manual'
+  | 'cancelled'
+  | 'refunded'
+  | 'chargeback'
+  | 'disputed';
 // Shared
 export type CommissionBaseRaw = OptionalId<{
   schemaVersion?: number;
@@ -25,13 +37,16 @@ export type CommissionBaseRaw = OptionalId<{
 }>;
 export type CommissionBase = Omit<CommissionBaseRaw, 'characters'> & {
   characters: CommissionCharacter[];
-}
+};
 export type DeserializedCommission = Deserialized<WithId<CommissionBase>> & {
   locked_fields?: {
     characters_count?: number;
-  }
+  };
 };
-export type CommissionOptions = Omit<CommissionBase, 'updated_at' | 'customer' | 'characters'> & {
+export type CommissionOptions = Omit<
+  CommissionBase,
+  'updated_at' | 'customer' | 'characters'
+> & {
   customer: string;
   characters: CommissionCharacterOptions[];
   payments: string[];
@@ -40,7 +55,10 @@ export type CommissionUpdate = CommissionOptions & {
   customer?: ObjectId;
   updated_at?: Date | string;
 };
-export type CommissionInsert = Omit<CommissionBase, 'characters' | 'customer' | 'payments'> & {
+export type CommissionInsert = Omit<
+  CommissionBase,
+  'characters' | 'customer' | 'payments'
+> & {
   customer: ObjectId;
   characters: CommissionCharacterOptions[];
 };
@@ -48,9 +66,17 @@ export type CommissionFilterOptions = {
   customer?: string;
   status?: CommissionStatusType | string;
 };
-export type CommissionPaymentOptions = Pick<CommissionPayment, 'currency' | 'income_amount' | 'public_note' | 'secure_note'> & { commission: string; };
-export type CommissionPaymentUpdate = Partial<Pick<CommissionPayment, 'public_note' | 'secure_note'>> & { state?: CommissionPaymentStatusEditable; };
-export type CommissionPaymentInsert = Omit<CommissionPayment, 'pid' | 'created_at' | 'updated_at'>;
+export type CommissionPaymentOptions = Pick<
+  CommissionPayment,
+  'currency' | 'income_amount' | 'public_note' | 'secure_note'
+> & { commission: string };
+export type CommissionPaymentUpdate = Partial<
+  Pick<CommissionPayment, 'public_note' | 'secure_note'>
+> & { state?: CommissionPaymentStatusEditable };
+export type CommissionPaymentInsert = Omit<
+  CommissionPayment,
+  'pid' | 'created_at' | 'updated_at'
+>;
 
 // Avatar bases
 export type AvatarBase = WithId<{
@@ -61,7 +87,10 @@ export type AvatarBase = WithId<{
   storefront_url: string | null;
   flags: AvatarBaseFlagsType;
 }>;
-export type AvatarBaseInsertOptions = Omit<WithoutId<AvatarBase>, 'created_at' | 'updated_at'>;
+export type AvatarBaseInsertOptions = Omit<
+  WithoutId<AvatarBase>,
+  'created_at' | 'updated_at'
+>;
 export type AvatarBaseUpdateOptions = Partial<AvatarBaseInsertOptions>;
 export type DeserializedAvatarBase = Deserialized<WithId<AvatarBase>>;
 
@@ -75,21 +104,24 @@ export type SerializedCommission = Omit<CommissionBase, 'customer'> & {
   };
   latest_payment: CommissionPayment;
 };
-export type SerializedCommissionCharacterOptions = Omit<CommissionCharacterOptions, 'commission'>;
+export type SerializedCommissionCharacterOptions = Omit<
+  CommissionCharacterOptions,
+  'commission'
+>;
 
 // Front-end types @ Frontoffice
 export type PublicSerializedCommission = {
   data: CommissionBase & {
     locked_fields?: {
       characters_count: number;
-    }
-  },
+    };
+  };
   attachments?: Record<string, CommissionCharacterAttachmentRaw>;
   customer: DeserializedCustomer;
-}
+};
 
 export type SingleCommissionResponse = {
   data: CommissionBaseRaw;
   attachments?: Record<string, CommissionCharacterAttachmentRaw>;
   customer: CustomerRaw;
-}
+};

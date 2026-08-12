@@ -3,14 +3,14 @@ export default defineEventHandler(async (event) => {
   await setPublicUserSession(event, {
     user: {
       username: customer.name,
-      id: customer.discord_id!,
+      id: customer.discord_id,
       discriminator: '0',
-      global_name: customer.name
+      global_name: customer.name,
     } as DiscordOAuthUser,
     secure: {
       access_token: 'test',
-      customer: customer._id.toString()
-    }
+      customer: customer._id.toString(),
+    },
   });
   await initCurrentUserSettings(event);
   logger.info(`Test public session claimed for customer ${customer._id}`);

@@ -1,24 +1,35 @@
-
 export default defineEventHandler(async (event) => {
   await hasPermission(event, 'create:payment');
-  const body = await readValidatedBody(event, commissionPaymentOptionsSchema.safeParse);
-  if (!body.success) throw createError({ status: 400, statusText: 'Invalid body' });
+  const body = await readValidatedBody(
+    event,
+    commissionPaymentOptionsSchema.safeParse,
+  );
+  if (!body.success)
+    throw createError({ status: 400, statusText: 'Invalid body' });
   const { id: commissionId } = await validateCommission(event);
   // Insert the new payment transaction item
   const billingModel = useBillingModel();
   const result = await billingModel.insertOne({
     ...body.data,
-    manual: true
+    manual: true,
   });
-  if (!result) throw createError({ status: 500, statusText: 'Failed to create payment' });
+  if (!result)
+    throw createError({ status: 500, statusText: 'Failed to create payment' });
   // Add payment ID to the commission's payments array
   const commissionModel = useCommissionModel();
-  const updateResult = await commissionModel.addTransactionToOne(commissionId, result.insertedId.toString());
-  if (!updateResult) throw createError({ status: 500, statusText: 'Failed to link transaction to commission' });
+  const updateResult = await commissionModel.addTransactionToOne(
+    commissionId,
+    result.insertedId.toString(),
+  );
+  if (!updateResult)
+    throw createError({
+      status: 500,
+      statusText: 'Failed to link transaction to commission',
+    });
   // Return the newly created payment
   event.context.audit = {
     transaction_id: result.insertedId.toString(),
-    body: body.data
+    body: body.data,
   };
   return result;
 });

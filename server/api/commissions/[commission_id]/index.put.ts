@@ -4,7 +4,12 @@ export default defineEventHandler(async (event) => {
   const { id: commissionId } = await validateCommission(event);
   // Parse request validated body
   const body = await readValidatedBody(event, commissionUpdateSchema.safeParse);
-  if (!body.success) throw createError({ status: 400, statusText: 'Invalid body', data: body.error });
+  if (!body.success)
+    throw createError({
+      status: 400,
+      statusText: 'Invalid body',
+      data: body.error,
+    });
 
   const safeCharacters = body.data.characters.map((c: any) => ({
     ...c,
@@ -21,8 +26,14 @@ export default defineEventHandler(async (event) => {
     logger.info('Confirming attachments for commission', { commissionId });
     await useCommissionModel().confirmAllAttachmentsFromOne(commissionId);
   } catch (error) {
-    logger.error('Failed to confirm attachments for commission', { commissionId, error });
-    throw createError({ status: 500, statusText: 'Failed to confirm attachments' });
+    logger.error('Failed to confirm attachments for commission', {
+      commissionId,
+      error,
+    });
+    throw createError({
+      status: 500,
+      statusText: 'Failed to confirm attachments',
+    });
   }
   event.context.audit = {
     commission_id: commissionId,

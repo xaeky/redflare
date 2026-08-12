@@ -9,7 +9,7 @@ interface DiscordUserCollectable {
     asset: string;
     label: string;
     palette: string;
-  }
+  };
 }
 
 interface DiscordUserPrimaryGuild {

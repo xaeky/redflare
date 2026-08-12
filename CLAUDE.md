@@ -44,8 +44,7 @@ A single commission can be viewed by either kind of user (or anonymously), and m
 
 `server/middleware/*` run in filename order for every request:
 1. `agent_auth.ts` — global auth gate. Every `/api/**` route is treated as restricted **unless** it's under `/api/auth`, `/api/_auth`, `/api/_nuxt_icon`, `/api/public`, or (test env only) `/api/test`. Restricted routes need either a valid session or the `X-RF-Service` header matching `runtime.backoffice.service` (used for server-to-server calls, e.g. from the "Geisha" service).
-2. `public_auth.ts` — currently a no-op pass-through for `/api/public` and `/commission` paths (session already resolved lazily via `getPublicUserSession`).
-3. `test_only.ts` — 404s any `/api/test/**` call unless `isTestEnv`.
+2. `test_only.ts` — 404s any `/api/test/**` call unless `isTestEnv`.
 
 `bypassAuthForDev(event)` (dev-only, header `X-RF-Bypass: 1`) skips auth entirely — used for local tooling, never active outside `NODE_ENV=development`.
 
