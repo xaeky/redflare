@@ -21,6 +21,7 @@ export default defineWebAuthnRegisterEventHandler({
       belongsTo: agentSession.user?.id as string,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      lastUsedAt: null
     } as AgentAccountPasskeyCredential;
     await useAgentAccountsModel().recordPasskeyCredential(curatedCredential);
   },

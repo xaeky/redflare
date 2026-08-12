@@ -32,16 +32,30 @@ export type AgentAccountPasskeyCredentialResponse = {
   counter: number;
   backedUp: boolean;
   transports?: AuthenticatorTransportFuture[];
-}
+};
 
 export type AgentAccountPasskeyCredential = AgentAccountPasskeyCredentialResponse & {
   belongsTo: string; // User ID of the account this credential belongs to
   alias: string;
   createdAt: string;
   updatedAt: string;
+  lastUsedAt: string | null;
 };
 
 export type AgentAccountProfile = {
   displayName: string | null;
   username: string;
-}
+};
+
+export type AgentConfirmIntent = {
+  action: string;
+
+  accountId: string;
+  createdAt: string;
+  expiresAt: string;
+  confirmed: boolean;
+  confirmedAt: string | null;
+  confirmationToken: string;
+};
+
+export type AgentConfirmIntentCreateOptions = Omit<AgentConfirmIntent, 'accountId' | 'createdAt' | 'expiresAt' | 'confirmed' | 'confirmedAt' | 'confirmationToken'>;

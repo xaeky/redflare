@@ -132,6 +132,22 @@ const deletePasskeyCredential = async (accountId: string, credentialId: string) 
   await collection.deleteOne({ id: credentialId, belongsTo: accountId });
 };
 
+const incrementPasskeyCounter = async (credentialId: string) => {
+  const collection = await useMongoCollection<AgentAccountPasskeyCredential>(collectionCredentialsName);
+  await collection.updateOne(
+    { id: credentialId },
+    { $inc: { counter: 1 } }
+  );
+};
+
+const recordPasskeyLastUsage = async (credentialId: string) => {
+  const collection = await useMongoCollection<AgentAccountPasskeyCredential>(collectionCredentialsName);
+  await collection.updateOne(
+    { id: credentialId },
+    { $set: { lastUsedAt: new Date().toISOString() } }
+  );
+};
+
 export const useAgentAccountsModel = () => ({
   getAll,
   countAll,
@@ -139,14 +155,18 @@ export const useAgentAccountsModel = () => ({
   getByUsername,
   insertOne,
   updateOne,
-  updatePassword,
   deleteOne,
+  // Auth
+  updatePassword,
   verifyPassword,
   isLockedOut,
   recordFailedLogin,
   resetFailedLogins,
+  // Passkeys
   recordPasskeyCredential,
   listPasskeyCredentialsForAccount,
   getPasskeyCredentialById,
-  deletePasskeyCredential
+  deletePasskeyCredential,
+  incrementPasskeyCounter,
+  recordPasskeyLastUsage
 });

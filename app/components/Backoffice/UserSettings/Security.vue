@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useAccountPasskeyCredentialsMutation } from '~/mutations/accounts';
-
-const toast = useToast();
+import { BackofficeUserSettingsModalPasskeyDetails } from '#components';
 
 const {
   data: passkeysData,
@@ -33,6 +32,17 @@ const meSecurityUpdatePassword = async () => {
 };
 
 const isMobile = useMediaQuery('(max-width: 640px)');
+
+const overlay = useOverlay();
+
+const openPasskeyDetails = (passkey: AgentAccountPasskeyCredential) => {
+  const passkeyDetailsModal = overlay.create(BackofficeUserSettingsModalPasskeyDetails, { destroyOnClose: true });
+  passkeyDetailsModal.open({
+    passkey,
+    overlay: passkeyDetailsModal,
+    onDelete: (credentialId: string) => passkeySafeDelete(credentialId)
+  });
+};
 </script>
 
 <template>
@@ -67,16 +77,18 @@ const isMobile = useMediaQuery('(max-width: 640px)');
           </UForm>
         </div>
         <div v-if="passkeysData && passkeysData.length > 0">
-          <ul class="space-y-2">
-            <li v-for="passkey in passkeysData" :key="passkey.id" class="bg-neutral-900/50 p-4 rounded-lg flex items-center justify-between">
-              <div class="space-y-2">
-                <div class="font-medium">{{ passkey.alias }}</div>
+          <ul class="space-y-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <li
+              v-for="passkey in passkeysData" :key="passkey.id" @click="openPasskeyDetails(passkey)"
+              class="registered_passkeycredential_item"
+            >
+              <div class="space-y-2 w-full">
+                <div class="font-medium flex items-center gap-2">
+                  <span v-text="passkey.alias" class="flex-1" />
+                  <UIcon name="i-lucide-arrow-up-right" />
+                </div>
                 <div class="text-sm text-muted">{{ useDateFormat(passkey.createdAt, 'MMM Do YYYY, HH:MM') }}</div>
               </div>
-              <UButton
-                icon="i-heroicons-trash-16-solid" :label="!isMobile ? 'Delete' : undefined" color="error"
-                @click="passkeySafeDelete(passkey.id)"
-              />
             </li>
           </ul>
         </div>
@@ -91,6 +103,11 @@ const isMobile = useMediaQuery('(max-width: 640px)');
 
 <style scoped>
 @reference '~/assets/global.css';
+
+.registered_passkeycredential_item {
+  @apply bg-linear-to-t from-muted/50 hover:from-muted ring ring-muted/50 p-4 rounded-lg
+  flex items-center justify-between cursor-pointer duration-100 ease-expo transition-all sm:active:scale-97;
+}
 
 h3 {
   @apply text-xl font-semibold;

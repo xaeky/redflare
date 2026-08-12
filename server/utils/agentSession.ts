@@ -137,3 +137,81 @@ export async function clearWebauthnChallenge(event: EventUserSession, attemptId:
     });
   }
 };
+
+// Confirmations
+
+/**
+ * Record an intent of confirmation in the cache for a specific (critical) action.
+ * Returns an opaque token that can be used to retrieve the intent later.
+ * The intent will expire after a short period (e.g., 2 minutes) to prevent replay attacks.
+ * The token should be sent to the client and included in the confirmation request.
+ */
+export async function recordConfirmationIntent(event: EventUserSession, newIntent: AgentConfirmIntentCreateOptions) {
+  const opaqueToken = Bun.randomUUIDv7();
+  const cacheKey = `confirmation-intent-${opaqueToken}`;
+  const confirmationIntent: AgentConfirmIntent = {
+    ...newIntent,
+    accountId: (await needAuth(event)).user!.id as string,
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 2 * 60 * 1000).toISOString(), // 2 minutes from now
+    confirmed: false,
+    confirmedAt: null,
+    confirmationToken: opaqueToken
+  };
+  const confirmationCache = useConfirmationCache();
+  await confirmationCache.set<AgentConfirmIntent>(cacheKey, confirmationIntent);
+  logger.withTag('confirmation').debug(`Recorded confirmation intent for action "${newIntent.action}" with token: ${opaqueToken}`);
+  return opaqueToken;
+}
+
+/**
+ * Approve a confirmation intent for a specific action using the provided token.
+ */
+export async function approveConfirmationIntent(event: EventUserSession, token: string) {
+  const confirmationCache = useConfirmationCache();
+  const cacheKey = `confirmation-intent-${token}`;
+  const intent = await confirmationCache.get<AgentConfirmIntent>(cacheKey);
+  if (!intent) throw createError({ status: 400, message: 'No confirmation intent found for the given token.' });
+  if (new Date(intent.expiresAt) <= new Date()) {
+    await confirmationCache.remove(cacheKey);
+    throw createError({ status: 400, message: 'The confirmation intent has expired.' });
+  };
+  intent.confirmed = true;
+  intent.confirmedAt = new Date().toISOString();
+  await confirmationCache.set<AgentConfirmIntent>(cacheKey, intent);
+  return true;
+};
+
+/**
+ * Look for recent confirmation intent for a specific action, if it exists and is valid, destroy it and return true.
+ * If token is provided but the intent is expired, destroy it and return false.
+ * If no token is provided, create a new intent and return the new opaque token.
+ */
+export async function needConfirmationIntent(event: H3Event, action: string): Promise<boolean | string> {
+  // Get token through Headers
+  const token = getHeader(event, 'x-rf-confirmation-token') || undefined;
+  const confirmationCache = useConfirmationCache();
+  // If a token is provided, it means the user was prompted for confirmation before, and their intent is now confirmed.
+  // We should check if the token is valid and corresponds to the expected action. If it does, we can clear the intent from the cache and return true.
+  if (token) {
+    const cacheKey = `confirmation-intent-${token}`;
+    const intent = await confirmationCache.get<AgentConfirmIntent>(`confirmation-intent-${token}`);
+    // If the intent exists, matches the action, but has expired, we should clear it from the cache and return false.
+    if (intent && intent.action === action && new Date(intent.expiresAt) <= new Date()) {
+      await confirmationCache.remove(cacheKey);
+      return false;
+    }
+    // If the intent exists, matches the action, and hasn't expired, we can consider it valid.
+    if (intent && intent.action === action && new Date(intent.expiresAt) > new Date()) {
+      await confirmationCache.remove(cacheKey);
+      return true;
+    }
+  }
+  // If no valid intent was found, we should create a new intent and return false.
+  const newIntent: AgentConfirmIntentCreateOptions = {
+    action
+  };
+  // Return the opaque token to the client so they can use it to confirm the action.
+  const opaqueToken = await recordConfirmationIntent(event, newIntent);
+  throw createError({ status: 428, message: 'Confirmation required', data: { confirmationToken: opaqueToken } });
+}

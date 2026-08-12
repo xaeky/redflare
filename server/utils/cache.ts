@@ -8,6 +8,15 @@ export default createStorage({
   })
 });
 
+const confirmationCache = createStorage({
+  driver: lruDriver({
+    max: 1000,
+    ttl: 2 * 60 * 1000 // 2 minutes
+  })
+});
+
+export const useConfirmationCache = () => confirmationCache;
+
 export const invalidateHandlerCache = async (name: string, key: string) => {
   await useStorage('cache').removeItem(`nitro:handlers:${name}:${key}.json`);
   logger.withTag('cache').debug(`Invalidated handler cache for key: ${name}:${key}`);

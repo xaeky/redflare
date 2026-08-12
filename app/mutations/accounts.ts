@@ -70,7 +70,10 @@ export const useAccountPasskeyCredentialsMutation = defineMutation(() => {
   // Remove a passkey credential by its ID
   const { mutate: mutateDelete } = useMutation({
     mutation: (credentialId: string) => useAPI(`/api/auth/passkey/${credentialId}`, { method: 'DELETE' }),
-    onSettled: () => useQueryCache().invalidateQueries(agentAccountPasskeyCredentialsListQuery())
+    onSuccess: () => {
+      invokeInfoToast({ title: 'Passkey deleted successfully.' });
+      useQueryCache().invalidateQueries(agentAccountPasskeyCredentialsListQuery())
+    },
   });
 
   const safeDelete = async (credentialId: string) => {
