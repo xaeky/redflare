@@ -49,9 +49,9 @@ const handleAgentLogout = async () => {
   })
 }
 
-function handleTurnstileVerified(token: string) {
+const handleTurnstileVerified = (token: string) => {
   agentLoginState.turnstileToken = token;
-}
+};
 
 const isMobile = useMediaQuery('(max-width: 640px)');
 const artistName = computed(() => agentSession.user.value?.displayName || agentSession.user.value?.username || 'artist');

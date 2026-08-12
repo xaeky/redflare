@@ -31,6 +31,7 @@ export const agentAccountPasswordSchema = z.string()
   .max(256, 'Password is too long.');
 
 export const agentAccountSetupSchema = z.object({
+  setupToken: z.string().trim().uuid(),
   username: agentAccountUsernameSchema,
   password: agentAccountPasswordSchema,
   displayName: z.string().max(64).optional().nullable(),

@@ -18,11 +18,6 @@ const legalAgreements = [
   { name: 'Privacy Policy', to: legalConfig?.privacyPolicyUrl }
 ];
 
-// Agent login: either the app hasn't been set up yet (no accounts), or show a
-// plain username/password form for the native auth system.
-const { data: setupStatus } = await useAsyncData('agent-setup-status', () => useAPI<{ locked: boolean }>('/api/auth/setup/status'));
-const isSetupLocked = computed(() => setupStatus.value?.locked ?? true);
-
 const isMobile = useMediaQuery('(max-width: 768px)');
 </script>
 

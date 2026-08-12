@@ -37,6 +37,8 @@ export type RedflareConfigEmail = RedflareConfigBase & {
 
 export type RedflareConfigAuthSetup = RedflareConfigBase & {
   category: RedflareConfigCategory.AuthSetup;
+  setupToken?: string;
+  createdAt?: string;
   locked: boolean;
   lockedAt?: string;
   lockedByUsername?: string;

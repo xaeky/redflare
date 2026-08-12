@@ -1,12 +1,15 @@
 export default defineEventHandler(async (event) => {
+  await needTurnstileVerification(event);
   // Guard against re-running setup once the app has already been set up.
   // Note: this check-then-act isn't fully atomic against a concurrent double-submit,
   // but this is a one-time bootstrap flow, not a high-frequency/high-risk endpoint.
-  if (await isSetupLocked()) throw createError({ status: 403, statusText: 'This app has already been set up.' });
+  if (await isSetupLocked()) throw createError({ status: 403, message: 'This app has already been set up.' });
 
-  const { data, error } = await readValidatedBody(event, agentAccountSetupSchema.safeParse);
-  if (error || !data) throw createError({ status: 400, statusText: 'Invalid body', data: error });
-  const { username, password, displayName } = data;
+  const { data, success } = await readValidatedBody(event, agentAccountSetupSchema.safeParse);
+  if (!success) throw createError({ status: 400, message: 'Invalid body' });
+  const { username, password, displayName, setupToken } = data;
+
+  await lockSetup(username, setupToken);
 
   const accountsModel = useAgentAccountsModel();
   const result = await accountsModel.insertOne({
@@ -15,8 +18,6 @@ export default defineEventHandler(async (event) => {
     displayName,
     permissions: ALL_PERMISSIONS
   });
-
-  await lockSetup(username);
 
   await setUserSession(event, {
     user: {
