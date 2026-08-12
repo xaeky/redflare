@@ -3,16 +3,10 @@ import { UserSession } from "#auth-utils";
 export default defineEventHandler(async (event) => {
   await setUserSession(event, {
     user: {
-      name: 'Test Agent',
-      nickname: 'test_agent',
-      picture: 'https://api.dicebear.com/9.x/glass/png',
-      sub: 'auth0|test_agent_123',
+      id: 'test-agent',
+      username: 'Test Agent',
+      permissions: ALL_PERMISSIONS,
     },
-    secure: {
-      access_token: 'test',
-      refresh_token: 'test',
-      id_token: 'test'
-    }
   } as UserSession);
   await initCurrentUserSettings(event);
   logger.info('Test agent session claimed');

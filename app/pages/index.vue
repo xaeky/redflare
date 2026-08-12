@@ -18,96 +18,36 @@ const legalAgreements = [
   { name: 'Privacy Policy', to: legalConfig?.privacyPolicyUrl }
 ];
 
-const agentSession = useUserSession();
-const isAgentLoggedIn = computed(() => agentSession.loggedIn.value);
-
-const publicSession = usePublicUserSession();
-const isPublicLoggedIn = computed(() => publicSession.isLoggedIn.value);
-
-const handleLoginDoor = (type: 'public' | 'agent') => {
-  const loginUrls = {
-    agent: '/api/auth/auth0',
-    public: '/api/public/auth/discord'
-  }
-  navigateTo(loginUrls[type], { external: true, replace: true });
-}
-
-const handleWelcomeDoor = (type: 'public' | 'agent') => {
-  const welcomeUrls = {
-    agent: '/dashboard',
-    public: '/me'
-  }
-  navigateTo(welcomeUrls[type], { external: true, replace: true });
-}
-
-const breakpoints = useBreakpoints({
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280
-});
-
-const isMobile = breakpoints.smaller('sm');
-const isDesktop = breakpoints.greater('lg');
+const isMobile = useMediaQuery('(max-width: 768px)');
 </script>
 
 <template>
   <div class="h-full flex items-center justify-center">
-    <div class="text-center space-y-4">
+    <div class="fixed -z-1 inset-0 opacity-25 pointer-events-none">
+      <BackgroundBeams
+        :beam-width="1.5"
+        :beam-height="25"
+        :beam-number="20"
+        light-color="#ffffff"
+        :speed="3"
+        :noise-intensity="1.75"
+        :scale="0.2"
+        :rotation="45"
+      />
+    </div>
+    <div class="sm:hidden fixed -z-1 inset-0 bg-linear-to-t from-neutral-950 via-neutral-950"></div>
+    <div class="text-center space-y-4 w-full sm:w-auto relative z-10">
       <div class="py-2 mx-auto">
         <HeaderLogo :size="isMobile ? 'lg' : 'xl'" />
       </div>
-      <div>
-        <h1>Avatars Console</h1>
-        <p>Please log in to your respective account to continue.</p>
-      </div>
-      <div class="flex flex-col gap-4 justify-center items-center">
-        <div
-          class="flex flex-col items-center gap-4 lg:gap-8"
-          :class="{
-            'lg:flex-row': !isPublicLoggedIn,
-          }"
-        >
-          <div class="rf-login-card">
-            <div v-if="!isPublicLoggedIn" class="card-icon">
-              <UIcon name="i-heroicons-sparkles-solid" class="size-8" />
-            </div>
-            <div v-if="!isPublicLoggedIn" class="frontier-content card-content">
-              <h2>I'm a customer</h2>
-              <UButton @click="handleLoginDoor('public')" label="Log in with Discord" icon="i-ic-baseline-discord" />
-            </div>
-            <div v-else class="welcome-content card-content">
-              <PublicSessionCard size="sm" />
-              <UButton block @click="handleWelcomeDoor('public')" label="Go to Account" trailing-icon="i-heroicons-arrow-right-20-solid" />
-            </div>
-          </div>
-          <USeparator
-            v-if="isDesktop && !isPublicLoggedIn" orientation="vertical" label="or" class="h-24" 
-          />
-          <USeparator
-            v-if="isDesktop && isPublicLoggedIn" label="or"
-          />
-          <div class="rf-login-card">
-            <div v-if="!isAgentLoggedIn" class="card-icon">
-              <UIcon name="i-heroicons-paint-brush-solid" class="size-8" />
-            </div>
-            <div v-if="!isAgentLoggedIn" class="card-content">
-              <h2>I'm an artist</h2>
-              <UButton @click="handleLoginDoor('agent')" label="Log in with Auth0" icon="i-heroicons-key-20-solid" />
-            </div>
-            <div v-else class="w-full">
-              <UButton block @click="handleWelcomeDoor('agent')" label="Go to Artist Dashboard" trailing-icon="i-heroicons-arrow-right-20-solid" />
-            </div>
-          </div>
-        </div>
-        <USeparator v-if="appHasConfiguredAgreements" />
-        <div v-if="appHasConfiguredAgreements">
-          By signing in, you agree to our
-          <span v-for="(page, index) in legalAgreements" :key="index">
-            <ULink external :to="page.to" target="_blank" class="text-primary-400 hover:underline">{{ page.name }}</ULink>
-            <span v-if="index < legalAgreements.length - 1"> and </span>
-          </span>.
-        </div>
+      <FrontierViewRealmDiscovery />
+      <USeparator v-if="appHasConfiguredAgreements" />
+      <div v-if="appHasConfiguredAgreements">
+        By signing in, you agree to our
+        <span v-for="(page, index) in legalAgreements" :key="index">
+          <ULink external :to="page.to" target="_blank" class="text-primary-400 hover:underline">{{ page.name }}</ULink>
+          <span v-if="index < legalAgreements.length - 1"> and </span>
+        </span>.
       </div>
     </div>
   </div>

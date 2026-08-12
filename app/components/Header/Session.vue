@@ -34,8 +34,8 @@ const { session } = useUserSession();
       v-model:open="userDropdownOpen" :ui="{ content: 'w-48' }"
     >
       <div class="flex items-center gap-4 pointer-events-none select-none">
-        <UAvatar :src="session.user.picture" />
-        <span v-text="session.user.nickname" />
+        <UAvatar :alt="session.user.displayName || session.user.username" />
+        <span v-text="session.user.displayName || session.user.username" />
       </div>
     </UDropdownMenu>
   </div>

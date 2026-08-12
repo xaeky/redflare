@@ -4,45 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Redflare is a Nuxt 4 / TypeScript web app for avatar artists to manage commissions, billing, and file attachments — a Trello/Notion-style commission organizer. Stack: Nuxt 4, MongoDB (native driver, no ODM), Auth0 (artist auth), Discord OAuth (customer auth), S3-compatible storage, Bun runtime, Nitro `bun` preset.
+Redflare is a Nuxt 4 / TypeScript web app for avatar artists to manage commissions, billing, and file attachments — a Trello/Notion-style commission organizer. Stack: Nuxt 4, MongoDB (native driver, no ODM), Discord OAuth (customer auth), S3-compatible storage, Bun runtime, Nitro `bun` preset.
 
 ## Prohibitions
 
 - Agent shall NOT run destructive scripts (migrations, rollbacks, etc.) on production unless explicitly instructed by an engineer. Commands included: `bun run migrate`, `bun run scripts/rollback.ts <count>`, `bun run util:db`.
+- Agent shall NOT run `bun dev`, `bun test` or `bun devs` scripts.
+- Agent shall NOT inspect `node_modules` or any other dependencies unless explicitly instructed by an engineer.
+- Agent shall NOT inspect `.nuxt`, `.data` or `.output` directories unless explicitly instructed by an engineer.
 
 ## Commands
 
-Package manager is **bun**, not npm/yarn.
-
-```bash
-bun install          # install deps
-bun dev               # start dev server (nuxt dev)
-bun devs              # dev server over HTTPS (self-signed, NODE_TLS_REJECT_UNAUTHORIZED=0)
-bun run build          # production build
-bun run migrate         # run pending Mongo migrations (scripts/migrate.ts)
-bun run scripts/rollback.ts <count>  # roll back the last N applied migrations
-bun run util:db          # scripts/helpers/database.ts — local DB helper
-```
+Package manager is **bun**, not npm/pnpm/yarn. Documentation and guides: https://bun.com/docs/guides
 
 Local infra (Mongo + rustfs S3-compatible storage) via `docker-compose.dev.yml`:
 ```bash
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-### Tests
-
-E2E tests use Playwright and are the only wired-up test runner (`bun test:e2e`; there is no `test` or `test:unit` script even though `vitest.config.ts` exists and expects specs under `test/unit`, `test/e2e`, `test/nuxt` — that directory doesn't exist yet, only `tests/e2e/`).
-
+You may want to setup Infisical too
 ```bash
-bun test:e2e                              # run all E2E tests
-bun test:e2e --ui                          # Playwright UI mode
-bun test:e2e tests/e2e/agentSession.test.ts  # run a single spec
-bun test:report                           # open the last HTML report
+cd services/infisical
+cp .env.example .env # Dont forget to fill in the values in .env
+docker compose up -d
 ```
-
-E2E tests need `.env.test` (copy from `.env.test.example`) and run against `TEST_URL` (defaults to `https://localhost:3000`); when the host isn't local, Playwright assumes a remote target and skips spinning up `bun dev` itself (see `FORCE_REMOTE` / `TEST_URL` in `playwright.config.ts`).
-
-Test-only session bootstrap endpoints exist under `/api/test/**` (`server/api/test/`), gated by `server/middleware/test_only.ts` — they 404 unless `PLAYWRIGHT_TEST=1` (see `isTestEnv` in `server/utils/const.ts`). Use `claimSession(page, 'agent' | 'public')` from `tests/e2e/utils/sessions.ts` to log in as an artist or a customer in a test.
 
 ## Architecture
 
@@ -50,7 +35,7 @@ Test-only session bootstrap endpoints exist under `/api/test/**` (`server/api/te
 
 Redflare has two distinct kinds of users that must not be conflated:
 
-- **Agent users** (artists/managers) — authenticated via Auth0, session managed by `nuxt-auth-utils`' built-in `useUserSession`/`getUserSession`. Logic lives in `server/utils/agentSession.ts` (`needAuth`, `getPermissions`, `hasPermission`, per-user settings). Permissions come from Auth0 roles; checked with `hasPermission(event, permission, throwError)`. `runtime.backoffice.skipRoles` can bypass permission checks (local/dev).
+- **Agent users** (artists/managers) — authenticated via a custom native session system, session managed by `nuxt-auth-utils`' built-in `useUserSession`/`getUserSession`. Logic lives in `server/utils/agentSession.ts`.
 - **Public users** (customers) — authenticated via Discord OAuth, session is a *separate* custom cookie-backed session implemented from scratch in `server/utils/publicSession.ts` (`getPublicUserSession`/`setPublicUserSession`, its own `rf_public_session` cookie, temp authorizations for e.g. one-off attachment access).
 
 A single commission can be viewed by either kind of user (or anonymously), and much of the API branches on a `ViewAs` type (`'agent' | 'customer' | 'anon'`) that controls field projection (e.g. hiding `secure_note`, `internal_note`, customer PII). See `validateCommission` in `server/utils/database.ts` for the canonical "who is viewing this commission and what can they see" resolution — it checks both sessions and an agent-only `forceAgentView` setting that lets an artist preview a commission as its owning customer would see it.
@@ -58,7 +43,7 @@ A single commission can be viewed by either kind of user (or anonymously), and m
 ### Server middleware pipeline
 
 `server/middleware/*` run in filename order for every request:
-1. `agent_auth.ts` — global auth gate. Every `/api/**` route is treated as restricted **unless** it's under `/api/auth`, `/api/_auth`, `/api/_nuxt_icon`, `/api/public`, or (test env only) `/api/test`. Restricted routes need either a valid Auth0 session or the `X-RF-Service` header matching `runtime.backoffice.service` (used for server-to-server calls, e.g. from the "Geisha" service).
+1. `agent_auth.ts` — global auth gate. Every `/api/**` route is treated as restricted **unless** it's under `/api/auth`, `/api/_auth`, `/api/_nuxt_icon`, `/api/public`, or (test env only) `/api/test`. Restricted routes need either a valid session or the `X-RF-Service` header matching `runtime.backoffice.service` (used for server-to-server calls, e.g. from the "Geisha" service).
 2. `public_auth.ts` — currently a no-op pass-through for `/api/public` and `/commission` paths (session already resolved lazily via `getPublicUserSession`).
 3. `test_only.ts` — 404s any `/api/test/**` call unless `isTestEnv`.
 

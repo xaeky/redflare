@@ -5,6 +5,8 @@
   --font-sans: 'Geist', sans-serif;
   --font-mono: 'Inconsolata', monospace;
   --ease-expo: cubic-bezier(0.2, 1, 0.25, 1), cubic-bezier(0.2, 1, 0.25, 1);
+  --ease-expo-smoothrelease: cubic-bezier(0.05, 1, 0.6, 1);
+  --ease-expo-smoothattack: cubic-bezier(0.75, 0, 1, 0.9);
 }
 
 :root {

@@ -27,7 +27,7 @@ export default defineConfig<ConfigOptions>({
   ],
   webServer: isRemote ? [] : [
     {
-      command: 'bun dev',
+      command: 'bun --bun dev',
       url: TEST_URL,
       wait: {
         stdout: /Nitro server built/,

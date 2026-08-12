@@ -3,11 +3,10 @@
  * This session type can only be used by public users (not admins), public users will use
  * Discord as OAuth provider, so no sensitive information should be stored in the session.
  * We can say there are two types of users in Redflare: Admin Users and Public Users.
- * Public users should not login through Auth0, they should login through Discord OAuth only.
+ * Public users should login with Discord OAuth only.
  */
 
 import _ from 'lodash';
-import { randomUUID } from 'crypto'
 import type { H3Event } from 'h3';
 
 interface PublicSessionData {
@@ -35,7 +34,7 @@ const initPublicSession = async (event: H3Event) => {
   // Verify if session has data or data structure is ok, if not initialize it
   if (_.isEmpty(session.data)) {
     await session.update({
-      id: randomUUID(),
+      id: Bun.randomUUIDv7(),
       user: null,
       secure: {}
     });

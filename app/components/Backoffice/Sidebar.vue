@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui';
 
-const { clear, session } = useUserSession();
+const { clear, session, user } = useUserSession();
 
 const links:NavigationMenuItem[] = [
   {
@@ -33,7 +33,12 @@ const links:NavigationMenuItem[] = [
     label: 'App Settings',
     icon: 'i-heroicons-cog-16-solid',
     to: '/dashboard/app-settings'
-  }
+  },
+  ...(user.value?.permissions?.includes('manage:managers') ? [{
+    label: 'Accounts',
+    icon: 'i-heroicons-users-20-solid',
+    to: '/dashboard/accounts'
+  }] : [])
 ];
 
 const userDropdownItems: DropdownMenuItem[] = [
@@ -70,7 +75,7 @@ const userDropdownItems: DropdownMenuItem[] = [
         :items="userDropdownItems"
         v-if="session && session.user"
       >
-        <UButton square class="w-full" variant="ghost" color="neutral" :label="session.user.nickname" :avatar="{ src: session.user.picture }" />
+        <UButton square class="w-full" variant="ghost" color="neutral" :label="session.user.displayName || session.user.username" :avatar="{ alt: session.user.displayName || session.user.username }" />
       </UDropdownMenu>
     </template>
   </USidebar>

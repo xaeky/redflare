@@ -14,6 +14,9 @@ export default defineNuxtConfig({
       { baseName: 'svg', dir: 'assets/svg' },
       { baseName: 'img', dir: 'assets/img' },
     ],
+    rollupConfig: {
+      external: ['node-fetch-native', 'uncrypto', 'ofetch']
+    }
   },
   imports: { dirs: ['shared/enums'], },
   alias: {
@@ -44,30 +47,35 @@ export default defineNuxtConfig({
     plugins: [require('vite-svg-loader')()],
     server: {
       allowedHosts: ['local.xavis.redflare']
+    },
+    optimizeDeps: {
+      include: ['zod', 'lodash', 'three', '@internationalized/date']
     }
   },
   shiki: {
     defaultTheme: 'vitesse-dark'
   },
+  auth: {
+    webAuthn: true
+  },
   runtimeConfig: {
     public: {
       env: process.env.NODE_ENV || '',
       redflare_env: '',
+      turnstile: {
+        site_key: '',
+      }
     },
     backoffice: {
-      skipRoles: false,
       mongo: '',
       mongoDb: '',
       service: ''
     },
     frontoffice: {
-      oauth: {
-        discord: {
-          clientId: '',
-          clientSecret: ''
-        }
-      },
       sessionPassword: ''
+    },
+    turnstile: {
+      secret_key: ''
     }
   }
 })
