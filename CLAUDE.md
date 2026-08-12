@@ -9,7 +9,7 @@ Redflare is a Nuxt 4 / TypeScript web app for avatar artists to manage commissio
 ## Prohibitions
 
 - Agent shall NOT run destructive scripts (migrations, rollbacks, etc.) on production unless explicitly instructed by an engineer. Commands included: `bun run migrate`, `bun run scripts/rollback.ts <count>`, `bun run util:db`.
-- Agent shall NOT run `bun dev`, `bun test` or `bun devs` scripts.
+- Agent shall NOT run `bun dev` or `bun test` scripts.
 - Agent shall NOT inspect `node_modules` or any other dependencies unless explicitly instructed by an engineer.
 - Agent shall NOT inspect `.nuxt`, `.data` or `.output` directories unless explicitly instructed by an engineer.
 

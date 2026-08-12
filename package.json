@@ -1,12 +1,11 @@
 {
-  "name": "nuxt-app",
+  "name": "redflare-app",
   "private": true,
   "type": "module",
   "license": "GPL-3.0-only",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "devs": "NODE_TLS_REJECT_UNAUTHORIZED=0 nuxt dev --https",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -16,12 +15,7 @@
     "util:db": "bun run scripts/helpers/database.ts"
   },
   "dependencies": {
-    "@auth0/auth0-spa-js": "^2.2.0",
-    "@clack/prompts": "^1.7.0",
-    "@google-cloud/secret-manager": "^6.1.1",
-    "@google-cloud/storage": "^7.17.3",
     "@infisical/sdk": "^5.0.2",
-    "@mercadopago/sdk-js": "^0.0.3",
     "@nuxt/fonts": "^0.14.0",
     "@nuxt/icon": "^2.3.1",
     "@nuxt/image": "2.0.0",
@@ -31,14 +25,11 @@
     "@pinia/nuxt": "0.11.1",
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.2",
-    "@types/cloudflare-turnstile": "^0.2.2",
     "@vueuse/nuxt": "^14.3.0",
-    "auth0": "^4.26.0",
     "aws4fetch": "^1.0.20",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "lru-cache": "^11.2.4",
-    "mercadopago": "^2.3.0",
     "mongodb": "^6.18.0",
     "nuxt": "^4.4.8",
     "nuxt-auth-utils": "0.5.20",
@@ -47,14 +38,13 @@
     "satori": "^0.26.0",
     "sharp": "^0.34.5",
     "three": "^0.185.1",
-    "typescript": "^7.0.2",
     "unstorage": "^1.17.3",
     "uuid": "^11.1.0",
     "vue": "^3.5.13",
-    "vue-router": "^5.2.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@clack/prompts": "^1.7.0",
     "@iconify-json/heroicons": "^1.2.2",
     "@iconify-json/lucide": "^1.2.60",
     "@nuxt/test-utils": "^3.21.0",
@@ -68,6 +58,7 @@
     "nuxt-mcp-dev": "^0.3.1",
     "playwright-core": "^1.57.0",
     "vite-svg-loader": "^5.1.0",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.16",
+    "typescript": "^7.0.2"
   }
 }
