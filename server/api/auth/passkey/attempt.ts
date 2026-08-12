@@ -8,11 +8,14 @@ export default defineWebAuthnAuthenticateEventHandler({
 
     return credential as AgentAccountPasskeyCredential;
   },
-  async onSuccess(event, { credential }) {
+  async onSuccess(event, { credential, authenticationInfo }) {
     const accountsModel = useAgentAccountsModel();
     const account = await accountsModel.getById(credential.belongsTo as string);
     await accountsModel.recordPasskeyLastUsage(credential.id);
-    await accountsModel.incrementPasskeyCounter(credential.id);
+    await accountsModel.setPasskeyCounter(
+      credential.id,
+      authenticationInfo.newCounter,
+    );
     await setUserSession(event, {
       user: {
         id: account._id.toString(),
