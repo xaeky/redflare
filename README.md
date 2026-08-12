@@ -31,7 +31,7 @@ Redflare uses many services to work:
     - Create a Discord developer app for the customer authentication.
     - Set up an S3-compatible storage for the file storage. I recommend using **Cloudflare R2** for this.
 4. Install the dependencies with `bun i`.
-5. Deploy the local development with `bun dev`.
+5. Deploy the local development with `bun --bun dev`.
 
 ```bash
 git clone https://github.com/xaeky/redflare.git
@@ -39,7 +39,7 @@ cd redflare
 cp .env.example .env
 vim .env # Fill the fields with your API keys.
 bun i
-bun dev
+bun --bun dev
 ```
 
 ## 🧪 Testing (E2E)
