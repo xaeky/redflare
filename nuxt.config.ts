@@ -15,7 +15,7 @@ export default defineNuxtConfig({
       { baseName: 'img', dir: 'assets/img' },
     ],
     rollupConfig: {
-      external: ['node-fetch-native', 'uncrypto', 'ofetch']
+      external: ['uncrypto', 'ofetch']
     }
   },
   imports: { dirs: ['shared/enums'], },
