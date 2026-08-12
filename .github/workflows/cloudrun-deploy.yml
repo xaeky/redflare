@@ -71,7 +71,6 @@ jobs:
             S3_ACCESS=${{ inputs.env == 'production' && 'PROD_S3_ACCESS:latest' || 'STAGING_S3_ACCESS:latest' }}
             S3_SECRET=${{ inputs.env == 'production' && 'PROD_S3_SECRET:latest' || 'STAGING_S3_SECRET:latest' }}
             INFISICAL_CLIENT_SECRET=${{ inputs.env == 'production' && 'PROD_INFISICAL_CLIENT_SECRET:latest' || 'STAGING_INFISICAL_CLIENT_SECRET:latest' }}
-            NUXT_TURNSTILE_SITE_SECRET=${{ inputs.env == 'production' && 'PROD_TURNSTILE_SECRET_KEY:latest' || 'STAGING_TURNSTILE_SECRET_KEY:latest' }}
             NUXT_FRONTOFFICE_OAUTH_DISCORD_CLIENT_SECRET=${{ inputs.env == 'production' && 'PROD_FO_DISCORD_SECRET:latest' || 'STAGING_FO_DISCORD_SECRET:latest' }}
             NUXT_FRONTOFFICE_SESSION_PASSWORD=${{ inputs.env == 'production' && 'PROD_FO_SESSION_PASSWORD:latest' || 'STAGING_FO_SESSION_PASSWORD:latest' }}
             NUXT_SESSION_PASSWORD=${{ inputs.env == 'production' && 'PROD_BO_SESSION_PASSWORD:latest' || 'STAGING_BO_SESSION_PASSWORD:latest' }}
