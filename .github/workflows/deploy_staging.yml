@@ -176,7 +176,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: https://avatars-console-staging.xaeky.cloud
+      url: https://dash-beta.fursomna.dev
     permissions:
       contents: read
       id-token: write
