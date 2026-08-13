@@ -1,13 +1,5 @@
 import type { OptionalId, WithId, WithoutId } from 'mongodb';
 
-// TODO: Unused!
-export enum CommissionFlagsType {
-  None = 0,
-  HideCustomer = 1 << 0,
-  HideCharacters = 1 << 1,
-  HidePayment = 1 << 2,
-  HighPriority = 1 << 3,
-}
 export type CommissionPaymentStatus =
   | 'pending'
   | 'paid_auto'

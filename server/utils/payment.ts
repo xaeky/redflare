@@ -38,7 +38,6 @@ export const createPaymentPreference = async (
       }
     },
     USD: async () => {
-      // TODO: PayPal integration
       throw createError({
         status: 501,
         statusText: 'PayPal integration not implemented yet',

@@ -27,7 +27,6 @@ const initPublicSession = async (event: H3Event) => {
     password: secret,
   });
   // Check session.data has the expected properties
-  // TODO: Improve session data structure validation with Zod or similar
   const sessionProps = ['id', 'user', 'secure'];
   const hasInvalidProps = _.some(
     sessionProps,
