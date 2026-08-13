@@ -18,7 +18,7 @@ const confirmationOverlay = overlay.create(ModalGenericConfirmation);
 const { mutate: updateCommission, isLoading: updateCommissionBusy } =
   useMutation({
     mutation: () =>
-      useAPI(`/api/commissions/${props.commission_id}`, {
+      useAPI(`/api/admin/commissions/${props.commission_id}`, {
         method: 'PUT',
         body: _.mapValues(commissionFormStore.formState, (v) =>
           (typeof v === 'string' && v?.trim()) === '' ? null : v,
@@ -36,7 +36,7 @@ const { mutate: updateCommission, isLoading: updateCommissionBusy } =
 const { mutate: deleteCommission, isLoading: deleteCommissionBusy } =
   useMutation({
     mutation: () =>
-      useAPI(`/api/commissions/${props.commission_id}`, { method: 'DELETE' }),
+      useAPI(`/api/admin/commissions/${props.commission_id}`, { method: 'DELETE' }),
     onSuccess() {
       queryCache.invalidateQueries(commissionsQuery({}));
       toast.add({ description: 'Commission deleted.' });

@@ -18,7 +18,7 @@ const meSecurityUpdatePasswordState = reactive({
 
 const meSecurityUpdatePassword = async () => {
   try {
-    await useAPI('/api/me/shadow', {
+    await useAPI('/api/admin/me/shadow', {
       method: 'PUT',
       body: {
         oldPassword: meSecurityUpdatePasswordState.oldPassword,

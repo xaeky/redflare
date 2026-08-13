@@ -11,7 +11,7 @@ const clonedUserSettings = reactive<AgentUserSettings>(
 
 const meSettingUpdate = async () => {
   try {
-    await useAPI('/api/me/settings', {
+    await useAPI('/api/admin/me/settings', {
       method: 'PUT',
       body: JSON.stringify(clonedUserSettings),
     });

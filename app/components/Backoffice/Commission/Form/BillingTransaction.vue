@@ -25,7 +25,7 @@ const billingTransactionDeleteHandle = () => {
     try {
       billingTransactionDeleteBusy.value = true;
       await useAPI(
-        `/api/commissions/${props.commission}/billing/${props.transaction._id}`,
+        `/api/admin/commissions/${props.commission}/billing/${props.transaction._id}`,
         {
           method: 'DELETE',
         },

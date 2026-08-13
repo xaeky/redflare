@@ -18,7 +18,7 @@ const {
   key: () => ['commission-billing', commissionFormStore.additionalState.id],
   query: () =>
     useAPI(
-      `/api/commissions/${commissionFormStore.additionalState.id}/billing`,
+      `/api/admin/commissions/${commissionFormStore.additionalState.id}/billing`,
     ),
   enabled: () => !!commissionFormStore.additionalState.id,
   refetchOnWindowFocus: false,

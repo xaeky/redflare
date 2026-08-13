@@ -24,7 +24,7 @@ export const useAccountProfileMutation = defineMutation(() => {
   );
 
   const { mutate } = useMutation({
-    mutation: () => useAPI('/api/me', { method: 'PUT', body: formState }),
+    mutation: () => useAPI('/api/admin/me', { method: 'PUT', body: formState }),
     onSuccess: () => {
       invokeSuccessToast({ description: 'Profile updated successfully.' });
       useQueryCache().invalidateQueries(agentAccountProfileQuery());

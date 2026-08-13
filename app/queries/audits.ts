@@ -24,7 +24,7 @@ export const auditsQuery = defineQueryOptions(
         queryObject,
         (val) => _.isUndefined(val) || _.isNull(val),
       );
-      return useAPI<{ data: Audit[]; total: number }>('/api/audits', {
+      return useAPI<{ data: Audit[]; total: number }>('/api/admin/audits', {
         query: cleanedQueryObject as Record<string, any>,
       }).then((res) => res);
     },

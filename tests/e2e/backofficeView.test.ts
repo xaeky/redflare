@@ -17,7 +17,7 @@ test.describe
     test('Agent is able to create customers', async ({ page }) => {
       test.setTimeout(1000 * 10);
       await claimSession(page, 'agent');
-      const res = await page.request.post('/api/customers', {
+      const res = await page.request.post('/api/admin/customers', {
         data: {
           name: testState.createdCustomerName,
           note: 'E2E Test Customer',
@@ -33,7 +33,7 @@ test.describe
       page,
     }) => {
       await claimSession(page, 'agent');
-      const res = await page.request.post('/api/commissions', {
+      const res = await page.request.post('/api/admin/commissions', {
         data: {
           customer: testState.customerId,
           public_note: 'Public E2E Test Note',
@@ -49,7 +49,7 @@ test.describe
     }) => {
       await claimSession(page, 'agent');
       const res = await page.request.delete(
-        `/api/customers/${testState.customerId}`,
+        `/api/admin/customers/${testState.customerId}`,
       );
       expect(res.ok()).toBe(false);
     });

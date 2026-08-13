@@ -48,7 +48,7 @@ export const useAvatarBaseFormStore = defineStore('avatarBaseForm', () => {
 
   const { mutate: update, isLoading: updateBusy } = useMutation({
     mutation: () =>
-      useAPI(`/api/commissions/bases/${additionalState.id}`, {
+      useAPI(`/api/admin/commissions/bases/${additionalState.id}`, {
         method: 'PUT',
         body: formState,
       }),
@@ -59,7 +59,7 @@ export const useAvatarBaseFormStore = defineStore('avatarBaseForm', () => {
 
   const { mutate: destroy, isLoading: destroyBusy } = useMutation({
     mutation: (baseId: string) =>
-      useAPI(`/api/commissions/bases/${baseId}`, { method: 'DELETE' }),
+      useAPI(`/api/admin/commissions/bases/${baseId}`, { method: 'DELETE' }),
     onSuccess() {
       clear();
     },
@@ -67,7 +67,7 @@ export const useAvatarBaseFormStore = defineStore('avatarBaseForm', () => {
 
   const { mutate: insert, isLoading: insertBusy } = useMutation({
     mutation: () =>
-      useAPI(`/api/commissions/bases`, { method: 'POST', body: formState }),
+      useAPI(`/api/admin/commissions/bases`, { method: 'POST', body: formState }),
     onSuccess() {
       clear();
     },

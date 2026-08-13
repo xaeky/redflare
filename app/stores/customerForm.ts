@@ -32,7 +32,7 @@ export const useCustomerFormStore = defineStore('customerForm', () => {
 
   const { mutate: update, isLoading: updateBusy } = useMutation({
     mutation: () =>
-      useAPI(`/api/customers/${additionalState.id}`, {
+      useAPI(`/api/admin/customers/${additionalState.id}`, {
         method: 'PUT',
         body: _.mapValues(formState, (v) =>
           (typeof v === 'string' && v?.trim()) === '' ? null : v,
@@ -47,7 +47,7 @@ export const useCustomerFormStore = defineStore('customerForm', () => {
 
   const { mutate: insert, isLoading: insertBusy } = useMutation({
     mutation: () =>
-      useAPI(`/api/customers`, {
+      useAPI(`/api/admin/customers`, {
         method: 'POST',
         body: _.mapValues(formState, (v) =>
           (typeof v === 'string' && v?.trim()) === '' ? null : v,
@@ -62,7 +62,7 @@ export const useCustomerFormStore = defineStore('customerForm', () => {
 
   const { mutate: destroy, isLoading: destroyBusy } = useMutation({
     mutation: (id: string) =>
-      useAPI(`/api/customers/${id}`, { method: 'DELETE' }),
+      useAPI(`/api/admin/customers/${id}`, { method: 'DELETE' }),
     onSuccess() {
       queryCache.invalidateQueries({ key: ['customers'] });
       useOverlay().closeAll();
@@ -96,7 +96,7 @@ export const useCustomerFormStore = defineStore('customerForm', () => {
     busy.value = true;
     try {
       additionalState.id = customerId;
-      const customer = await $fetch<Schema>(`/api/customers/${customerId}`);
+      const customer = await $fetch<Schema>(`/api/admin/customers/${customerId}`);
       _.assign(formState, customer);
     } catch (_error) {
       invokeErrorToast({ description: 'Failed to load customer data.' });

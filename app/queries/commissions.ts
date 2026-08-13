@@ -19,7 +19,7 @@ export const commissionsQuery = defineQueryOptions(
         sort_by: sorting.by,
         sort_order: sorting.order,
       };
-      return useAPI<CommissionsResponse>('/api/commissions', {
+      return useAPI<CommissionsResponse>('/api/admin/commissions', {
         query: queryObject,
       }).then((res) => res);
     },
@@ -31,7 +31,7 @@ export const commissionsQuery = defineQueryOptions(
 export const avatarBasesQuery = defineQueryOptions({
   key: ['avatar_bases'],
   query: () => {
-    return useAPI<DeserializedAvatarBase[]>(`/api/commissions/bases`);
+    return useAPI<DeserializedAvatarBase[]>(`/api/admin/commissions/bases`);
   },
   refetchOnWindowFocus: false,
   enabled: typeof document !== 'undefined',

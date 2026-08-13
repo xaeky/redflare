@@ -32,7 +32,7 @@ const billingTransactionFormBusy = ref(false);
 const billingTransactionFormPostHandle = async () => {
   try {
     billingTransactionFormBusy.value = true;
-    await useAPI(`/api/commissions/${props.commission}/billing`, {
+    await useAPI(`/api/admin/commissions/${props.commission}/billing`, {
       method: 'POST',
       body: billingTransactionState,
     });

@@ -74,7 +74,7 @@ export const useCommissionFormStore = defineStore('commissionForm', () => {
 
   const { mutate: insert, isLoading: insertBusy } = useMutation({
     mutation: () =>
-      useAPI(`/api/commissions`, {
+      useAPI(`/api/admin/commissions`, {
         method: 'POST',
         body: _.mapValues(formState, (v) =>
           (typeof v === 'string' && v?.trim()) === '' ? null : v,

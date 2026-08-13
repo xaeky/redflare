@@ -7,7 +7,7 @@ export const agentAccountsQuery = defineQueryOptions(() => ({
 
 export const agentAccountProfileQuery = defineQueryOptions(() => ({
   key: ['agent-account-profile'],
-  query: () => useAPI<AgentAccountProfile>('/api/me'),
+  query: () => useAPI<AgentAccountProfile>('/api/admin/me'),
   refetchOnWindowFocus: false,
   enabled: typeof document !== 'undefined',
 }));

@@ -26,7 +26,7 @@ export const customersQuery = defineQueryOptions(
         queryObject,
         _.isUndefined || _.isNull || _.isEmpty,
       );
-      return useAPI<CustomersResponse>('/api/customers', {
+      return useAPI<CustomersResponse>('/api/admin/customers', {
         query: cleanedQueryObject,
       }).then((res) => res);
     },
@@ -45,7 +45,7 @@ export const customerFilterQuery = defineQueryOptions(
         queryObject,
         _.isUndefined || _.isNull || _.isEmpty,
       );
-      return useAPI<CustomersResponse>('/api/customers', {
+      return useAPI<CustomersResponse>('/api/admin/customers', {
         query: cleanedQueryObject,
       }).then((res) => res);
     },

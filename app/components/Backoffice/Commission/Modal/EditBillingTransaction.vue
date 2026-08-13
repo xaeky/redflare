@@ -22,7 +22,7 @@ const billingTransactionFormPostHandle = async () => {
   try {
     billingTransactionFormBusy.value = true;
     await useAPI(
-      `/api/commissions/${props.commission}/billing/${props.transaction._id}`,
+      `/api/admin/commissions/${props.commission}/billing/${props.transaction._id}`,
       {
         method: 'PATCH',
         body: billingTransactionState,

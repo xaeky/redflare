@@ -39,7 +39,7 @@ const dateForInput = computed({
 
 const getUploadSignedUrl = async (file: File) => {
   return useAPI<{ success: boolean; url?: string; id?: string }>(
-    '/api/storage/signedUpload',
+    '/api/admin/storage/signedUpload',
     {
       method: 'POST',
       body: {
@@ -75,7 +75,7 @@ const handleFileRemove = async (attachmentId: string) => {
     color: 'neutral',
   });
   try {
-    await useAPI('/api/storage', {
+    await useAPI('/api/admin/storage', {
       method: 'DELETE',
       body: {
         id: attachmentId,

@@ -37,7 +37,7 @@ const useConfigCategoryMutation = <Schema extends z.ZodObject<z.ZodRawShape>>(
 
     const { mutate, ...mutation } = useMutation({
       mutation: () =>
-        useAPI(`/api/config/${category}`, { method: 'POST', body: formState }),
+        useAPI(`/api/admin/config/${category}`, { method: 'POST', body: formState }),
       onSettled: () =>
         useQueryCache().invalidateQueries(configByCategoryQuery(category)),
     });
