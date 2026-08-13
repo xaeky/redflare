@@ -174,7 +174,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://avatars-console.xaeky.cloud
+      url: https://dash.fursomna.dev
     permissions:
       contents: read
       id-token: write
