@@ -97,7 +97,7 @@ export const useCommissionFormStore = defineStore('commissionForm', () => {
       busy.value = true;
       additionalState.id = commissionId;
       const response = await useAPI<SingleCommissionResponse>(
-        `/api/commissions/${commissionId}`,
+        `/api/admin/commissions/${commissionId}`,
       );
       const localData = toUpdateData(response.data);
       _.assign(formState, _.pick(localData, Object.keys(schema.shape)));
