@@ -1,9 +1,9 @@
 export default defineAppConfig({
   ui: {
     colors: {
-      primary: 'cyan',
+      primary: 'pink',
       secondary: 'purple',
-      neutral: 'zinc',
+      neutral: 'mauve',
     },
     container: {
       base: 'w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8',

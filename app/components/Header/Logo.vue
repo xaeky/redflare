@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Logotype from '~/assets/svg/xa_logotype.svg';
+import Logotype from '~/assets/svg/fursomna_logo.svg';
 
 withDefaults(
   defineProps<{

@@ -46,7 +46,7 @@ export default defineNuxtConfig({
   vite: {
     plugins: [require('vite-svg-loader')()],
     server: {
-      allowedHosts: ['local.avvy'],
+      allowedHosts: ['local.fs.avvy'],
     },
     optimizeDeps: {
       include: ['zod', 'lodash', 'three', '@internationalized/date'],
