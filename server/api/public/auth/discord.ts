@@ -7,7 +7,6 @@ type DiscordOAuthResponseQuery = {
 
 export default defineEventHandler(async (event) => {
   const runtimeConfig = useRuntimeConfig();
-  // TODO: Restore OAuth for Discord login in runtime config
   const { clientId: client_id, clientSecret: client_secret } =
     runtimeConfig.frontoffice.oauth.discord;
   const redirect_uri = `${getRequestURL(event).origin}/api/public/auth/discord`;

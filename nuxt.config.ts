@@ -73,6 +73,12 @@ export default defineNuxtConfig({
     },
     frontoffice: {
       sessionPassword: '',
+      oauth: {
+        discord: {
+          clientId: '',
+          clientSecret: '',
+        },
+      },
     },
     turnstile: {
       secret_key: '',
