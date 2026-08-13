@@ -80,8 +80,5 @@ export default defineNuxtConfig({
         },
       },
     },
-    turnstile: {
-      secret_key: '',
-    },
   },
 });
