@@ -39,7 +39,7 @@ const actions: PageAction[] = [
 definePageMeta({
   title: 'Commissions',
   description: 'Manage your commissions',
-  middleware: 'auth',
+  middleware: 'agent-only',
   layout: 'backoffice',
   keepalive: true,
 });

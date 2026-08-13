@@ -7,7 +7,7 @@ const devLinks = [
 ];
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: 'agent-only',
   layout: 'backoffice',
   keepalive: true,
 });

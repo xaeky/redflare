@@ -36,7 +36,9 @@ const { mutate: updateCommission, isLoading: updateCommissionBusy } =
 const { mutate: deleteCommission, isLoading: deleteCommissionBusy } =
   useMutation({
     mutation: () =>
-      useAPI(`/api/admin/commissions/${props.commission_id}`, { method: 'DELETE' }),
+      useAPI(`/api/admin/commissions/${props.commission_id}`, {
+        method: 'DELETE',
+      }),
     onSuccess() {
       queryCache.invalidateQueries(commissionsQuery({}));
       toast.add({ description: 'Commission deleted.' });

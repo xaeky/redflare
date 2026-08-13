@@ -59,7 +59,7 @@ const actions: PageAction[] = [
 definePageMeta({
   title: 'Customers',
   description: 'Manage your customers',
-  middleware: 'auth',
+  middleware: 'agent-only',
   layout: 'backoffice',
   keepalive: true,
 });

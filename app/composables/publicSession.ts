@@ -1,21 +1,29 @@
 export function usePublicUserSession() {
-  const publicSessionState = useState<{
-    user: DiscordOAuthUser | null;
-    id: string;
-  }>('public-session', () => ({ user: null, id: '' }));
+  const publicSessionDefaultState: PublicSessionExposedData = {
+    user: null,
+    meta: {
+      isRegistered: false,
+    },
+    id: '',
+  };
+  const publicSessionState = useState<PublicSessionExposedData>(
+    'public-session',
+    () => publicSessionDefaultState,
+  );
   const publicSessionReady = useState('public-session-ready', () => false);
 
   const fetch = async () => {
-    const sessionResult = await useRequestFetch()<{
-      user: DiscordOAuthUser;
-      id: string;
-    }>('/api/public/auth/session', {
-      headers: { accept: 'application/json' },
-      retry: false,
-    }).catch(() => null);
+    const sessionResult = await useRequestFetch()<PublicSessionExposedData>(
+      '/api/public/auth/session',
+      {
+        headers: { accept: 'application/json' },
+        retry: false,
+      },
+    ).catch(() => null);
     if (sessionResult) {
       publicSessionState.value = {
         user: sessionResult.user,
+        meta: sessionResult.meta,
         id: sessionResult.id,
       };
     }
@@ -28,7 +36,7 @@ export function usePublicUserSession() {
       headers: { accept: 'application/json' },
       retry: false,
     });
-    publicSessionState.value = { user: null, id: '' };
+    publicSessionState.value = publicSessionDefaultState;
   };
 
   const login = async () => {

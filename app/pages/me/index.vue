@@ -3,6 +3,7 @@ const { isLoggedIn, login, session } = usePublicUserSession();
 
 definePageMeta({
   title: 'My Account',
+  middleware: ['customers-only'],
 });
 
 const commissionsQueryOptions = defineQueryOptions({

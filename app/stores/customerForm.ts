@@ -96,7 +96,9 @@ export const useCustomerFormStore = defineStore('customerForm', () => {
     busy.value = true;
     try {
       additionalState.id = customerId;
-      const customer = await $fetch<Schema>(`/api/admin/customers/${customerId}`);
+      const customer = await $fetch<Schema>(
+        `/api/admin/customers/${customerId}`,
+      );
       _.assign(formState, customer);
     } catch (_error) {
       invokeErrorToast({ description: 'Failed to load customer data.' });

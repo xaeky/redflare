@@ -3,7 +3,7 @@ import { statsQuery } from '~/queries/stats';
 
 definePageMeta({
   title: 'Home',
-  middleware: 'auth',
+  middleware: 'agent-only',
   layout: 'backoffice',
   keepalive: true,
 });

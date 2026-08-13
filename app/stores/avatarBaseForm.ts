@@ -67,7 +67,10 @@ export const useAvatarBaseFormStore = defineStore('avatarBaseForm', () => {
 
   const { mutate: insert, isLoading: insertBusy } = useMutation({
     mutation: () =>
-      useAPI(`/api/admin/commissions/bases`, { method: 'POST', body: formState }),
+      useAPI(`/api/admin/commissions/bases`, {
+        method: 'POST',
+        body: formState,
+      }),
     onSuccess() {
       clear();
     },

@@ -73,7 +73,7 @@ export default defineEventHandler(async (event) => {
     user: discordUser,
     secure: {
       access_token: discordAccessToken,
-      customer: customerUser._id.toString(),
+      customer: customerUser?._id.toString(),
     },
   });
   return sendRedirect(event, '/me');

@@ -2,7 +2,7 @@
 definePageMeta({
   title: 'App Settings',
   description: 'Manage Redflare global settings.',
-  middleware: 'auth',
+  middleware: 'agent-only',
   layout: 'backoffice',
   keepalive: true,
 });

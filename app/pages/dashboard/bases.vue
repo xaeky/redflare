@@ -44,7 +44,7 @@ const actions: PageAction[] = [
 definePageMeta({
   title: 'Avatar bases',
   description: 'Manage your avatar bases for commissions',
-  middleware: 'auth',
+  middleware: 'agent-only',
   layout: 'backoffice',
   keepalive: true,
 });

@@ -4,7 +4,7 @@ import { agentAccountsQuery } from '~/queries/accounts';
 definePageMeta({
   title: 'Accounts',
   description: 'Manage artist accounts',
-  middleware: 'auth',
+  middleware: 'agent-only',
   layout: 'backoffice',
   keepalive: true,
 });

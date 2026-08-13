@@ -65,7 +65,7 @@ const handleBack = () => {
 
 definePageMeta({
   title: 'User Settings',
-  middleware: 'auth',
+  middleware: 'agent-only',
   layout: 'backoffice',
   keepalive: true,
 });
