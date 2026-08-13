@@ -3,7 +3,7 @@ definePageMeta({
   title: 'Welcome back',
 });
 
-// Get agreement URLs from Redflare config
+// Get agreement URLs from Avvy config
 const { config } = useRedflarePublicConfig();
 const legalConfig = config.value?.legal as RedflareConfigLegal;
 

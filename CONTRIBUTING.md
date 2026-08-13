@@ -1,22 +1,22 @@
-# Contributing to Redflare
+# Contributing to Avvy
 
-Thank you for your interest in contributing! Redflare is a webapp for managing art commissions. Our tech stack includes Nuxt 3, TypeScript, Tailwind CSS, MongoDB, Docker, and we use Google Cloud Platform for deployment.
+Thank you for your interest in contributing! Avvy is a webapp for managing art commissions. Our tech stack includes Nuxt 4, TypeScript, Tailwind CSS, MongoDB, Docker, and we use Google Cloud Platform for deployment.
 
-Keep on mind, we'll only accept pull requests that align with our project's goals and maintain code quality. To ensure your work won't be rejected, we suggest using GitHub issues to discuss significant changes before you start coding.
+Keep in mind, we'll only accept pull requests that align with our project's goals and maintain code quality. To ensure your work won't be rejected, we suggest using GitHub issues to discuss significant changes before you start coding.
 
 ## How to Contribute
 
 1. **Fork the repository** and create your branch from `main`.
 2. **Clone your fork** and set up the project:
     ```sh
-    git clone https://github.com/<your-username>/redflare.git
-    cd redflare
+    git clone https://github.com/<your-username>/avvy.git
+    cd avvy
     ```
 3. **Create a new branch** for your feature or fix:
     ```sh
     git checkout -b my-feature
     ```
-4. **Setup your environemt propertly**, be sure to duplicate the `.env.example` file to `.env` and fill in the required variables. We recommend using a local MongoDB instance for development, use docker if needed. For package management, we use bun.
+4. **Setup your environment properly**, be sure to duplicate the `.env.example` file to `.env` and fill in the required variables. We recommend using a local MongoDB instance for development, use docker if needed. For package management, we use bun.
     ```sh
     bun install
     ```
@@ -52,4 +52,4 @@ Keep on mind, we'll only accept pull requests that align with our project's goal
 
 ## Reporting Issues
 
-Use [GitHub Issues](https://github.com/xaeky/redflare/issues) for bugs and feature requests. If you are going to create a new issue, be sure to include steps to reproduce the problem or describe the feature in detail, provide screenshots if applicable, and specify your environment (OS, browser, etc.).
+Use [GitHub Issues](https://github.com/FURSOMNA/avvy/issues) for bugs and feature requests. If you are going to create a new issue, be sure to include steps to reproduce the problem or describe the feature in detail, provide screenshots if applicable, and specify your environment (OS, browser, etc.).

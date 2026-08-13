@@ -6,7 +6,7 @@ import { MongoClient } from 'mongodb';
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) throw new Error('MONGO_URI is not set');
 const logger = consola.create({
-  defaults: { tag: 'redflare:migrate' },
+  defaults: { tag: 'db:migrate' },
 });
 
 const client = new MongoClient(MONGO_URI);

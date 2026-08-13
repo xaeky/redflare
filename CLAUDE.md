@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Redflare is a Nuxt 4 / TypeScript web app for avatar artists to manage commissions, billing, and file attachments — a Trello/Notion-style commission organizer. Stack: Nuxt 4, MongoDB (native driver, no ODM), Discord OAuth (customer auth), S3-compatible storage, Bun runtime, Nitro `bun` preset.
+Avvy is a Nuxt 4 / TypeScript web app for avatar artists to manage commissions, billing, and file attachments — a Trello/Notion-style commission organizer. Stack: Nuxt 4, MongoDB (native driver, no ODM), Discord OAuth (customer auth), S3-compatible storage, Bun runtime, Nitro `bun` preset.
 
 ## Prohibitions
 
@@ -33,7 +33,7 @@ docker compose up -d
 
 ### Two separate user/session systems
 
-Redflare has two distinct kinds of users that must not be conflated:
+Avvy has two distinct kinds of users that must not be conflated:
 
 - **Agent users** (artists/managers) — authenticated via a custom native session system, session managed by `nuxt-auth-utils`' built-in `useUserSession`/`getUserSession`. Logic lives in `server/utils/agentSession.ts`.
 - **Public users** (customers) — authenticated via Discord OAuth, session is a *separate* custom cookie-backed session implemented from scratch in `server/utils/publicSession.ts` (`getPublicUserSession`/`setPublicUserSession`, its own `rf_public_session` cookie, temp authorizations for e.g. one-off attachment access).

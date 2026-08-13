@@ -6,7 +6,7 @@ const description = computed<string>(
 );
 
 useHead({
-  titleTemplate: '%s - Redflare Backoffice',
+  titleTemplate: '%s - Avvy Backoffice',
   title,
 });
 </script>

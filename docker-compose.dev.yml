@@ -1,4 +1,4 @@
-name: redflare-dev-services
+name: avvy-dev-services
 
 services:
   mongo:
@@ -10,7 +10,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=local
       - MONGO_INITDB_ROOT_PASSWORD=local
-      - MONGO_INITDB_DATABASE=redflare
+      - MONGO_INITDB_DATABASE=avvy
     volumes:
       - ./.data/db:/data/db
 

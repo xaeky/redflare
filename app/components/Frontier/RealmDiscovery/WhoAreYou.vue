@@ -12,7 +12,7 @@ const emit = defineEmits<{
         <FrontierRealmDiscoveryAuthRealmButton
           @click="emit('view-select', 'agent')"
           title="I am an artist"
-          description="I'm a registered artist in this Redflare instance."
+          description="I'm a registered artist in this Avvy instance."
           icon="i-lucide-brush"
         />
         <FrontierRealmDiscoveryAuthRealmButton

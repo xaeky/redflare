@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
   const discordAccessToken = `Bearer ${tokens.access_token}`;
   const discordUser = await $fetch<DiscordOAuthUser>(discordUrls.userInfo, {
     headers: {
-      'user-agent': 'RedflareApi',
+      'user-agent': 'AvvyApi',
       Authorization: discordAccessToken,
     },
   });

@@ -46,7 +46,7 @@ export default defineNuxtConfig({
   vite: {
     plugins: [require('vite-svg-loader')()],
     server: {
-      allowedHosts: ['local.xavis.redflare'],
+      allowedHosts: ['local.avvy'],
     },
     optimizeDeps: {
       include: ['zod', 'lodash', 'three', '@internationalized/date'],
@@ -61,7 +61,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       env: process.env.NODE_ENV || '',
-      redflare_env: '',
+      avvy_env: '',
       turnstile: {
         site_key: '',
       },

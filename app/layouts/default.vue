@@ -3,7 +3,7 @@ const route = useRoute();
 const title = computed<string>(() => (route.meta.title as string) || '');
 
 useHead({
-  titleTemplate: '%s - Redflare Console',
+  titleTemplate: '%s - Avvy Dashboard',
   title,
 });
 </script>

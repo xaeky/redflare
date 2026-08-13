@@ -10,14 +10,14 @@ const mapErrors: { [key: number]: string } = {
   401: 'Need authentication',
   403: 'Missing permissions',
   404: "It doesn't exist!",
-  500: 'Redflare Error',
+  500: 'Avvy Error',
 };
 </script>
 
 <template>
-  <main id="redflare_default">
+  <main id="app-error-root">
     <div
-      id="redflare_error"
+      id="app-error"
       class="container mx-auto px-12 min-h-screen flex flex-col justify-center"
     >
       <div v-if="props.error" class="font-mono">

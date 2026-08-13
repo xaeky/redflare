@@ -1,10 +1,9 @@
-![Redflare Banner](.github/assets/REDFLARE_TWHEADER_SOCIAL.png)
+![Avvy Banner](.github/assets/SOCIAL_TWHEADER_APP_AVVY.png)
 
-# 🌠 Redflare
-This web app is focused to avatar artists, a replacement for kanban-board apps like Trello and Notion. Redflare is a commission organizer web app that includes dashboard for artists and customers, billing and attachment organization.
+This web app is focused to avatar artists, a replacement for kanban-board apps like Trello and Notion. Avvy is a commission organizer web app that includes dashboard for artists and customers, billing and attachment organization.
 
-## 🤔 Why Redflare?
-Many note-taking applications charges to the final user for general usage, those apps are customizable for artists but with a lot of options that doesn't follow a proper standard, giving to the artist the freedom but at the same time the decision of what "format/style" to use when organizing their commissions. This is why I made Redflare, to create a standard to organize stuff for avatar artists, you can find it as a "template" for artists if you want, with billing features and storage management.
+## 🤔 Why Avvy?
+Many note-taking applications charges to the final user for general usage, those apps are customizable for artists but with a lot of options that doesn't follow a proper standard, giving to the artist the freedom but at the same time the decision of what "format/style" to use when organizing their commissions. This is why I made Avvy, to create a standard to organize stuff for avatar artists, you can find it as a "template" for artists if you want, with billing features and storage management.
 
 ## ⭐ Features & planned ideas
 - Management for billing and asset storage (`.unitypackage`, `.spp`, etc.).
@@ -14,11 +13,12 @@ Many note-taking applications charges to the final user for general usage, those
   - UI isn't customizable in-app.
 
 ## 📚 Deployment and stack required
-Redflare uses many services to work:
+Avvy uses many services to work:
 
 - **MongoDB** database (MongoDB Atlas cloud solution works fine).
 - **Discord OAuth App** for customer authentication
 - **Any S3-compatible storage** to store files like `.unitypackage`, `.spp`, etc.
+- **Cloudflare Turnstile** for attack protection and spam prevention.
 
 0. Make sure you already have the following installed in your system:
     - [bun](https://bun.sh/)
@@ -34,8 +34,8 @@ Redflare uses many services to work:
 5. Deploy the local development with `bun --bun dev`.
 
 ```bash
-git clone https://github.com/xaeky/redflare.git
-cd redflare
+git clone https://github.com/FURSOMNA/avvy.git
+cd avvy
 cp .env.example .env
 vim .env # Fill the fields with your API keys.
 bun i

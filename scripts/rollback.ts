@@ -5,7 +5,7 @@ import { MongoClient } from 'mongodb';
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) throw new Error('MONGO_URI is not set');
 const logger = consola.create({
-  defaults: { tag: 'redflare:rollback' },
+  defaults: { tag: 'db:rollback' },
 });
 
 const count = parseInt(process.argv[2] ?? '0', 10);

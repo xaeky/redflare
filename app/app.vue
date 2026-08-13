@@ -5,7 +5,7 @@ useHead({
 </script>
 
 <template>
-  <main id="redflare_root">
+  <main id="avvy_root">
     <NuxtLoadingIndicator color="#00d3f2" />
     <NuxtLayout>
       <NuxtPage />

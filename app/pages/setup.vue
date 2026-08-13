@@ -62,7 +62,7 @@ const handleSetupSubmit = async () => {
 };
 
 definePageMeta({
-  title: 'Set up Redflare',
+  title: 'Set up Avvy',
 });
 </script>
 
@@ -73,7 +73,7 @@ definePageMeta({
         <HeaderLogo size="lg" />
       </div>
       <div>
-        <h1>Set up Redflare</h1>
+        <h1>Set up Avvy</h1>
         <p>Create the first artist account. This can only be done once.</p>
       </div>
       <UForm
