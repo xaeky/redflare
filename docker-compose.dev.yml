@@ -2,7 +2,7 @@ name: avvy-dev-services
 
 services:
   mongo:
-    image: mongo:latest
+    image: mongo:8.3.8-noble
     hostname: mongodb
     container_name: mongo
     ports:
