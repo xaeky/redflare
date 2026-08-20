@@ -12,9 +12,7 @@ import _ from 'lodash';
 export interface PublicSessionData {
   id: string;
   user: DiscordOAuthUser | null;
-  meta: {
-    isRegistered: boolean; // Whether the public user has a linked customer account
-  };
+  customer?: null;
   secure: {
     customer?: string; // Customer ID linked to this public user
     access_token?: string; // OAuth access token
@@ -30,9 +28,12 @@ const initPublicSession = async (event: H3Event) => {
   const session = await useSession<PublicSessionData>(event, {
     name: 'rf_public_session',
     password: secret,
+    cookie: {
+      sameSite: 'lax'
+    }
   });
   // Check session.data has the expected properties
-  const sessionProps = ['id', 'user', 'meta', 'secure'];
+  const sessionProps = ['id', 'user', 'customer', 'secure'];
   const hasInvalidProps = _.some(
     sessionProps,
     (prop) => !_.has(session.data, prop),
@@ -43,9 +44,7 @@ const initPublicSession = async (event: H3Event) => {
     await session.update({
       id: Bun.randomUUIDv7(),
       user: null,
-      meta: {
-        isRegistered: false,
-      },
+      customer: null,
       secure: {},
     });
   }

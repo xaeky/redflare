@@ -70,10 +70,10 @@ export default defineEventHandler(async (event) => {
 
   const customerUser = await useCustomerModel().getByDiscordId(discordUser.id);
   await setPublicUserSession(event, {
+    customer: customerUser?._id.toString(),
     user: discordUser,
     secure: {
-      access_token: discordAccessToken,
-      customer: customerUser?._id.toString(),
+      access_token: discordAccessToken
     },
   });
   return sendRedirect(event, '/me');

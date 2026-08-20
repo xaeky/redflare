@@ -1,5 +1,5 @@
 export default defineNuxtRouteMiddleware(() => {
   const { session } = usePublicUserSession();
-  if (session.value.meta.isRegistered === false)
+  if (session.value.customer === null)
     return navigateTo('/me/unregistered', { replace: true });
 });

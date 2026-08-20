@@ -1,9 +1,7 @@
 export function usePublicUserSession() {
   const publicSessionDefaultState: PublicSessionExposedData = {
     user: null,
-    meta: {
-      isRegistered: false,
-    },
+    customer: null,
     id: '',
   };
   const publicSessionState = useState<PublicSessionExposedData>(
@@ -23,7 +21,7 @@ export function usePublicUserSession() {
     if (sessionResult) {
       publicSessionState.value = {
         user: sessionResult.user,
-        meta: sessionResult.meta,
+        customer: sessionResult.customer,
         id: sessionResult.id,
       };
     }
